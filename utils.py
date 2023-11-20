@@ -13,5 +13,5 @@ def get_betted_amount(interaction):
     for channel_id in data.race_games:
         for bet in data.race_games[channel_id]["bets"]:
             if interaction.user == bet["player"]:
-                betted_amount += bet["bet_amount"]
+                betted_amount += abs(bet["bet_amount"])
     return betted_amount
