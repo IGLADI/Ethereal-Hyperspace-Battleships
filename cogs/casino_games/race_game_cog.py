@@ -86,6 +86,7 @@ class RaceGame(commands.Cog):
             await asyncio.sleep(1)
         await message.delete()
 
+        # TODO check so that someone cant bet alone with 2 bets
         if len(data.race_games[interaction.channel_id].get("bets", [])) < 2:
             await interaction.followup.send("Not enough players to start the race.")
             del data.race_games[interaction.channel_id]
@@ -147,6 +148,7 @@ class RaceGame(commands.Cog):
 
     # ? maybe change this to use discord drop down menus? (to choose on which racer to bet on)
     # TODO add a command to modify/remove betts
+    # TODO change negative bets to take in account the multiplier (so if thereare 5 racers and you bet -10 you lose 50)
     @app_commands.command(
         name="bet_on_race", description="Bet on a racer, to bet on his lost just use a negative amount"
     )

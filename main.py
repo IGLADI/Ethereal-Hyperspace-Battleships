@@ -73,4 +73,4 @@ client.run(TOKEN)
 
 
 # TODO check Rich presence on discord developer portal to show activity on profiles
-# TODO add a "try my commands" & add app buttun (see midjourneys profile)
+# TODO add a "try my commands" (see midjourneys profile)
