@@ -29,7 +29,11 @@ class Client(commands.Bot):
         super().__init__(command_prefix="/", intents=intents)
 
         # load the slash commands from the different cog files
-        self.cogslist = ["cogs.casino_games.race_game_cog", "cogs.general_commands_cog"]
+        self.cogslist = [
+            "cogs.general_commands_cog",
+            "cogs.casino_games.casino_cog",
+            "cogs.casino_games.race_game_cog",
+        ]
 
     async def setup_hook(self):
         for ext in self.cogslist:

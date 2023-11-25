@@ -8,10 +8,16 @@ async def check_player_exists(interaction):
     return True
 
 
+# TODO make this work with negative betts (with the multiplier)
 def get_betted_amount(interaction):
     betted_amount = 0
-    for channel_id in data.race_games:
-        for bet in data.race_games[channel_id]["bets"]:
-            if interaction.user == bet["player"]:
-                betted_amount += abs(bet["bet_amount"])
+    if interaction.channel_id not in data.race_games:
+        return 0
+    amount_of_racers = len(data.race_games[interaction.channel_id]["racers"])
+    for bet in data.race_games[interaction.channel_id]["bets"]:
+        if interaction.user == bet["player"]:
+            if bet["bet_amount"] > 0:
+                betted_amount += bet["bet_amount"]
+            else:
+                betted_amount += -bet["bet_amount"] * (amount_of_racers - 1)
     return betted_amount
