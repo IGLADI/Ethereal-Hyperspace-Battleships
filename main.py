@@ -16,8 +16,7 @@ import json
 
 # TODO save all the data every minute in a json file and when the bot is started again load the data from the json
 # ? OR directly save the data in a json file and load it for each action (might be slow)
-# ? or use a database
-# initialize data, this is temporary and will be replaced by a json file
+# ? or use a (local) database
 
 
 class Client(commands.Bot):
@@ -35,6 +34,7 @@ class Client(commands.Bot):
             "cogs.casino_games.race_game_cog",
         ]
 
+    # this overwrites the default sync setup (used by self.tree.sync in on_ready)
     async def setup_hook(self):
         for ext in self.cogslist:
             await self.load_extension(ext)
@@ -57,6 +57,7 @@ with open("config.json", "r") as f:
     data = json.load(f)
     TOKEN = data["bot_token"]
 
+# create the bot
 client = Client()
 
 
@@ -77,4 +78,4 @@ client.run(TOKEN)
 
 
 # TODO check Rich presence on discord developer portal to show activity on profiles
-# TODO add a "try my commands" (see midjourneys profile)
+# ? TODO add a "try my commands" (see midjourneys profile)
