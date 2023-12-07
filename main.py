@@ -13,6 +13,7 @@ import json
 # TODO add asci emojis/tabulate/figlet/... to the msgs (also colors?)
 
 # ! check for racing condition (buying something while betting ect) => use get_betted_amount(interaction) & ...
+# discord seems to already block it and only process one command at a time per user
 
 # TODO save all the data every minute in a json file and when the bot is started again load the data from the json
 # ? OR directly save the data in a json file and load it for each action (might be slow)

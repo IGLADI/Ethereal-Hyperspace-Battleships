@@ -1,8 +1,8 @@
-from typing import Literal
-
 import discord
 from discord import app_commands
 from discord.ext import commands
+
+from typing import Literal
 
 import asyncio
 import random
@@ -150,8 +150,9 @@ class RaceGame(commands.Cog):
         if betamount > 0:
             await interaction.response.send_message(f"You have bet ${betamount} on {racer_to_bet_on.capitalize()}.")
         else:
+            cost = -betamount * (amount_of_racers - 1)
             await interaction.response.send_message(
-                f"You have bet ${-betamount} on {racer_to_bet_on.capitalize()} to lose, which costs ${-betamount * (amount_of_racers - 1)}."
+                f"You have bet ${-betamount} on {racer_to_bet_on.capitalize()} to lose, which costs ${cost}."
             )
 
 
