@@ -34,7 +34,11 @@ class ShipCommands(commands.Cog):
         ship = player.ship
         for module in ship.modules:
             if module_name == module.name:
-                module.upgrade()
+                try:
+                    module.upgrade()
+                except Exception as e:
+                        await interaction.response.send_message(f"Couldn't upgrade {module_name}: {e}", ephemeral=True)
+                        return
                 await interaction.response.send_message(f"Upgraded {module_name} to level {module.level}.", ephemeral=True)
                 return
         await interaction.response.send_message(f"Couldn't find module {module_name}.", ephemeral=True)

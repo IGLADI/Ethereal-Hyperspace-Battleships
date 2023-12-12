@@ -31,7 +31,10 @@ class Module:
         self._level += 1
 
     def __str__(self):
-        return f" - Name: {self._name}\n - Description: {self._description}\n - Level: {self._level}/{self._max_level}\n - Upgrade Cost: {self._cost}\n"
+        cost_str = "".join(f"\n   - {cost['resource']}: {cost['amount']}" for cost in self._cost)
+        if self._level == self._max_level:
+            return f" - Name: {self._name}\n - Description: {self._description}\n - Level: {self._level}/{self._max_level}\n - Upgrade Cost: MAX LEVEL\n"
+        return f" - Name: {self._name}\n - Description: {self._description}\n - Level: {self._level}/{self._max_level}\n - Upgrade Cost: {cost_str}\n"
 
 class Travel_Module(Module):
     def __init__(self):
@@ -49,10 +52,13 @@ class Travel_Module(Module):
         if self._level == self._max_level:
             raise Exception("Module is already at max level.")
         super().upgrade()
-        upgrade_amount = 500 - (100 * (self.level - 1))
+        upgrade_amount = 500 - (100 * (self.level - 2))
         self._max_distance += upgrade_amount
         self._cost[0]["amount"] *= 3
         self._cost[1]["amount"] += 300
+
+    def __str__(self):
+        return f"{super().__str__()} - Max Distance: {self._max_distance} lightyears\n"
 
 class Mining_Module(Module):
     def __init__(self):
@@ -79,6 +85,9 @@ class Mining_Module(Module):
         self._cost[0]["amount"] *= 3
         self._cost[1]["amount"] += 300
 
+    def __str__(self):
+        return f"{super().__str__()} - Mining Bonus: {self._mining_bonus}%\n"
+
 class Cargo(Module):
     def __init__(self):
         super().__init__("Cargo", "Increases the amount of cargo the ship can hold.", 6, [{"resource": "money", "amount": 100}, {"resource": "gold", "amount": 300}])
@@ -100,10 +109,13 @@ class Cargo(Module):
         if self._level == self._max_level:
             raise Exception("Module is already at max level.")
         super().upgrade()
-        upgrade_amount = 500 - (100 * (self.level - 1))
+        upgrade_amount = 500 - (100 * (self.level - 2))
         self._max_capacity += upgrade_amount
         self._cost[0]["amount"] *= 3
         self._cost[1]["amount"] += 300
+
+    def __str__(self):
+        return f"{super().__str__()} - Max Capacity: {self._max_capacity} tons\n"
     
 class Canon(Module):
     def __init__(self):
@@ -136,6 +148,9 @@ class Canon(Module):
         self._cost[2]["amount"] += 150
         self._cost[3]["amount"] += 150
 
+    def __str__(self):
+        return f"{super().__str__()} - Strength: {self._strength} firepower\n"
+
 class Shield(Module):
     def __init__(self):
         super().__init__("Shield", "Increases the ship's defense.", 5, [{"resource": "money", "amount": 200}, {"resource": "copper", "amount": 150}, {"resource": "silver", "amount": 150}, {"resource": "gold", "amount": 150}])
@@ -166,6 +181,9 @@ class Shield(Module):
         self._cost[1]["amount"] += 150
         self._cost[2]["amount"] += 150
         self._cost[3]["amount"] += 150
+    
+    def __str__(self):
+        return f"{super().__str__()} - Defense: {self._defense} armor\n"
 
 class Fuel(Module):
     def __init__(self):
@@ -190,7 +208,7 @@ class Fuel(Module):
         if self._level == self._max_level:
             raise Exception("Module is already at max level.")
         super().upgrade()
-        upgrade_amount = 500 - (100 * (self.level - 1))
+        upgrade_amount = 500 - (100 * (self.level - 2))
         self._max_fuel += upgrade_amount
         self._fuel += upgrade_amount
         self._cost[0]["amount"] *= 3
@@ -198,6 +216,9 @@ class Fuel(Module):
             self._cost[1]["amount"] += 150
             self._cost[2]["amount"] += 150
             self._cost[3]["amount"] += 150
+
+    def __str__(self):
+        return f"{super().__str__()} - Current Fuel: {self._fuel} liters - Max Fuel: {self._max_fuel} liters\n"
 
 class Radar(Module):
     def __init__(self):
@@ -225,6 +246,9 @@ class Radar(Module):
         self._cost[1]["amount"] += 100
         self._cost[2]["amount"] += 100
         self._cost[3]["amount"] += 150
+
+    def __str__(self):
+        return f"{super().__str__()} - Radar Range: {self._radar_range} lightyears\n"
 
 # generation = amount / minute
 class Energy_Generator(Module):
@@ -271,3 +295,6 @@ class Energy_Generator(Module):
         else:
             self._cost[1]["amount"] += 50
             self._cost[2]["amount"] += 50
+
+    def __str__(self):
+        return f"{super().__str__()} - Max Energy: {self._max_energy} - Generation: {self._generation} per minute\n"
