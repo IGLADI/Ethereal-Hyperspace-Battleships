@@ -7,9 +7,17 @@ class Player:
     def money(self):
         return self._money
 
+    @property
+    def ship(self):
+        return self._ship
+
     @money.setter
     def money(self, amount):
         if amount >= 0:
             self._money = amount
         else:
             self._money = 0
+
+    @ship.setter
+    def ship(self, ship):
+        self._ship = ship
