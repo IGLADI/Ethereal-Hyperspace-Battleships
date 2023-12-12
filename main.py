@@ -1,6 +1,8 @@
 import discord
 from discord.ext import commands
 
+from create_channels import create_channels
+
 import json
 
 # check discord.py docs AND discord developer portal docs, please use cogs and slash commands (discord.py 2.0)
@@ -72,6 +74,7 @@ async def on_guild_join(guild):
             # TODO should have a complete intro message
             await channel.send("Hello! Welcome to Ethereal Hyperspace Battleships type /help for more info.")
         break
+    await create_channels(guild)
 
 
 # start the bot with the token in the config file
