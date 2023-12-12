@@ -102,3 +102,169 @@ class Cargo(Module):
         self._cost[0]["amount"] *= 3
         self._cost[1]["amount"] += 300
     
+class Canon(Module):
+    def __init__(self):
+        super().__init__("Canon", "Increases the ship's attack damage.", 5, [{"resource": "money", "amount": 200}, {"resource": "copper", "amount": 150}, {"resource": "silver", "amount": 150}, {"resource": "gold", "amount": 150}])
+        self._strength = 100
+    
+    @property
+    def strength(self):
+        return self._strength
+    
+    # strength levels:      100,    110,    130,    145,    150
+    # money cost levels:    200,    600,    1200,   3600,   10800
+    # copper cost levels:   150,    300,    450,    600,    750
+    # silver cost levels:   150,    300,    450,    600,    750
+    # gold cost levels:     150,    300,    450,    600,    750
+    def upgrade(self):
+        if self._level == self._max_level:
+            raise Exception("Module is already at max level.")
+        super().upgrade()
+        if self.level == 2:
+            self._strength += 10
+        elif self.level == 3:
+            self._strength += 20
+        elif self.level == 4:
+            self._strength += 15
+        elif self.level == 5:
+            self._strength += 5
+        self._cost[0]["amount"] *= 3
+        self._cost[1]["amount"] += 150
+        self._cost[2]["amount"] += 150
+        self._cost[3]["amount"] += 150
+
+class Shield(Module):
+    def __init__(self):
+        super().__init__("Shield", "Increases the ship's defense.", 5, [{"resource": "money", "amount": 200}, {"resource": "copper", "amount": 150}, {"resource": "silver", "amount": 150}, {"resource": "gold", "amount": 150}])
+        self._defense = 100
+    
+    @property
+    def defense(self):
+        return self._defense
+    
+    # defense levels:       100,    110,    130,    145,    150
+    # money cost levels:    200,    600,    1200,   3600,   10800
+    # copper cost levels:   150,    300,    450,    600,    750
+    # silver cost levels:   150,    300,    450,    600,    750
+    # gold cost levels:     150,    300,    450,    600,    750
+    def upgrade(self):
+        if self._level == self._max_level:
+            raise Exception("Module is already at max level.")
+        super().upgrade()
+        if self.level == 2:
+            self._defense += 10
+        elif self.level == 3:
+            self._defense += 20
+        elif self.level == 4:
+            self._defense += 15
+        elif self.level == 5:
+            self._defense += 5
+        self._cost[0]["amount"] *= 3
+        self._cost[1]["amount"] += 150
+        self._cost[2]["amount"] += 150
+        self._cost[3]["amount"] += 150
+
+class Fuel(Module):
+    def __init__(self):
+        super().__init__("Fuel", "Increases the ship's fuel capacity.", 6, [{"resource": "money", "amount": 200}, {"resource": "copper", "amount": 150}, {"resource": "silver", "amount": 150}, {"resource": "gold", "amount": 150}])
+        self._max_fuel = 1000
+        self._fuel = 1000
+    
+    @property
+    def max_fuel(self):
+        return self._max_fuel
+    
+    @property
+    def fuel(self):
+        return self._fuel
+    
+    # max_fuel levels:      1000,   1500,   1900,   2200,   2400,   2500
+    # money cost levels:    200,    600,    1200,   3600,   10800,  32400
+    # copper cost levels:   150,    300,    450,    600,    750,    750
+    # silver cost levels:   150,    300,    450,    600,    750,    750
+    # gold cost levels:     150,    300,    450,    600,    750,    750
+    def upgrade(self):
+        if self._level == self._max_level:
+            raise Exception("Module is already at max level.")
+        super().upgrade()
+        upgrade_amount = 500 - (100 * (self.level - 1))
+        self._max_fuel += upgrade_amount
+        self._fuel += upgrade_amount
+        self._cost[0]["amount"] *= 3
+        if self.level < 6:
+            self._cost[1]["amount"] += 150
+            self._cost[2]["amount"] += 150
+            self._cost[3]["amount"] += 150
+
+class Radar(Module):
+    def __init__(self):
+        super().__init__("Radar", "Increases the ship's radar range.", 7, [{"resource": "money", "amount": 500}, {"resource": "copper", "amount": 50}, {"resource": "silver", "amount": 50}, {"resource": "gold", "amount": 50}])
+        self._radar_range = 1000
+    
+    @property
+    def radar_range(self):
+        return self._radar_range
+    
+    # radar_range levels:   50,     60,     70,     80,     90,     95,     100
+    # money cost levels:    500,    1000,   2000,   4000,   8000,   16000,  32000
+    # copper cost levels:   50,     150,    250,    350,    450,    550,    650
+    # silver cost levels:   50,     150,    250,    350,    450,    550,    650
+    # gold cost levels:     50,     200,    350,    500,    650,    800,    950
+    def upgrade(self):
+        if self._level == self._max_level:
+            raise Exception("Module is already at max level.")
+        super().upgrade()
+        if self.level < 6:
+            self._radar_range += 10
+        else:
+            self._radar_range += 5
+        self._cost[0]["amount"] *= 2
+        self._cost[1]["amount"] += 100
+        self._cost[2]["amount"] += 100
+        self._cost[3]["amount"] += 150
+
+# generation = amount / minute
+class Energy_Generator(Module):
+    def __init__(self):
+        super().__init__("Energy Generator", "Increases the ship's energy generation and maximum energy capacity.", 7, [{"resource": "money", "amount": 1000}, {"resource": "copper", "amount": 200}, {"resource": "silver", "amount": 200}, {"resource": "gold", "amount": 500}])
+        self._max_energy = 100
+        self._generation = 1
+
+    @property
+    def max_energy(self):
+        return self._max_energy
+    
+    @property
+    def generation(self):
+        return self._generation
+    
+    # max_energy levels:    100,    150,    200,    300,    450,    600,    750
+    # generation levels:    1,      2,      3,      5,      7,      10,     10
+    # money cost levels:    1000,   2000,   4000,   8000,   16000,  32000,  64000
+    # copper cost levels:   200,    350,    500,    650,    800,    950,    1000
+    # silver cost levels:   200,    350,    500,    650,    800,    950,    1000
+    # gold cost levels:     500,    500,    500,    500,    500,    500,    500
+    def upgrade(self):
+        if self._level == self._max_level:
+            raise Exception("Module is already at max level.")
+        super().upgrade()
+        if self.level == 2 or self.level == 3:
+            self._max_energy += 50
+            self._generation += 1
+        elif self.level == 4:
+            self._max_energy += 100
+            self._generation += 2
+        elif self.level == 5:
+            self._max_energy += 150
+            self._generation += 2
+        else:
+            self._max_energy += 150
+            if self.level < 7:
+                self._generation += 3
+        self._cost[0]["amount"] *= 2
+        if self.level < 7:
+            self._cost[1]["amount"] += 150
+            self._cost[2]["amount"] += 150
+        else:
+            self._cost[1]["amount"] += 50
+            self._cost[2]["amount"] += 50
