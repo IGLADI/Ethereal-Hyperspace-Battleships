@@ -30,6 +30,9 @@ class Module:
     def upgrade(self):
         self._level += 1
 
+    def __str__(self):
+        return f" - Name: {self._name}\n - Description: {self._description}\n - Level: {self._level}/{self._max_level}\n - Upgrade Cost: {self._cost}\n"
+
 class Travel_Module(Module):
     def __init__(self):
         super().__init__("Travel Module", "Increases the distance the ship can travel.", 6, [{"resource": "money", "amount": 100}, {"resource": "copper", "amount": 300}])

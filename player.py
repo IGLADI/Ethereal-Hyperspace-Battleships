@@ -1,7 +1,10 @@
+from ship import Ship
+
 class Player:
     def __init__(self, id):
         self.id = id
         self._money = 1000
+        self._ship = Ship()
 
     @property
     def money(self):
@@ -17,7 +20,3 @@ class Player:
             self._money = amount
         else:
             self._money = 0
-
-    @ship.setter
-    def ship(self, ship):
-        self._ship = ship
