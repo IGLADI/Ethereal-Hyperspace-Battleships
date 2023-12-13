@@ -57,4 +57,5 @@ async def create_category_main_guilds(guild: discord.Guild, name: str):
             await guild_category.create_voice_channel("quarters")
 
         if not discord.utils.get(guild_category.stage_channels, name="meeting room"):
+            # ? maybe lock the stage channels to the guild officers
             await guild_category.create_stage_channel("meeting room")
