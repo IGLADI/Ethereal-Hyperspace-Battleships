@@ -1,9 +1,9 @@
 from discord import app_commands
 import discord
 from discord.ext import commands
+from typing import Literal
 
 import data
-from player import Player
 from utils import check_player_exists
 
 class ShipCommands(commands.Cog):
@@ -26,7 +26,7 @@ class ShipCommands(commands.Cog):
 
     # TODO: add a check to see if the player has enough resources
     @app_commands.command(name="upgrade", description="upgrade a module")
-    async def upgrade(self, interaction: discord.Interaction, module_name: str):
+    async def upgrade(self, interaction: discord.Interaction, module_name: Literal["Travel Module", "Mining Module", "Canon", "Shield", "Fuel", "Cargo", "Radar", "Energy Generator"]):
         if await check_player_exists(interaction) is False:
             return
 
