@@ -79,3 +79,17 @@ CREATE TABLE IF NOT EXISTS `resource` (
   `drop_rate` int(11) NOT NULL,
   PRIMARY KEY (`resource_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+CREATE TABLE IF NOT EXISTS `ship` (
+  `ship_id` int(11) NOT NULL AUTO_INCREMENT,
+  `ship_name` varchar(255) NOT NULL,
+  `location_id` int(11) NOT NULL,
+  `module_id` int(11) NOT NULL,
+  PRIMARY KEY (`ship_id`),
+  KEY `FK_location_ship` (`location_id`) USING BTREE,
+  KEY `FK_module_ship` (`module_id`) USING BTREE,
+  CONSTRAINT `FK_location_ship` FOREIGN KEY (`location_id`) REFERENCES `location` (`location_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `FK_module_ship` FOREIGN KEY (`module_id`) REFERENCES `module` (`module_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
