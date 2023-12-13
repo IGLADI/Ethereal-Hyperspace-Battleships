@@ -38,3 +38,17 @@ CREATE TABLE IF NOT EXISTS `cargo` (
   CONSTRAINT `FK_module_cargo` FOREIGN KEY (`module_id`) REFERENCES `module` (`module_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+CREATE TABLE IF NOT EXISTS `planet` (
+  `planet_id` int(11) NOT NULL AUTO_INCREMENT,
+  `planet_type` varchar(255) NOT NULL,
+  `location_id` int(11) NOT NULL,
+  `guild_id` int(11) NOT NULL,
+  `resource_id` int(11) NOT NULL,
+  PRIMARY KEY (`planet_id`),
+  KEY `FK_location` (`location_id`) USING BTREE,
+  KEY `FK_guild` (`guild_id`) USING BTREE,
+  KEY `FK_resource` (`resource_id`) USING BTREE,
+  CONSTRAINT `FK_guild_planet` FOREIGN KEY (`guild_id`) REFERENCES `guild` (`guild_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `FK_location_planet` FOREIGN KEY (`location_id`) REFERENCES `location` (`location_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `FK_resource_planet` FOREIGN KEY (`resource_id`) REFERENCES `resource` (`resource_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
