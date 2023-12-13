@@ -161,4 +161,3 @@ cython_debug/
 
 config.json
 .vscode/
-requirements.txt
