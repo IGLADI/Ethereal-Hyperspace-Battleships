@@ -1,3 +1,5 @@
+from resources import Resource
+
 # The comments show the properties of each module at each level. These can be changed as we need to balance the game.
 class Module:
     def __init__(self, name, description, max_level, cost):
@@ -33,8 +35,8 @@ class Module:
     def __str__(self):
         cost_str = "".join(f"\n   - {cost['resource']}: {cost['amount']}" for cost in self._cost)
         if self._level == self._max_level:
-            return f" - Name: {self._name}\n - Description: {self._description}\n - Level: {self._level}/{self._max_level}\n - Upgrade Cost: MAX LEVEL\n"
-        return f" - Name: {self._name}\n - Description: {self._description}\n - Level: {self._level}/{self._max_level}\n - Upgrade Cost: {cost_str}\n"
+            return f" - **Name: {self._name}**\n - Description: {self._description}\n - Level: {self._level}/{self._max_level}\n - Upgrade Cost: MAX LEVEL\n"
+        return f" - **Name: {self._name}**\n - Description: {self._description}\n - Level: {self._level}/{self._max_level}\n - Upgrade Cost: {cost_str}\n"
 
 class Travel_Module(Module):
     def __init__(self):
@@ -74,7 +76,7 @@ class Mining_Module(Module):
     # silver cost levels:   300,    600,    900,    1200,   1500
     def upgrade(self):
         if self._level == self._max_level:
-            raise Exception("Module is already at max level.")
+            raise Exception("Module is already at max level.")            
         super().upgrade()
         if self.level == 2:
             self._mining_bonus += 1
@@ -93,6 +95,9 @@ class Cargo(Module):
         super().__init__("Cargo", "Increases the amount of cargo the ship can hold.", 6, [{"resource": "money", "amount": 100}, {"resource": "gold", "amount": 300}])
         self._max_capacity = 1000
         self._capacity = []
+        self._capacity.append(Resource("copper", 0))
+        self._capacity.append(Resource("silver", 0))
+        self._capacity.append(Resource("gold", 0))
     
     @property
     def max_capacity(self):
@@ -101,6 +106,15 @@ class Cargo(Module):
     @property
     def capacity(self):
         return self._capacity
+    
+    def add_cargo(self, resource, amount):
+        max_amount = self._max_capacity - sum(cargo.get_amount() for cargo in self._capacity)
+        if amount > max_amount:
+            amount = max_amount
+        for cargo in self._capacity:
+            if cargo.get_name() == resource:
+                cargo.amount += amount
+                return amount
     
     # max_capacity levels:  1000,   1500,   1900,   2200,   2400,   2500
     # money cost levels:    100,    300,    900,    2700,   8100,   24300
@@ -115,7 +129,8 @@ class Cargo(Module):
         self._cost[1]["amount"] += 300
 
     def __str__(self):
-        return f"{super().__str__()} - Max Capacity: {self._max_capacity} tons\n"
+        capacity_str = "".join(f"\n   - {str(cargo)}" for cargo in self._capacity)
+        return f"{super().__str__()} - Capacity: {capacity_str} \n - Max Capacity: {self._max_capacity} tons\n"
     
 class Canon(Module):
     def __init__(self):

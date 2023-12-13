@@ -25,7 +25,7 @@ class ShipCommands(commands.Cog):
         await interaction.response.send_message(ship_message, ephemeral=True)
 
     # TODO: add a check to see if the player has enough resources
-    @app_commands.command(name="upgrade", description="upgrade a module")
+    @app_commands.command(name="upgrade", description="Upgrade a module")
     async def upgrade(self, interaction: discord.Interaction, module_name: Literal["Travel Module", "Mining Module", "Canon", "Shield", "Fuel", "Cargo", "Radar", "Energy Generator"]):
         if await check_player_exists(interaction) is False:
             return
@@ -43,6 +43,20 @@ class ShipCommands(commands.Cog):
                 return
         await interaction.response.send_message(f"Couldn't find module {module_name}.", ephemeral=True)
         return
+    
+    @app_commands.command(name="add_cargo", description="For debugging purposes")
+    async def add_cargo(self, interaction: discord.Interaction, resource: Literal["copper", "silver", "gold"], amount: int):
+        if await check_player_exists(interaction) is False:
+            return
+
+        player = data.players[interaction.user]
+        new_amount = player.ship.modules[5].add_cargo(resource, amount)
+        if new_amount == 0:
+            await interaction.response.send_message(f"Cargo is full, could not add to your ship.", ephemeral=True)
+        elif new_amount < amount:
+            await interaction.response.send_message(f"You left {amount - new_amount} behind, because you reached maximum capacity.", ephemeral=True)
+        else:
+            await interaction.response.send_message(f"Added {amount} cargo to your ship.", ephemeral=True)
 
 async def setup(client: commands.Bot) -> None:
     await client.add_cog(ShipCommands(client))
