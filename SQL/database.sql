@@ -29,3 +29,12 @@ CREATE TABLE IF NOT EXISTS `location` (
   UNIQUE KEY `y_pos` (`y_pos`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+CREATE TABLE IF NOT EXISTS `cargo` (
+  `cargo_id` int(11) NOT NULL AUTO_INCREMENT,
+  `module_id` int(11) NOT NULL,
+  `space` int(11) NOT NULL,
+  PRIMARY KEY (`cargo_id`),
+  KEY `module_id` (`module_id`)
+  CONSTRAINT `FK_module_cargo` FOREIGN KEY (`module_id`) REFERENCES `module` (`module_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
