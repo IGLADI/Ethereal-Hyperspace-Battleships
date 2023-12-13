@@ -1,8 +1,8 @@
 from location import Location
 from module import Travel_Module, Mining_Module, Canon, Shield, Fuel, Cargo, Radar, Energy_Generator
 
-class Ship:
 
+class Ship:
     def __init__(self):
         self._modules = []
         self._location = Location(0, 0)
