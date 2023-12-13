@@ -124,12 +124,12 @@ class Cargo(Module):
     def __init__(self):
         super().__init__("Cargo", "Increases the amount of cargo the ship can hold.", 6, [{"resource": "Money", "amount": 0}, {"resource": "Copper", "amount": 150}, {"resource": "Silver", "amount": 150}, {"resource": "Gold", "amount": 150}])
         self._max_capacity = 300
-        self._capacity = []
-        self._capacity.append(Resource("Copper", 0, self._max_capacity))
-        self._capacity.append(Resource("Silver", 0, self._max_capacity))
-        self._capacity.append(Resource("Gold", 0, self._max_capacity))
-        self._capacity.append(Resource("Uranium", 0, self._max_capacity))
-        self._capacity.append(Resource("Black Matter", 0, self._max_capacity))
+        self._inventory = []
+        self._inventory.append(Resource("Copper", 0, self._max_capacity))
+        self._inventory.append(Resource("Silver", 0, self._max_capacity))
+        self._inventory.append(Resource("Gold", 0, self._max_capacity))
+        self._inventory.append(Resource("Uranium", 0, self._max_capacity))
+        self._inventory.append(Resource("Black Matter", 0, self._max_capacity))
     
     #individual per resource
     @property
@@ -137,38 +137,45 @@ class Cargo(Module):
         return self._max_capacity
     
     @property
-    def capacity(self):
-        return self._capacity
+    def inventory(self):
+        return self._inventory
     
     def get_resource_amount(self, resource_name):
-        for resource in self._capacity:
+        for resource in self._inventory:
             if resource.name.lower() == resource_name.lower():
                 return resource.amount
         return 0
     
     def consume_resource(self, resource_name, amount):
-        for resource in self._capacity:
+        for resource in self._inventory:
             if resource.name.lower() == resource_name.lower():
                 resource.amount -= amount
                 return
     
-    #! REMOVE THIS FUNCTION WHEN DONE DEBUGGING
     def add_cargo(self, resource, amount):
-        if resource.lower() == "copper":
-            max_amount = self._max_capacity - self._capacity[0].amount
-        elif resource.lower() == "silver":
-            max_amount = self._max_capacity - self._capacity[1].amount
-        elif resource.lower() == "gold":
-            max_amount = self._max_capacity - self._capacity[2].amount
-        elif resource.lower() == "uranium":
-            max_amount = self._max_capacity - self._capacity[3].amount
-        elif resource.lower() == "black matter":
-            max_amount = self._max_capacity - self._capacity[4].amount
+        # Dictionary that maps resource names to indices in the inventory list
+        resource_indices = {
+            "copper": 0,
+            "silver": 1,
+            "gold": 2,
+            "uranium": 3,
+            "black matter": 4
+        }
+
+        resource_lower = resource.lower()
+        if resource_lower in resource_indices:
+            index = resource_indices[resource_lower]
+            max_amount = self._max_capacity - self._inventory[index].amount
+        else:
+            max_amount = 0
+            
         if amount > max_amount:
             amount = max_amount
-        for cargo in self._capacity:
-            if cargo.name.lower() == resource.lower():
+
+        for cargo in self._inventory:
+            if cargo.name.lower() == resource_lower:
                 cargo.amount += amount
+
         return amount
     
     # max_capacity levels:  300,    400,    500,    600,      800,      1000
@@ -190,8 +197,8 @@ class Cargo(Module):
                 self._cost[i]["amount"] += 100
 
     def __str__(self):
-        capacity_str = "".join(f"\n   - {str(cargo)}" for cargo in self._capacity)
-        return f"{super().__str__()} - Capacity: {capacity_str} \n - Max Capacity: {self._max_capacity} tons\n"
+        inventory_str = "".join(f"\n   - {str(cargo)}" for cargo in self._inventory)
+        return f"{super().__str__()} - Inventory: {inventory_str} \n - Max Capacity: {self._max_capacity} tons\n"
     
 class Canon(Module):
     def __init__(self):
@@ -304,8 +311,8 @@ class Energy_Generator(Module):
     def generation(self):
         return self._generation
     
-    # generation levels:    1,      2,      3,      5,      7,      10,     10
-    # money cost levels:    1000,   2000,   4000,   8000,   16000,  32000,  64000
+    # generation levels:    1,      2,      3,      5,      7,      10,     13
+    # money cost levels:    0,      0,      0,      0,      0,      0,      0
     # copper cost levels:   50,     200,    350,    500,    650,    800,    950
     # silver cost levels:   50,     200,    350,    500,    650,    800,    950
     # gold cost levels:     50,     200,    350,    500,    650,    800,    950
