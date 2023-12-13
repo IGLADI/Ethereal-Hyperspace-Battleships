@@ -10,8 +10,8 @@ class ShipCommands(commands.Cog):
     def __init__(self, client: commands.Bot):
         self.client = client
 
-    @app_commands.command(name="ship", description="Get info on your ship")
-    async def ship(self, interaction: discord.Interaction):
+    @app_commands.command(name="ship_info", description="Get info on your ship")
+    async def ship_info(self, interaction: discord.Interaction):
         if await check_player_exists(interaction) is False:
             return
 

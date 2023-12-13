@@ -1,12 +1,5 @@
 from location import Location
-from module import Travel_Module
-from module import Mining_Module
-from module import Canon
-from module import Shield
-from module import Fuel
-from module import Cargo
-from module import Radar
-from module import Energy_Generator
+from module import Travel_Module, Mining_Module, Canon, Shield, Fuel, Cargo, Radar, Energy_Generator
 
 class Ship:
 

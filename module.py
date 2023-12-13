@@ -42,7 +42,7 @@ class Module:
 
 class Travel_Module(Module):
     def __init__(self):
-        super().__init__("Travel Module", "Increases the distance the ship can travel.", 6, [{"resource": "money", "amount": 100}, {"resource": "copper", "amount": 300}])
+        super().__init__("Travel Module", "Increases the distance the ship can travel.", 6, [{"resource": "Money", "amount": 0}, {"resource": "Copper", "amount": 200}, {"resource": "Silver", "amount": 0}, {"resource": "Gold", "amount": 0}])
         self._max_distance = 1000
     
     @property
@@ -51,29 +51,39 @@ class Travel_Module(Module):
 
     # max_distance levels:  1000,   1500,   1900,   2200,     2400,     2500
     # money cost levels:    100,    300,    900,    2700,     8100,     24300
-    # copper cost levels:   300,    600,    900,    1200,     1500,     1800
+    # copper cost levels:   200,    200,    300,    400,      500,      600
+    # silver cost levels:   0,      200,    300,    400,      500,      600
+    # gold cost levels:     0,      200,    300,    400,      500,      600
     def upgrade(self):
         super().upgrade()
         upgrade_amount = 500 - (100 * (self.level - 2))
         self._max_distance += upgrade_amount
-        self._cost[0]["amount"] *= 3
-        self._cost[1]["amount"] += 300
+        if self.level == 2:
+            self._cost[2]["amount"] = 200
+            self._cost[3]["amount"] = 200
+        else:
+            self._cost[1]["amount"] += 100
+            self._cost[2]["amount"] += 100
+            self._cost[3]["amount"] += 100
+        
 
     def __str__(self):
         return f"{super().__str__()} - Max Distance: {self._max_distance} lightyears\n"
 
 class Mining_Module(Module):
     def __init__(self):
-        super().__init__("Mining Module", "Increases the amount of resources the ship can mine.", 5, [{"resource": "money", "amount": 100}, {"resource": "silver", "amount": 300}])
+        super().__init__("Mining Module", "Increases the amount of resources the ship can mine.", 5, [{"resource": "Money", "amount": 0}, {"resource": "Copper", "amount": 150}, {"resource": "Silver", "amount": 150}, {"resource": "Gold", "amount": 150}])
         self._mining_bonus = 100
     
     @property
     def mining_bonus(self):
         return self._mining_bonus
     
-    # mining_bonus levels:  100,    101,    103,    105,    110
-    # money cost levels:    100,    300,    900,    2700,   8100
-    # silver cost levels:   300,    600,    900,    1200,   1500
+    # mining_bonus levels:  100,    101,    103,    105,      110
+    # money cost levels:    100,    300,    900,    2700,     8100
+    # copper cost levels:   0,      200,    300,    400,      500
+    # silver cost levels:   200,    200,    300,    400,      500
+    # gold cost levels:     0,      200,    300,    400,      500
     def upgrade(self):   
         super().upgrade()
         if self.level == 2:
@@ -82,21 +92,29 @@ class Mining_Module(Module):
             self._mining_bonus += 2
         elif self.level == 5:
             self._mining_bonus += 5
-        self._cost[0]["amount"] *= 3
-        self._cost[1]["amount"] += 300
+        if self.level == 2:
+            self._cost[1]["amount"] = 200
+            self._cost[3]["amount"] = 200
+        else:
+            self._cost[1]["amount"] += 100
+            self._cost[2]["amount"] += 100
+            self._cost[3]["amount"] += 100
 
     def __str__(self):
         return f"{super().__str__()} - Mining Bonus: {self._mining_bonus}%\n"
 
 class Cargo(Module):
     def __init__(self):
-        super().__init__("Cargo", "Increases the amount of cargo the ship can hold.", 6, [{"resource": "money", "amount": 100}, {"resource": "gold", "amount": 300}])
-        self._max_capacity = 1000
+        super().__init__("Cargo", "Increases the amount of cargo the ship can hold.", 6, [{"resource": "Money", "amount": 0}, {"resource": "Copper", "amount": 150}, {"resource": "Silver", "amount": 150}, {"resource": "Gold", "amount": 150}])
+        self._max_capacity = 300
         self._capacity = []
-        self._capacity.append(Resource("copper", 0))
-        self._capacity.append(Resource("silver", 0))
-        self._capacity.append(Resource("gold", 0))
+        self._capacity.append(Resource("Copper", 0, self._max_capacity))
+        self._capacity.append(Resource("Silver", 0, self._max_capacity))
+        self._capacity.append(Resource("Gold", 0, self._max_capacity))
+        self._capacity.append(Resource("Uranium", 0, self._max_capacity))
+        self._capacity.append(Resource("Black Matter", 0, self._max_capacity))
     
+    #individual per resource
     @property
     def max_capacity(self):
         return self._max_capacity
@@ -105,8 +123,9 @@ class Cargo(Module):
     def capacity(self):
         return self._capacity
     
+    #! REMOVE THIS FUNCTION WHEN DONE DEBUGGING
     def add_cargo(self, resource, amount):
-        max_amount = self._max_capacity - sum(cargo.get_amount() for cargo in self._capacity)
+        max_amount = self._max_capacity
         if amount > max_amount:
             amount = max_amount
         for cargo in self._capacity:
@@ -114,15 +133,24 @@ class Cargo(Module):
                 cargo.amount += amount
                 return amount
     
-    # max_capacity levels:  1000,   1500,   1900,   2200,   2400,   2500
-    # money cost levels:    100,    300,    900,    2700,   8100,   24300
-    # gold cost levels:     300,    600,    900,    1200,   1500,   1800
+    # max_capacity levels:  300,    400,    500,    600,      800,      1000
+    # money cost levels:    100,    300,    900,    2700,     8100,     24300
+    # copper cost levels:   0       200,    300,    400,      500,      600
+    # silver cost levels:   0,      200,    300,    400,      500,      600
+    # gold cost levels:     200,    200,    300,    400,      500,      600
     def upgrade(self):
         super().upgrade()
-        upgrade_amount = 500 - (100 * (self.level - 2))
-        self._max_capacity += upgrade_amount
-        self._cost[0]["amount"] *= 3
-        self._cost[1]["amount"] += 300
+        if self.level < 5:
+            self._max_capacity += 100
+        else:
+            self._max_capacity += 200
+        if self.level == 2:
+            self._cost[1]["amount"] = 200
+            self._cost[2]["amount"] = 200
+        else:
+            self._cost[1]["amount"] += 100
+            self._cost[2]["amount"] += 100
+            self._cost[3]["amount"] += 100
 
     def __str__(self):
         capacity_str = "".join(f"\n   - {str(cargo)}" for cargo in self._capacity)
@@ -130,7 +158,7 @@ class Cargo(Module):
     
 class Canon(Module):
     def __init__(self):
-        super().__init__("Canon", "Increases the ship's attack damage.", 5, [{"resource": "money", "amount": 200}, {"resource": "copper", "amount": 150}, {"resource": "silver", "amount": 150}, {"resource": "gold", "amount": 150}])
+        super().__init__("Canon", "Increases the ship's attack damage.", 5, [{"resource": "Money", "amount": 0}, {"resource": "Copper", "amount": 150}, {"resource": "Silver", "amount": 150}, {"resource": "Gold", "amount": 150}])
         self._strength = 100
     
     @property
@@ -152,7 +180,6 @@ class Canon(Module):
             self._strength += 15
         elif self.level == 5:
             self._strength += 5
-        self._cost[0]["amount"] *= 3
         self._cost[1]["amount"] += 150
         self._cost[2]["amount"] += 150
         self._cost[3]["amount"] += 150
@@ -162,7 +189,7 @@ class Canon(Module):
 
 class Shield(Module):
     def __init__(self):
-        super().__init__("Shield", "Increases the ship's defense.", 5, [{"resource": "money", "amount": 200}, {"resource": "copper", "amount": 150}, {"resource": "silver", "amount": 150}, {"resource": "gold", "amount": 150}])
+        super().__init__("Shield", "Increases the ship's defense.", 5, [{"resource": "Money", "amount": 0}, {"resource": "Copper", "amount": 150}, {"resource": "Silver", "amount": 150}, {"resource": "Gold", "amount": 150}])
         self._defense = 100
     
     @property
@@ -184,7 +211,6 @@ class Shield(Module):
             self._defense += 15
         elif self.level == 5:
             self._defense += 5
-        self._cost[0]["amount"] *= 3
         self._cost[1]["amount"] += 150
         self._cost[2]["amount"] += 150
         self._cost[3]["amount"] += 150
@@ -194,41 +220,23 @@ class Shield(Module):
 
 class Fuel(Module):
     def __init__(self):
-        super().__init__("Fuel", "Increases the ship's fuel capacity.", 6, [{"resource": "money", "amount": 200}, {"resource": "copper", "amount": 150}, {"resource": "silver", "amount": 150}, {"resource": "gold", "amount": 150}])
-        self._max_fuel = 1000
-        self._fuel = 1000
-    
-    @property
-    def max_fuel(self):
-        return self._max_fuel
+        super().__init__("Fuel", "Holds the ship's fuel.", 1, [{"resource": "Money", "amount": 0}, {"resource": "Copper", "amount": 0}, {"resource": "Silver", "amount": 0}, {"resource": "Gold", "amount": 0}])
+        self._fuel = 100
     
     @property
     def fuel(self):
         return self._fuel
     
-    # max_fuel levels:      1000,   1500,   1900,   2200,   2400,   2500
-    # money cost levels:    200,    600,    1200,   3600,   10800,  32400
-    # copper cost levels:   150,    300,    450,    600,    750,    750
-    # silver cost levels:   150,    300,    450,    600,    750,    750
-    # gold cost levels:     150,    300,    450,    600,    750,    750
     def upgrade(self):
         super().upgrade()
-        upgrade_amount = 500 - (100 * (self.level - 2))
-        self._max_fuel += upgrade_amount
-        self._fuel += upgrade_amount
-        self._cost[0]["amount"] *= 3
-        if self.level < 6:
-            self._cost[1]["amount"] += 150
-            self._cost[2]["amount"] += 150
-            self._cost[3]["amount"] += 150
 
     def __str__(self):
-        return f"{super().__str__()} - Current Fuel: {self._fuel} liters - Max Fuel: {self._max_fuel} liters\n"
+        return f"{super().__str__()} - Current Fuel: {self._fuel}%\n"
 
 class Radar(Module):
     def __init__(self):
-        super().__init__("Radar", "Increases the ship's radar range.", 7, [{"resource": "money", "amount": 500}, {"resource": "copper", "amount": 50}, {"resource": "silver", "amount": 50}, {"resource": "gold", "amount": 50}])
-        self._radar_range = 1000
+        super().__init__("Radar", "Increases the ship's radar range.", 7, [{"resource": "Money", "amount": 0}, {"resource": "Copper", "amount": 50}, {"resource": "Silver", "amount": 50}, {"resource": "Gold", "amount": 50}])
+        self._radar_range = 50
     
     @property
     def radar_range(self):
@@ -236,8 +244,8 @@ class Radar(Module):
     
     # radar_range levels:   50,     60,     70,     80,     90,     95,     100
     # money cost levels:    500,    1000,   2000,   4000,   8000,   16000,  32000
-    # copper cost levels:   50,     150,    250,    350,    450,    550,    650
-    # silver cost levels:   50,     150,    250,    350,    450,    550,    650
+    # copper cost levels:   50,     200,    350,    500,    650,    800,    950
+    # silver cost levels:   50,     200,    350,    500,    650,    800,    950
     # gold cost levels:     50,     200,    350,    500,    650,    800,    950
     def upgrade(self):
         super().upgrade()
@@ -245,9 +253,8 @@ class Radar(Module):
             self._radar_range += 10
         else:
             self._radar_range += 5
-        self._cost[0]["amount"] *= 2
-        self._cost[1]["amount"] += 100
-        self._cost[2]["amount"] += 100
+        self._cost[1]["amount"] += 150
+        self._cost[2]["amount"] += 150
         self._cost[3]["amount"] += 150
 
     def __str__(self):
@@ -256,46 +263,29 @@ class Radar(Module):
 # generation = amount / minute
 class Energy_Generator(Module):
     def __init__(self):
-        super().__init__("Energy Generator", "Increases the ship's energy generation and maximum energy capacity.", 7, [{"resource": "money", "amount": 1000}, {"resource": "copper", "amount": 200}, {"resource": "silver", "amount": 200}, {"resource": "gold", "amount": 500}])
-        self._max_energy = 100
+        super().__init__("Energy Generator", "Increases the ship's energy generation.", 7, [{"resource": "Money", "amount": 0}, {"resource": "Copper", "amount": 50}, {"resource": "Silver", "amount": 50}, {"resource": "Gold", "amount": 50}])
         self._generation = 1
-
-    @property
-    def max_energy(self):
-        return self._max_energy
     
     @property
     def generation(self):
         return self._generation
     
-    # max_energy levels:    100,    150,    200,    300,    450,    600,    750
     # generation levels:    1,      2,      3,      5,      7,      10,     10
     # money cost levels:    1000,   2000,   4000,   8000,   16000,  32000,  64000
-    # copper cost levels:   200,    350,    500,    650,    800,    950,    1000
-    # silver cost levels:   200,    350,    500,    650,    800,    950,    1000
-    # gold cost levels:     500,    500,    500,    500,    500,    500,    500
+    # copper cost levels:   50,     200,    350,    500,    650,    800,    950
+    # silver cost levels:   50,     200,    350,    500,    650,    800,    950
+    # gold cost levels:     50,     200,    350,    500,    650,    800,    950
     def upgrade(self):
         super().upgrade()
         if self.level == 2 or self.level == 3:
-            self._max_energy += 50
             self._generation += 1
-        elif self.level == 4:
-            self._max_energy += 100
-            self._generation += 2
-        elif self.level == 5:
-            self._max_energy += 150
+        elif self.level == 4 or self.level == 5:
             self._generation += 2
         else:
-            self._max_energy += 150
-            if self.level < 7:
-                self._generation += 3
-        self._cost[0]["amount"] *= 2
-        if self.level < 7:
-            self._cost[1]["amount"] += 150
-            self._cost[2]["amount"] += 150
-        else:
-            self._cost[1]["amount"] += 50
-            self._cost[2]["amount"] += 50
+            self._generation += 3
+        self._cost[1]["amount"] += 150
+        self._cost[2]["amount"] += 150
+        self._cost[3]["amount"] += 150
 
     def __str__(self):
-        return f"{super().__str__()} - Max Energy: {self._max_energy} - Generation: {self._generation} per minute\n"
+        return f"{super().__str__()} - Generation: {self._generation} per minute\n"
