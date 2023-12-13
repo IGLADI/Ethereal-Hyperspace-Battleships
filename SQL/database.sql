@@ -93,3 +93,12 @@ CREATE TABLE IF NOT EXISTS `ship` (
   CONSTRAINT `FK_module_ship` FOREIGN KEY (`module_id`) REFERENCES `module` (`module_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+CREATE TABLE IF NOT EXISTS `speed` (
+  `speed_id` int(11) NOT NULL AUTO_INCREMENT,
+  `module_id` int(11) NOT NULL,
+  `speed` float NOT NULL,
+  PRIMARY KEY (`speed_id`),
+  KEY `FK_moudule_speed` (`module_id`),
+  CONSTRAINT `FK_moudule_speed` FOREIGN KEY (`module_id`) REFERENCES `module` (`module_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
