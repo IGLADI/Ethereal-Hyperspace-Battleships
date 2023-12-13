@@ -1,6 +1,8 @@
 import discord
 from discord.ext import commands
 
+from create_channels import create_channels
+
 import json
 
 from create_roles import create_roles
@@ -75,6 +77,7 @@ async def on_guild_join(guild):
             await channel.send("Hello! Welcome to Ethereal Hyperspace Battleships type /help for more info.")
         break
     await create_roles(guild)
+    await create_channels(guild)
 
 
 # start the bot with the token in the config file
