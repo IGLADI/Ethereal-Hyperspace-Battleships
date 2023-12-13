@@ -71,3 +71,11 @@ CREATE TABLE IF NOT EXISTS `player` (
   CONSTRAINT `FK_x_pos_player` FOREIGN KEY (`x_pos`) REFERENCES `location` (`x_pos`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `FK_y_pos_player` FOREIGN KEY (`y_pos`) REFERENCES `location` (`y_pos`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS `resource` (
+  `resource_id` int(11) NOT NULL AUTO_INCREMENT,
+  `description` varchar(255) NOT NULL,
+  `resource_name` varchar(255) NOT NULL,
+  `drop_rate` int(11) NOT NULL,
+  PRIMARY KEY (`resource_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
