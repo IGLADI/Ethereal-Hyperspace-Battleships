@@ -30,6 +30,8 @@ class Module:
         return self._cost
     
     def upgrade(self):
+        if self._level == self._max_level:
+            raise Exception("Module is already at max level.")
         self._level += 1
 
     def __str__(self):
@@ -51,8 +53,6 @@ class Travel_Module(Module):
     # money cost levels:    100,    300,    900,    2700,     8100,     24300
     # copper cost levels:   300,    600,    900,    1200,     1500,     1800
     def upgrade(self):
-        if self._level == self._max_level:
-            raise Exception("Module is already at max level.")
         super().upgrade()
         upgrade_amount = 500 - (100 * (self.level - 2))
         self._max_distance += upgrade_amount
@@ -74,9 +74,7 @@ class Mining_Module(Module):
     # mining_bonus levels:  100,    101,    103,    105,    110
     # money cost levels:    100,    300,    900,    2700,   8100
     # silver cost levels:   300,    600,    900,    1200,   1500
-    def upgrade(self):
-        if self._level == self._max_level:
-            raise Exception("Module is already at max level.")            
+    def upgrade(self):   
         super().upgrade()
         if self.level == 2:
             self._mining_bonus += 1
@@ -120,8 +118,6 @@ class Cargo(Module):
     # money cost levels:    100,    300,    900,    2700,   8100,   24300
     # gold cost levels:     300,    600,    900,    1200,   1500,   1800
     def upgrade(self):
-        if self._level == self._max_level:
-            raise Exception("Module is already at max level.")
         super().upgrade()
         upgrade_amount = 500 - (100 * (self.level - 2))
         self._max_capacity += upgrade_amount
@@ -147,8 +143,6 @@ class Canon(Module):
     # silver cost levels:   150,    300,    450,    600,    750
     # gold cost levels:     150,    300,    450,    600,    750
     def upgrade(self):
-        if self._level == self._max_level:
-            raise Exception("Module is already at max level.")
         super().upgrade()
         if self.level == 2:
             self._strength += 10
@@ -181,8 +175,6 @@ class Shield(Module):
     # silver cost levels:   150,    300,    450,    600,    750
     # gold cost levels:     150,    300,    450,    600,    750
     def upgrade(self):
-        if self._level == self._max_level:
-            raise Exception("Module is already at max level.")
         super().upgrade()
         if self.level == 2:
             self._defense += 10
@@ -220,8 +212,6 @@ class Fuel(Module):
     # silver cost levels:   150,    300,    450,    600,    750,    750
     # gold cost levels:     150,    300,    450,    600,    750,    750
     def upgrade(self):
-        if self._level == self._max_level:
-            raise Exception("Module is already at max level.")
         super().upgrade()
         upgrade_amount = 500 - (100 * (self.level - 2))
         self._max_fuel += upgrade_amount
@@ -250,8 +240,6 @@ class Radar(Module):
     # silver cost levels:   50,     150,    250,    350,    450,    550,    650
     # gold cost levels:     50,     200,    350,    500,    650,    800,    950
     def upgrade(self):
-        if self._level == self._max_level:
-            raise Exception("Module is already at max level.")
         super().upgrade()
         if self.level < 6:
             self._radar_range += 10
@@ -287,8 +275,6 @@ class Energy_Generator(Module):
     # silver cost levels:   200,    350,    500,    650,    800,    950,    1000
     # gold cost levels:     500,    500,    500,    500,    500,    500,    500
     def upgrade(self):
-        if self._level == self._max_level:
-            raise Exception("Module is already at max level.")
         super().upgrade()
         if self.level == 2 or self.level == 3:
             self._max_energy += 50
