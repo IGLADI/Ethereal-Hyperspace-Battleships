@@ -9,4 +9,12 @@ CREATE TABLE IF NOT EXISTS `building` (
   PRIMARY KEY (`building_id`)
  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-
+CREATE TABLE IF NOT EXISTS `guild` (
+  `guild_id` int(11) NOT NULL AUTO_INCREMENT,
+  `guild_name` varchar(255) NOT NULL,
+  `guild_description` varchar(255) NOT NULL,
+  `owned_buildings` text NOT NULL,
+  `owned_planets` text NOT NULL,
+  `members` text NOT NULL,
+  PRIMARY KEY (`guild_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
