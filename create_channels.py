@@ -38,6 +38,10 @@ async def create_category_general(guild: discord.Guild, name: str):
 @create_category_if_not_exists
 async def create_category_main_guilds(guild: discord.Guild, name: str):
     guild_category = discord.utils.get(guild.categories, name=name)
+    await guild_category.set_permissions(guild.default_role, read_messages=False)
+    guild_role = discord.utils.get(guild.roles, name=name)
+    await guild_category.set_permissions(guild_role, read_messages=True)
+
     if guild_category:
         if not discord.utils.get(guild_category.text_channels, name="announcements"):
             await guild_category.create_text_channel("announcements")
