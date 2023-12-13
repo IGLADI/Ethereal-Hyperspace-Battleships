@@ -52,3 +52,22 @@ CREATE TABLE IF NOT EXISTS `planet` (
   CONSTRAINT `FK_location_planet` FOREIGN KEY (`location_id`) REFERENCES `location` (`location_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `FK_resource_planet` FOREIGN KEY (`resource_id`) REFERENCES `resource` (`resource_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS `player` (
+  `player_id` int(11) NOT NULL AUTO_INCREMENT,
+  `player_name` varchar(255) NOT NULL,
+  `discord_id` int(19) NOT NULL,
+  `money` int(255) NOT NULL DEFAULT 0,
+  `x_pos` int(11) NOT NULL,
+  `y_pos` int(11) NOT NULL,
+  `damage` int(11) NOT NULL,
+  `ship` int(11) NOT NULL,
+  `fuel` int(11) NOT NULL,
+  `player_speed` int(11) NOT NULL,
+  `class` enum('Dwarf','Droid','Martian') NOT NULL,
+  PRIMARY KEY (`player_id`),
+  KEY `FK_xpos_player` (`x_pos`),
+  KEY `FK_ypos_player` (`y_pos`),
+  CONSTRAINT `FK_x_pos_player` FOREIGN KEY (`x_pos`) REFERENCES `location` (`x_pos`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `FK_y_pos_player` FOREIGN KEY (`y_pos`) REFERENCES `location` (`y_pos`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
