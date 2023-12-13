@@ -79,13 +79,11 @@ class Travel_Module(Module):
         upgrade_amount = 500 - (100 * (self.level - 2))
         self._max_distance += upgrade_amount
         if self.level == 2:
-            self._cost[2]["amount"] = 200
-            self._cost[3]["amount"] = 200
+            for i in range(2, 4):
+                self._cost[i]["amount"] = 200
         else:
-            self._cost[1]["amount"] += 100
-            self._cost[2]["amount"] += 100
-            self._cost[3]["amount"] += 100
-        
+            for i in range(1, 4):
+                self._cost[i]["amount"] += 100        
 
     def __str__(self):
         return f"{super().__str__()} - Max Distance: {self._max_distance} lightyears\n"
@@ -113,12 +111,11 @@ class Mining_Module(Module):
         elif self.level == 5:
             self._mining_bonus += 5
         if self.level == 2:
-            self._cost[1]["amount"] = 200
-            self._cost[3]["amount"] = 200
+            for i in [1, 3]:
+                self._cost[i]["amount"] = 200
         else:
-            self._cost[1]["amount"] += 100
-            self._cost[2]["amount"] += 100
-            self._cost[3]["amount"] += 100
+            for i in range(1, 4):
+                self._cost[i]["amount"] += 100
 
     def __str__(self):
         return f"{super().__str__()} - Mining Bonus: {self._mining_bonus}%\n"
@@ -186,12 +183,11 @@ class Cargo(Module):
         else:
             self._max_capacity += 200
         if self.level == 2:
-            self._cost[1]["amount"] = 200
-            self._cost[2]["amount"] = 200
+            for i in range(1, 3):
+                self._cost[i]["amount"] = 200
         else:
-            self._cost[1]["amount"] += 100
-            self._cost[2]["amount"] += 100
-            self._cost[3]["amount"] += 100
+            for i in range(1, 4):
+                self._cost[i]["amount"] += 100
 
     def __str__(self):
         capacity_str = "".join(f"\n   - {str(cargo)}" for cargo in self._capacity)
@@ -221,9 +217,8 @@ class Canon(Module):
             self._strength += 15
         elif self.level == 5:
             self._strength += 5
-        self._cost[1]["amount"] += 150
-        self._cost[2]["amount"] += 150
-        self._cost[3]["amount"] += 150
+        for i in range(1, 4):
+            self._cost[i]["amount"] += 150
 
     def __str__(self):
         return f"{super().__str__()} - Strength: {self._strength} firepower\n"
@@ -252,9 +247,8 @@ class Shield(Module):
             self._defense += 15
         elif self.level == 5:
             self._defense += 5
-        self._cost[1]["amount"] += 150
-        self._cost[2]["amount"] += 150
-        self._cost[3]["amount"] += 150
+        for i in range(1, 4):
+            self._cost[i]["amount"] += 150
     
     def __str__(self):
         return f"{super().__str__()} - Defense: {self._defense} armor\n"
@@ -294,9 +288,8 @@ class Radar(Module):
             self._radar_range += 10
         else:
             self._radar_range += 5
-        self._cost[1]["amount"] += 150
-        self._cost[2]["amount"] += 150
-        self._cost[3]["amount"] += 150
+        for i in range(1, 4):
+            self._cost[i]["amount"] += 150
 
     def __str__(self):
         return f"{super().__str__()} - Radar Range: {self._radar_range} lightyears\n"
@@ -324,9 +317,8 @@ class Energy_Generator(Module):
             self._generation += 2
         else:
             self._generation += 3
-        self._cost[1]["amount"] += 150
-        self._cost[2]["amount"] += 150
-        self._cost[3]["amount"] += 150
+        for i in range(1, 4):
+            self._cost[i]["amount"] += 150
 
     def __str__(self):
         return f"{super().__str__()} - Generation: {self._generation} per minute\n"
