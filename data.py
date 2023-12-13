@@ -2,3 +2,4 @@
 
 race_games = {}
 players = {}
+planets = {}
