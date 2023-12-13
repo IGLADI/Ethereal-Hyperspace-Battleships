@@ -24,7 +24,6 @@ class ShipCommands(commands.Cog):
         ship_message += f"{'\n'.join(modules_info)}\n"
         await interaction.response.send_message(ship_message, ephemeral=True)
 
-    # TODO: add a check to see if the player has enough resources
     @app_commands.command(name="upgrade_ship", description="Upgrade a module")
     async def upgrade_ship(self, interaction: discord.Interaction, module_name: Literal["Travel Module", "Mining Module", "Canon", "Shield", "Fuel", "Cargo", "Radar", "Energy Generator"]):
         if await check_player_exists(interaction) is False:
