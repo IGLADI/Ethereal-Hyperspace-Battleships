@@ -21,7 +21,7 @@ class ShipCommands(commands.Cog):
         ship_message += f"**Location:** {ship.location}\n"
         ship_message += f"**Modules:**\n"
         modules_info = [str(module) for module in ship.modules]
-        ship_message += f"{'\n'.join(modules_info)}\n"
+        ship_message += f"{' '.join(modules_info)}"
         await interaction.response.send_message(ship_message, ephemeral=True)
 
     # TODO: add a check to see if the player has enough resources
