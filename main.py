@@ -3,6 +3,8 @@ from discord.ext import commands
 
 import json
 
+from create_roles import create_roles
+
 # check discord.py docs AND discord developer portal docs, please use cogs and slash commands (discord.py 2.0)
 # https://discordpy.readthedocs.io/en/stable/interactions/api.html
 # https://discord.com/developers/docs/interactions/receiving-and-responding
@@ -72,6 +74,7 @@ async def on_guild_join(guild):
             # TODO should have a complete intro message
             await channel.send("Hello! Welcome to Ethereal Hyperspace Battleships type /help for more info.")
         break
+    await create_roles(guild)
 
 
 # start the bot with the token in the config file
