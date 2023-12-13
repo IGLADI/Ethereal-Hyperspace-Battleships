@@ -1,4 +1,5 @@
 from ship import Ship
+from utils import get_betted_amount
 
 class Player:
     def __init__(self, id):
@@ -8,7 +9,8 @@ class Player:
 
     @property
     def money(self):
-        return self._money
+        betted_amount = get_betted_amount(self.id)
+        return self._money - betted_amount
 
     @property
     def ship(self):

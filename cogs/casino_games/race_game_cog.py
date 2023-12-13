@@ -10,7 +10,7 @@ from tabulate import tabulate
 
 import data
 from races import Racer
-from utils import check_player_exists, get_betted_amount
+from utils import check_player_exists
 
 
 # TODO add imgs (AI/start w hardcoded)
@@ -106,18 +106,17 @@ class RaceGame(commands.Cog):
         if betamount == 0:
             await interaction.response.send_message("You can't bet $0.", ephemeral=True)
             return
-        betted_amount = get_betted_amount(interaction)
         # TODO change negative bets to take in account the multiplier
         # (so if thereare 5 racers and you bet -10 you lose 50)
         # TODO add a check to not bet 0$
         # TODO add a custom message for negative bets
-        if data.players[interaction.user].money - betted_amount < abs(betamount):
+        if data.players[interaction.user].money < abs(betamount):
             await interaction.response.send_message("You don't have enough money.", ephemeral=True)
             return
         # TODO this works but also need to be implemented in get betted amount
         amount_of_racers = len(data.race_games[interaction.channel_id]["racers"])
         if betamount < 0:
-            if data.players[interaction.user].money - betted_amount < abs(betamount * (amount_of_racers - 1)):
+            if data.players[interaction.user].money < abs(betamount * (amount_of_racers - 1)):
                 await interaction.response.send_message("You don't have enough to bet on a lost.", ephemeral=True)
                 return
         if any(
