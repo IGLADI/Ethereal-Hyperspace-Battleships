@@ -4,6 +4,7 @@ from discord.ext import commands
 from typing import Literal
 
 import data
+import asyncio
 from utils import check_player_exists
 
 
@@ -51,6 +52,23 @@ class ShipCommands(commands.Cog):
                 return
         await interaction.response.send_message(f"Couldn't find module {module_name}.", ephemeral=True)
 
+    @app_commands.command(name="travel", description="Travel to a new location")
+    async def travel(self, interaction: discord.Interaction, x_coordinate: int, y_coordinate: int):
+        if await check_player_exists(interaction) is False:
+            return
+
+        player = data.players[interaction.user]
+        ship = player.ship
+        try:
+            sleep = ship.travel(x_coordinate, y_coordinate)
+            await interaction.response.send_message(f"Traveling to ({x_coordinate}, {y_coordinate}).", ephemeral=True)
+        except Exception as e:
+            await interaction.response.send_message(f"Couldn't travel: {e}", ephemeral=True)
+            return
+        
+        await asyncio.sleep(sleep)
+        await interaction.followup.send(f"Arrived at ({x_coordinate}, {y_coordinate}).", ephemeral=True)
+        
 
 async def setup(client: commands.Bot) -> None:
     await client.add_cog(ShipCommands(client))

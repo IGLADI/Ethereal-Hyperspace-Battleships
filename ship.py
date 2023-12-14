@@ -1,6 +1,9 @@
 from location import Location
 from module import TravelModule, MiningModule, Canon, Shield, Fuel, Cargo, Radar, EnergyGenerator
 
+import time
+import threading
+
 
 class Ship:
     def __init__(self):
@@ -22,3 +25,27 @@ class Ship:
     @property
     def location(self):
         return self._location
+    
+    def travel(self, x_coordinate, y_coordinate):
+        '''Travels to the given coordinates'''
+        old_location = self._location
+        new_location = Location(x_coordinate, y_coordinate)
+        distance = int(old_location.distance_to(new_location))
+        if distance > self._modules[0].max_distance:
+            raise Exception("You can't travel that far! You need to upgrade your travel module.")
+        
+        def travel_thread():
+            while self._location != new_location:
+                if self._location.x < new_location.x:
+                    self._location.x += 1
+                elif self._location.x > new_location.x:
+                    self._location.x -= 1
+                if self._location.y < new_location.y:
+                    self._location.y += 1
+                elif self._location.y > new_location.y:
+                    self._location.y -= 1
+                time.sleep(1)
+        
+        travel_thread_instance = threading.Thread(target=travel_thread)
+        travel_thread_instance.start()
+        return distance
