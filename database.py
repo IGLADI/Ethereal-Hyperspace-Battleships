@@ -20,13 +20,14 @@ def insert_data(connection, table_name, column_names, values):
 
 def get_database_connection():
     try:
-        # Connect to MariaDB server
+        # Connect to MariaDB server will take login information from config.json
         connection = mariadb.connect(
-            host="localhost", 
-            user="root", 
-            password="projectx", 
-            host="192.0.2.1", port=3306, 
-            database="etherealhyperspacebattleshipsdb")
+            host="", 
+            user="", 
+            password="", 
+            host="", 
+            port=, 
+            database="")
         cursor = connection.cursor()
 
         # Return the connection object
@@ -34,7 +35,6 @@ def get_database_connection():
     except mariadb.Error as e:
         # Print error message
         print("Error connecting to MariaDB:", e)
-        sys.exit(1)
         return None
 
 
