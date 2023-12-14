@@ -9,6 +9,6 @@ class Location:
 
     def get_y(self):
         return self.y
-    
+
     def __str__(self):
         return f"({self.x}, {self.y})"
