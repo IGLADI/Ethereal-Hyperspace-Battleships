@@ -18,8 +18,13 @@ class MineCommands(commands.Cog):
     async def mine(self, interaction: discord.Interaction):
         if await check_player_exists(interaction) is False:
             return
-
         player = data.players[interaction.user]
+        if player.ship.energy < 10:
+            await interaction.response.send_message("You don't have enough energy.", ephemeral=True)
+            return
+
+        # TODO mining module changes energy efficiency
+        player.ship.remove_energy(10)
         mining_bonus = player.ship.modules[1].mining_bonus
         resource = random.choices(["Copper", "Silver", "Gold", "Uranium", "Black Matter"], weights=[35, 30, 25, 7, 3])[
             0

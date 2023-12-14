@@ -1,5 +1,6 @@
 from location import Location
-from module import TravelModule, MiningModule, Canon, Shield, Fuel, Cargo, Radar, Energy_Generator
+from module import TravelModule, MiningModule, Canon, Shield, Fuel, Cargo, Radar, EnergyGenerator
+
 
 class Ship:
     def __init__(self):
@@ -12,7 +13,7 @@ class Ship:
         self._modules.append(Fuel())
         self._modules.append(Cargo())
         self._modules.append(Radar())
-        self._modules.append(Energy_Generator())
+        self._modules.append(EnergyGenerator())
         # TODO make this in apart battery module
         self._energy = 100
         self._energy_capacity = 100
