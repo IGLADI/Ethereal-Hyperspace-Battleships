@@ -7,3 +7,4 @@ class Guild:
 race_games = {}
 players = {}
 guilds = [Guild("The Federation"), Guild("The Empire"), Guild("The Alliance"), Guild("The Independents")]
+planets = {}
