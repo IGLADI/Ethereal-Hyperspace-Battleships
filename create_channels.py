@@ -24,12 +24,7 @@ async def create_channels(guild: discord.Guild):
 async def create_category_general(guild: discord.Guild, name: str):
     general_category = discord.utils.get(guild.categories, name=name)
 
-    channels = [
-        {"type": "text", "name": "general", "position": 1},
-        {"type": "forum", "name": "questions", "position": 2},
-        {"type": "voice", "name": "general", "position": 3},
-    ]
-    for channel in channels:
+    for channel in data.general_channels:
         await create_channel(general_category, channel)
 
 
@@ -40,17 +35,8 @@ async def create_category_main_guilds(guild: discord.Guild, name: str):
     guild_role = discord.utils.get(guild.roles, name=name)
     await guild_category.set_permissions(guild_role, read_messages=True)
 
-    channels = [
-        {"type": "text", "name": "announcements"},
-        {"type": "text", "name": "general"},
-        {"type": "text", "name": "off-topic"},
-        {"type": "forum", "name": "guides"},
-        {"type": "voice", "name": "quarters"},
-        {"type": "stage", "name": "meeting room"},
-    ]
-
     if guild_category:
-        for channel in channels:
+        for channel in data.guild_channels:
             await create_channel(guild_category, channel)
 
 
