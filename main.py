@@ -2,6 +2,8 @@ import discord
 from discord.ext import commands
 
 import json
+from data import planets
+from planet import Planet
 
 # check discord.py docs AND discord developer portal docs, please use cogs and slash commands (discord.py 2.0)
 # https://discordpy.readthedocs.io/en/stable/interactions/api.html
@@ -53,6 +55,10 @@ class Client(commands.Bot):
         except Exception as e:
             print(e)
         print("--------------------------------------------")
+
+        #! temporary data storage untill we have a database
+        planets["C4MPU5 K441"] = Planet("C4MPU5 K441", 0, 0)
+        planets["Earth"] = Planet("Earth", 50, 0)
 
 
 # load the bot token from config.json KEEP THIS TOKEN PRIVATE (gitignore)
