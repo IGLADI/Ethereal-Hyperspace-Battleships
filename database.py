@@ -1,5 +1,5 @@
 import mariadb
-import sys
+
 
 # Make a function to insert_data into database
 def insert_data(connection, table_name, column_names, values):
@@ -37,21 +37,4 @@ def get_database_connection():
         sys.exit(1)
         return None
 
-if __name__ == "__main__":
-    try:
-        get_database_connection()
 
-        # Get the table column names and values from the user
-        table_name = input("Enter the table name: ")
-        column_names = input("Enter the column names separated by commas: ")
-        column_names = column_names.split(", ")
-        values = input("Enter the corresponding values separated by commas: ")
-        values = values.split(", ")
-
-        # Call the function to insert data into the specified table
-        insert_data(connection, table_name, column_names, values)
-
-        connection.close()
-    except Exception as e:
-        print("Error connecting to MariaDB:", e)
-        sys.exit(1)
