@@ -23,16 +23,14 @@ async def create_channels(guild: discord.Guild):
 @create_category_if_not_exists
 async def create_category_general(guild: discord.Guild, name: str):
     general_category = discord.utils.get(guild.categories, name=name)
-    if general_category:
-        if not discord.utils.get(general_category.text_channels, name="general"):
-            await general_category.create_text_channel("general", position=1)
-        # TODO add a announcements channel, store it in the DB to send news
 
-        if not discord.utils.get(general_category.forums, name="questions"):
-            await general_category.create_forum("questions", position=2)
-
-        if not discord.utils.get(general_category.voice_channels, name="general"):
-            await general_category.create_voice_channel("general", position=3)
+    channels = [
+        {"type": "text", "name": "general", "position": 1},
+        {"type": "forum", "name": "questions", "position": 2},
+        {"type": "voice", "name": "general", "position": 3},
+    ]
+    for channel in channels:
+        await create_channel(general_category, channel)
 
 
 @create_category_if_not_exists
@@ -42,20 +40,31 @@ async def create_category_main_guilds(guild: discord.Guild, name: str):
     guild_role = discord.utils.get(guild.roles, name=name)
     await guild_category.set_permissions(guild_role, read_messages=True)
 
+    channels = [
+        {"type": "text", "name": "announcements"},
+        {"type": "text", "name": "general"},
+        {"type": "text", "name": "off-topic"},
+        {"type": "forum", "name": "guides"},
+        {"type": "voice", "name": "quarters"},
+        {"type": "stage", "name": "meeting room"},
+    ]
+
     if guild_category:
-        if not discord.utils.get(guild_category.text_channels, name="announcements"):
-            await guild_category.create_text_channel("announcements")
-        if not discord.utils.get(guild_category.text_channels, name="general"):
-            await guild_category.create_text_channel("general")
-        if not discord.utils.get(guild_category.text_channels, name="off-topic"):
-            await guild_category.create_text_channel("off-topic")
+        for channel in channels:
+            await create_channel(guild_category, channel)
 
-        if not discord.utils.get(guild_category.forums, name="guides"):
-            await guild_category.create_forum("guides")
 
-        if not discord.utils.get(guild_category.voice_channels, name="quarters"):
-            await guild_category.create_voice_channel("quarters")
-
-        if not discord.utils.get(guild_category.stage_channels, name="meeting room"):
-            # ? maybe lock the stage channels to the guild officers
-            await guild_category.create_stage_channel("meeting room")
+async def create_channel(category, channel):
+    if channel["type"] == "text":
+        if not discord.utils.get(category.text_channels, name=channel["name"]):
+            await category.create_text_channel(channel["name"])
+    elif channel["type"] == "forum":
+        if not discord.utils.get(category.forums, name=channel["name"]):
+            await category.create_forum(channel["name"])
+    elif channel["type"] == "voice":
+        if not discord.utils.get(category.voice_channels, name=channel["name"]):
+            await category.create_voice_channel(channel["name"])
+    elif channel["type"] == "stage":
+        # ? maybe lock the stage channels to the guild officers
+        if not discord.utils.get(category.stage_channels, name=channel["name"]):
+            await category.create_stage_channel(channel["name"])
