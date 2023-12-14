@@ -61,13 +61,13 @@ class ShipCommands(commands.Cog):
         ship = player.ship
         try:
             sleep = ship.travel(x_coordinate, y_coordinate)
-            await interaction.response.send_message(f"Traveling to ({x_coordinate}, {y_coordinate}). Estimated duration = {sleep}.", ephemeral=True)
+            await interaction.response.send_message(f"Traveling to ({x_coordinate}, {y_coordinate}). Estimated duration = {sleep}.")
         except Exception as e:
             await interaction.response.send_message(f"Couldn't travel: {e}", ephemeral=True)
             return
-        
-        await asyncio.sleep(sleep)
-        await interaction.followup.send(f"Arrived at ({x_coordinate}, {y_coordinate}).", ephemeral=True)
+        else:
+            await asyncio.sleep(sleep)
+            await interaction.followup.send(f"Arrived at ({x_coordinate}, {y_coordinate}).")
         
 
 async def setup(client: commands.Bot) -> None:
