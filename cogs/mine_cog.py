@@ -18,7 +18,10 @@ class MineCommands(commands.Cog):
     async def mine(self, interaction: discord.Interaction):
         if await check_player_exists(interaction) is False:
             return
-
+        if data.players[interaction.user].ship.is_traveling:
+            await interaction.response.send_message("You can't mine while traveling!", ephemeral=True)
+            return
+        
         player = data.players[interaction.user]
         mining_bonus = player.ship.modules[1].mining_bonus
         resource = random.choices(["Copper", "Silver", "Gold", "Uranium", "Black Matter"], weights=[35, 30, 25, 7, 3])[
