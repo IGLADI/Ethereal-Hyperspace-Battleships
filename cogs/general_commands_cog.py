@@ -78,6 +78,7 @@ class GeneralCommands(commands.Cog):
 
     @app_commands.command(name="where_am_i", description="Get your location info")
     async def where_am_i(self, interaction: discord.Interaction):
+        '''Returns the location of the player'''
         if await check_player_exists(interaction) is False:
             return
 
