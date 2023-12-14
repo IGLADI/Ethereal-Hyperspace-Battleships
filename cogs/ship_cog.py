@@ -1,3 +1,4 @@
+import asyncio
 from discord import app_commands
 import discord
 from discord.ext import commands
@@ -89,6 +90,47 @@ class ShipCommands(commands.Cog):
             await interaction.response.send_message(
                 f"You added {amount} tons of {resource} to your ship.", ephemeral=True
             )
+
+    @app_commands.command(name="toggle_energy_generator", description="Toggle on of the energy generator")
+    async def toggle_energy_generator(self, interaction: discord.Interaction, on: bool):
+        if await check_player_exists(interaction) is False:
+            return
+
+        player = data.players[interaction.user]
+        generator_status = player.ship.modules[7].is_on
+        if player.ship.modules[7].booting:
+            await interaction.response.send_message("The generator is still booting.", ephemeral=True)
+            return
+        if on is generator_status:
+            status_message = "Generator is already " + ("on" if generator_status else "off")
+            await interaction.response.send_message(status_message, ephemeral=True)
+            return
+
+        if on and not generator_status:
+            player.ship.modules[7].booting = True
+            await interaction.response.send_message("Booting up the generator...")
+            message = await interaction.followup.send("░░░░░░░░░░ 0%")
+            for percent in range(0, 100, 10):
+                bar = "█" * (percent // 10) + "░" * ((100 - percent) // 10)
+                await message.edit(content=f"{bar} {percent}%")
+                await asyncio.sleep(0.5)
+            await message.delete()
+
+            await interaction.followup.send("Generator is now online!")
+            player.ship.modules[7].turn_on()
+            player.ship.modules[7].booting = False
+        elif not on and generator_status:
+            player.ship.modules[7].booting = True
+            await interaction.response.send_message("Shutting down the generator...")
+            message = await interaction.followup.send("██████████ 100%")
+            for percent in range(100, 0, -10):
+                bar = "█" * (percent // 10) + "░" * ((100 - percent) // 10)
+                await message.edit(content=f"{bar} {percent}%")
+                await asyncio.sleep(0.5)
+            await message.delete()
+            player.ship.modules[7].turn_off()
+            await interaction.followup.send("Generator has been shut down.")
+            player.ship.modules[7].booting = False
 
 
 async def setup(client: commands.Bot) -> None:

@@ -391,10 +391,16 @@ class EnergyGenerator(Module):
             ],
         )
         self._generation = 10
+        self._is_on = True
+        self.booting = False
 
     @property
     def generation(self):
         return self._generation
+
+    @property
+    def is_on(self):
+        return self._is_on
 
     # generation levels:    10,     20,     30,     50,     70,     100,    130
     # money cost levels:    1000,   2000,   4000,   8000,   16000,  32000,  64000
@@ -414,6 +420,12 @@ class EnergyGenerator(Module):
 
     def __str__(self):
         return f"{super().__str__()} - Generation: {self._generation} per minute\n"
+
+    def turn_on(self):
+        self._is_on = True
+
+    def turn_off(self):
+        self._is_on = False
 
 
 class SolarPanel(Module):

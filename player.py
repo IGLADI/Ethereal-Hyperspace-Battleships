@@ -10,7 +10,6 @@ class Player:
         self.id = id
         self._money = 1000
         self._ship = Ship()
-        self.generator_activated = True
         self._energy_thread = Thread(target=self.update_energy)
         self._energy_thread.daemon = True
         self._energy_thread.start()
@@ -36,7 +35,7 @@ class Player:
         while True:
             if self.ship.energy < 100:
                 self.ship.add_energy(self.ship.modules[8].generation)
-            if self.generator_activated:
+            if self.ship.modules[7].is_on:
                 # always use 1 uranium for now, will probably add a different rendement per level later on
                 for resource in self.ship.modules[5]._capacity:
                     if resource.name == "Uranium":
