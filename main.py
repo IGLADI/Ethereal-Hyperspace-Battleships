@@ -4,6 +4,8 @@ from discord.ext import commands
 from create_channels import create_channels
 
 import json
+from data import planets
+from planet import Planet
 
 from create_roles import create_roles
 
@@ -37,6 +39,8 @@ class Client(commands.Bot):
             "cogs.general_commands_cog",
             "cogs.casino_games.casino_cog",
             "cogs.casino_games.race_game_cog",
+            "cogs.ship_cog",
+            "cogs.mine_cog",
         ]
 
     # this overwrites the default sync setup (used by self.tree.sync in on_ready)
@@ -55,6 +59,10 @@ class Client(commands.Bot):
         except Exception as e:
             print(e)
         print("--------------------------------------------")
+
+        #! temporary data storage untill we have a database
+        planets["C4MPU5 K441"] = Planet("C4MPU5 K441", 0, 0)
+        planets["Earth"] = Planet("Earth", 50, 0)
 
 
 # load the bot token from config.json KEEP THIS TOKEN PRIVATE (gitignore)
