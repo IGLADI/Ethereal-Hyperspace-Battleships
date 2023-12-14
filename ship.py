@@ -41,7 +41,7 @@ class Ship:
         
         def travel_thread():
             self._is_traveling = True
-            while self._location != new_location:
+            while self._location.x != new_location.x or self._location.y != new_location.y:
                 if self._location.x < new_location.x:
                     self._location.x += 1
                 elif self._location.x > new_location.x:
