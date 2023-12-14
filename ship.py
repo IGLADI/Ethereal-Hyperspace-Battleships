@@ -9,6 +9,7 @@ class Ship:
     def __init__(self):
         self._modules = []
         self._location = Location(0, 0)
+        self._is_traveling = False
         self._modules.append(TravelModule())
         self._modules.append(MiningModule())
         self._modules.append(Canon())
@@ -26,6 +27,10 @@ class Ship:
     def location(self):
         return self._location
     
+    @property
+    def is_traveling(self):
+        return self._is_traveling
+    
     def travel(self, x_coordinate, y_coordinate):
         '''Travels to the given coordinates'''
         old_location = self._location
@@ -35,6 +40,7 @@ class Ship:
             raise Exception("You can't travel that far! You need to upgrade your travel module.")
         
         def travel_thread():
+            self._is_traveling = True
             while self._location != new_location:
                 if self._location.x < new_location.x:
                     self._location.x += 1
@@ -45,6 +51,7 @@ class Ship:
                 elif self._location.y > new_location.y:
                     self._location.y -= 1
                 time.sleep(1)
+            self._is_traveling = False
         
         travel_thread_instance = threading.Thread(target=travel_thread)
         travel_thread_instance.start()
