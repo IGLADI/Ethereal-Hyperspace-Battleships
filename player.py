@@ -1,6 +1,7 @@
 from ship import Ship
 from utils import get_betted_amount
 
+
 class Player:
     def __init__(self, id):
         self.id = id

@@ -1,5 +1,6 @@
 from data import planets
 
+
 class Location:
     def __init__(self, x, y):
         self.x = x
@@ -10,7 +11,7 @@ class Location:
 
     def get_y(self):
         return self.y
-    
+
     def __str__(self):
         return f"({self.x}, {self.y})"
 
