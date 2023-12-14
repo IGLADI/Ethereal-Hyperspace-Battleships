@@ -27,7 +27,7 @@ class ShipCommands(commands.Cog):
         ship_message += f"\nEnergy: {ship.energy}"
         await interaction.response.send_message(ship_message, ephemeral=True)
 
-    @app_commands.command(name="cargo_info", description="Get info on your cargo and it's capacity")
+    @app_commands.command(name="inventory", description="Get info on your cargo and it's contents")
     async def cargo_info(self, interaction: discord.Interaction):
         if await check_player_exists(interaction) is False:
             return
