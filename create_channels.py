@@ -55,16 +55,17 @@ async def create_category_main_guilds(guild: discord.Guild, name: str):
 
 
 async def create_channel(category, channel):
-    if channel["type"] == "text":
-        if not discord.utils.get(category.text_channels, name=channel["name"]):
-            await category.create_text_channel(channel["name"])
-    elif channel["type"] == "forum":
-        if not discord.utils.get(category.forums, name=channel["name"]):
-            await category.create_forum(channel["name"])
-    elif channel["type"] == "voice":
-        if not discord.utils.get(category.voice_channels, name=channel["name"]):
-            await category.create_voice_channel(channel["name"])
-    elif channel["type"] == "stage":
-        # ? maybe lock the stage channels to the guild officers
-        if not discord.utils.get(category.stage_channels, name=channel["name"]):
-            await category.create_stage_channel(channel["name"])
+    match channel["type"]:
+        case "text":
+            if not discord.utils.get(category.text_channels, name=channel["name"]):
+                await category.create_text_channel(channel["name"])
+        case "forum":
+            if not discord.utils.get(category.forums, name=channel["name"]):
+                await category.create_forum(channel["name"])
+        case "voice":
+            if not discord.utils.get(category.voice_channels, name=channel["name"]):
+                await category.create_voice_channel(channel["name"])
+        case "stage":
+            # ? maybe lock the stage channels to the guild officers
+            if not discord.utils.get(category.stage_channels, name=channel["name"]):
+                await category.create_stage_channel(channel["name"])
