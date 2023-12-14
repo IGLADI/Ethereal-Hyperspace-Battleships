@@ -76,6 +76,15 @@ class GeneralCommands(commands.Cog):
         else:
             await interaction.response.send_message("You are already registered as a player.", ephemeral=True)
 
+    @app_commands.command(name="where_am_i", description="Get your location info")
+    async def where_am_i(self, interaction: discord.Interaction):
+        if await check_player_exists(interaction) is False:
+            return
+
+        player = data.players[interaction.user]
+        player_location = player.ship.location
+        location_name = player_location.is_planet()
+        await interaction.response.send_message(f"You are currently at {player_location}, also known as {location_name}.", ephemeral=True)
 
 async def setup(client: commands.Bot) -> None:
     await client.add_cog(GeneralCommands(client))
