@@ -189,6 +189,15 @@ class Cargo(Module):
                 resource.amount -= amount
                 return
 
+    def add_resource(self, resource_name, amount):
+        for resource in self._capacity:
+            if resource.name.lower() == resource_name.lower():
+                resource.amount += amount
+                return
+
+    def remove_resource(self, resource_name, amount):
+        self.consume_resource(resource_name, amount)
+
     # ! REMOVE THIS FUNCTION WHEN DONE DEBUGGING
     def add_cargo(self, resource, amount):
         if resource.lower() == "copper":
