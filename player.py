@@ -3,7 +3,6 @@ from utils import get_betted_amount
 from threading import Thread
 import time
 
-
 # TODO when implementing the db, on load of the players call init with values (and put actual values as default values)
 class Player:
     def __init__(self, id):

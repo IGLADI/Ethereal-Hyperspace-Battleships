@@ -1,13 +1,12 @@
 from location import Location
-from module import Travel_Module, Mining_Module, Canon, Shield, Fuel, Cargo, Radar, Energy_Generator
-
+from module import TravelModule, MiningModule, Canon, Shield, Fuel, Cargo, Radar, Energy_Generator
 
 class Ship:
     def __init__(self):
         self._modules = []
         self._location = Location(0, 0)
-        self._modules.append(Travel_Module())
-        self._modules.append(Mining_Module())
+        self._modules.append(TravelModule())
+        self._modules.append(MiningModule())
         self._modules.append(Canon())
         self._modules.append(Shield())
         self._modules.append(Fuel())

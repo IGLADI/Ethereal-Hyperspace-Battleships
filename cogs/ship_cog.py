@@ -39,7 +39,6 @@ class ShipCommands(commands.Cog):
         ship_message += f"{' '.join(cargo_info)}"
         await interaction.response.send_message(ship_message, ephemeral=True)
 
-    # TODO: add a check to see if the player has enough resources
     @app_commands.command(name="upgrade_ship", description="Upgrade a module")
     async def upgrade_ship(
         self,
@@ -65,7 +64,6 @@ class ShipCommands(commands.Cog):
                 )
                 return
         await interaction.response.send_message(f"Couldn't find module {module_name}.", ephemeral=True)
-        return
 
     # ! For debugging purposes
     @app_commands.command(name="add_cargo", description="For debugging purposes")
@@ -83,7 +81,8 @@ class ShipCommands(commands.Cog):
             )
         elif new_amount < amount:
             await interaction.response.send_message(
-                f"You added {new_amount} tons of {resource} and left {amount - new_amount} tons behind, because you reached maximum capacity.",
+                f"You added {new_amount} tons of {resource} and left "
+                f"{amount - new_amount} tons behind, because you reached maximum capacity.",
                 ephemeral=True,
             )
         else:

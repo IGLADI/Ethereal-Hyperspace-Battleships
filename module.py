@@ -48,21 +48,24 @@ class Module:
 
         return True
 
-    def consume_resources(self, cargo_player):
-        for cost in self._cost:
-            resource_name = cost["resource"]
-            required_amount = cost["amount"]
-
-            cargo_player.consume_resource(resource_name, required_amount)
-
     def __str__(self):
         cost_str = "".join(f"\n   - {cost['resource']}: {cost['amount']}" for cost in self._cost)
         if self._level == self._max_level:
-            return f" - **Name: {self._name}**\n - Description: {self._description}\n - Level: {self._level}/{self._max_level}\n - Upgrade Cost: MAX LEVEL\n"
-        return f" - **Name: {self._name}**\n - Description: {self._description}\n - Level: {self._level}/{self._max_level}\n - Upgrade Cost: {cost_str}\n"
+            return (
+                f" - **Name: {self._name}**\n"
+                f" - Description: {self._description}\n"
+                f" - Level: {self._level}/{self._max_level}\n"
+                f" - Upgrade Cost: MAX LEVEL\n"
+            )
+        return (
+            f" - **Name: {self._name}**\n"
+            f" - Description: {self._description}\n"
+            f" - Level: {self._level}/{self._max_level}\n"
+            f" - Upgrade Cost: {cost_str}\n"
+        )
 
 
-class Travel_Module(Module):
+class TravelModule(Module):
     def __init__(self):
         super().__init__(
             "Travel Module",
@@ -101,7 +104,7 @@ class Travel_Module(Module):
         return f"{super().__str__()} - Max Distance: {self._max_distance} lightyears\n"
 
 
-class Mining_Module(Module):
+class MiningModule(Module):
     def __init__(self):
         super().__init__(
             "Mining Module",
@@ -374,7 +377,7 @@ class Radar(Module):
 
 
 # generation = amount / minute
-class Energy_Generator(Module):
+class EnergyGenerator(Module):
     def __init__(self):
         super().__init__(
             "Energy Generator",
