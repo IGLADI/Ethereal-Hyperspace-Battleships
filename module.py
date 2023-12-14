@@ -390,13 +390,52 @@ class EnergyGenerator(Module):
                 {"resource": "Gold", "amount": 50},
             ],
         )
+        self._generation = 10
+
+    @property
+    def generation(self):
+        return self._generation
+
+    # generation levels:    10,     20,     30,     50,     70,     100,    130
+    # money cost levels:    1000,   2000,   4000,   8000,   16000,  32000,  64000
+    # copper cost levels:   50,     200,    350,    500,    650,    800,    950
+    # silver cost levels:   50,     200,    350,    500,    650,    800,    950
+    # gold cost levels:     50,     200,    350,    500,    650,    800,    950
+    def upgrade(self, cargo_player):
+        super().upgrade(cargo_player)
+        if self.level == 2 or self.level == 3:
+            self._generation += 10
+        elif self.level == 4 or self.level == 5:
+            self._generation += 20
+        else:
+            self._generation += 30
+        for i in range(1, 4):
+            self._cost[i]["amount"] += 150
+
+    def __str__(self):
+        return f"{super().__str__()} - Generation: {self._generation} per minute\n"
+
+
+class SolarPanel(Module):
+    def __init__(self):
+        super().__init__(
+            "Solar Panel",
+            "Increases the ship's energy generation.",
+            7,
+            [
+                {"resource": "Money", "amount": 0},
+                {"resource": "Copper", "amount": 50},
+                {"resource": "Silver", "amount": 50},
+                {"resource": "Gold", "amount": 50},
+            ],
+        )
         self._generation = 1
 
     @property
     def generation(self):
         return self._generation
 
-    # generation levels:    1,      2,      3,      5,      7,      10,     10
+    # generation levels:    1,      2,      3,      5,      7,      10,     13
     # money cost levels:    1000,   2000,   4000,   8000,   16000,  32000,  64000
     # copper cost levels:   50,     200,    350,    500,    650,    800,    950
     # silver cost levels:   50,     200,    350,    500,    650,    800,    950

@@ -14,6 +14,7 @@ class MineCommands(commands.Cog):
 
     # Chances of getting a resource:
     # Copper: 35% | Silver: 30% |Gold: 25% | Uranium: 7% | Black Matter: 3%
+    # TODO mine X times (avoid spamming /mine)
     @app_commands.command(name="mine", description="Mine a random resource")
     async def mine(self, interaction: discord.Interaction):
         if await check_player_exists(interaction) is False:
