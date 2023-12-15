@@ -70,12 +70,12 @@ CREATE TABLE `polls` (
 );
 
 CREATE TABLE `votes` (
-`poll_id` int(11) NOT NULL,
-CONSTRAINT `FK__polls__votes` FOREIGN KEY (`poll_id`)
-	   REFERENCES `polls` (`poll_id`),
-`player_id` int(11) NOT NULL,
-CONSTRAINT `FK__players__votes` FOREIGN KEY (`player_id`)
-	   REFERENCES `players` (`player_id`)
+    `poll_id` int(11) NOT NULL,
+    CONSTRAINT `FK__polls__votes` FOREIGN KEY (`poll_id`)
+	    REFERENCES `polls` (`poll_id`),
+    `player_id` int(11) NOT NULL,
+    CONSTRAINT `FK__players__votes` FOREIGN KEY (`player_id`)
+	    REFERENCES `players` (`player_id`)
 );
 
 CREATE TABLE `ships` (
@@ -91,7 +91,7 @@ CREATE TABLE `modules` (
     `module_id` int(11) NOT NULL AUTO_INCREMENT,
     CONSTRAINT `PK__modules` PRIMARY KEY (`module_id`),
     `level` int(11) NOT NULL DEFAULT 0,
-    `state` enum('active', 'inactive') NOT NULL,
+    `state` enum('active', 'inactive') NULL,
     `type` int(11) NOT NULL,
     `ship_id` int(11) NOT NULL,
     CONSTRAINT `FK__ships__modules` FOREIGN KEY (`ship_id`)
@@ -110,7 +110,7 @@ CREATE TABLE `items` (
     `item_id` int(11) NOT NULL AUTO_INCREMENT,
     CONSTRAINT `PK__items` PRIMARY KEY (`item_id`),
     `amount` int(11) NOT NULL DEFAULT 0,
-    `cargo_id` int(11) NOT NULL,
+    `cargo_id` int(11) NULL,
     CONSTRAINT `FK__cargos__items` FOREIGN KEY (`cargo_id`)
 	    REFERENCES `cargos` (`cargo_id`)
 );
@@ -132,4 +132,3 @@ CREATE TABLE `building_upgrades` (
     CONSTRAINT `FK__items__building_upgrades` FOREIGN KEY (`item_id`)
 	    REFERENCES `items` (`item_id`)
 );
-
