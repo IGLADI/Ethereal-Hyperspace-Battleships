@@ -1,104 +1,135 @@
-CREATE DATABASE IF NOT EXISTS `etherealhyperspacebattleshipsdb` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci */;
-USE `etherealhyperspacebattleshipsdb`;
+DROP DATABASE IF EXISTS `ethbdb`;
+CREATE DATABASE IF NOT EXISTS `ethbdb`;
+USE `ethbdb`;
 
-CREATE TABLE IF NOT EXISTS `building` (
-  `building_id` int(11) NOT NULL AUTO_INCREMENT,
-  `building_name` varchar(255) NOT NULL,
-  `building_cost` int(11) NOT NULL,
-  `upgrade_cost` int(11) NOT NULL,
-  PRIMARY KEY (`building_id`)
- ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+CREATE TABLE `locations` (
+    `location_x_pos` int(11) NOT NULL,
+    `location_y_pos` int(11) NOT NULL,
+    `name` varchar(255) NOT NULL,
+    CONSTRAINT `PK_locations` PRIMARY KEY (`location_x_pos`, `location_y_pos`)
+);
 
-CREATE TABLE IF NOT EXISTS `guild` (
-  `guild_id` int(11) NOT NULL AUTO_INCREMENT,
-  `guild_name` varchar(255) NOT NULL,
-  `guild_description` varchar(255) NOT NULL,
-  `owned_buildings` text NOT NULL,
-  `owned_planets` text NOT NULL,
-  `members` text NOT NULL,
-  PRIMARY KEY (`guild_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+CREATE TABLE `planets` (
+    `planet_id` int(11) NOT NULL AUTO_INCREMENT,
+    CONSTRAINT `PK__planets` PRIMARY KEY (`planet_id`),
+    `free_slots` int(11) NOT NULL,
+    `location_x_pos` int(11) NOT NULL,
+    `location_y_pos` int(11) NOT NULL,
+    CONSTRAINT `FK__locations__planets` FOREIGN KEY (`location_x_pos`, `location_y_pos`)
+	    REFERENCES `locations` (`location_x_pos`, `location_y_pos`)
+);
 
-CREATE TABLE IF NOT EXISTS `location` (
-  `location_id` int(11) NOT NULL AUTO_INCREMENT,
-  `x_pos` int(11) NOT NULL,
-  `y_pos` int(11) NOT NULL,
-  `location_description` varchar(255) NOT NULL,
-  PRIMARY KEY (`location_id`),
-  UNIQUE KEY `x_pos` (`x_pos`) USING BTREE,
-  UNIQUE KEY `y_pos` (`y_pos`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+CREATE TABLE `buildings` (
+    `building_id` int(11) NOT NULL AUTO_INCREMENT,
+    CONSTRAINT `PK__buildings` PRIMARY KEY (`building_id`),
+    `level` int(11) NOT NULL DEFAULT 1,
+    `building_type` varchar(255) NOT NULL,
+    `planet_id` int(11) NOT NULL,
+    CONSTRAINT `FK__planets__buildings` FOREIGN KEY (`planet_id`)
+	    REFERENCES `planets` (`planet_id`)
+);
 
-CREATE TABLE IF NOT EXISTS `cargo` (
-  `cargo_id` int(11) NOT NULL AUTO_INCREMENT,
-  `module_id` int(11) NOT NULL,
-  `space` int(11) NOT NULL,
-  PRIMARY KEY (`cargo_id`),
-  KEY `module_id` (`module_id`)
-  CONSTRAINT `FK_module_cargo` FOREIGN KEY (`module_id`) REFERENCES `module` (`module_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+CREATE TABLE `guilds` (
+    `guild_id` int(11) NOT NULL AUTO_INCREMENT,
+    CONSTRAINT `PK__guilds` PRIMARY KEY (`guild_id`),
+    `annoucement_channel` int(11) NOT NULL,
+    `planet_id` int(11) NOT NULL,
+    CONSTRAINT `FK__planets__guilds` FOREIGN KEY (`planet_id`)
+	    REFERENCES `planets` (`planet_id`)
+);
 
-CREATE TABLE IF NOT EXISTS `planet` (
-  `planet_id` int(11) NOT NULL AUTO_INCREMENT,
-  `planet_type` varchar(255) NOT NULL,
-  `location_id` int(11) NOT NULL,
-  `guild_id` int(11) NOT NULL,
-  `resource_id` int(11) NOT NULL,
-  PRIMARY KEY (`planet_id`),
-  KEY `FK_location` (`location_id`) USING BTREE,
-  KEY `FK_guild` (`guild_id`) USING BTREE,
-  KEY `FK_resource` (`resource_id`) USING BTREE,
-  CONSTRAINT `FK_guild_planet` FOREIGN KEY (`guild_id`) REFERENCES `guild` (`guild_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `FK_location_planet` FOREIGN KEY (`location_id`) REFERENCES `location` (`location_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `FK_resource_planet` FOREIGN KEY (`resource_id`) REFERENCES `resource` (`resource_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+CREATE TABLE `players` (
+    `player_id` int(11) NOT NULL AUTO_INCREMENT,
+    CONSTRAINT `PK__players` PRIMARY KEY (`player_id`),
+    `discord_name` varchar(255) NOT NULL,
+    `class` enum('dwarf', 'martian', 'droid') NOT NULL,
+    `money` int(11) NOT NULL DEFAULT 0,
+    `reputation` int(11) NOT NULL DEFAULT 0,
+    `x_pos` int(11) NOT NULL,
+    `y_pos` int(11) NOT NULL,
+    `guild_id` int(11) NOT NULL,
+    CONSTRAINT `FK__guilds__players` FOREIGN KEY (`guild_id`)
+	    REFERENCES `guilds` (`guild_id`)
+);
 
-CREATE TABLE IF NOT EXISTS `player` (
-  `player_id` int(11) NOT NULL AUTO_INCREMENT,
-  `player_name` varchar(255) NOT NULL,
-  `discord_id` int(19) NOT NULL,
-  `money` int(255) NOT NULL DEFAULT 0,
-  `x_pos` int(11) NOT NULL,
-  `y_pos` int(11) NOT NULL,
-  `damage` int(11) NOT NULL,
-  `ship` int(11) NOT NULL,
-  `fuel` int(11) NOT NULL,
-  `player_speed` int(11) NOT NULL,
-  `class` enum('Dwarf','Droid','Martian') NOT NULL,
-  PRIMARY KEY (`player_id`),
-  KEY `FK_xpos_player` (`x_pos`),
-  KEY `FK_ypos_player` (`y_pos`),
-  CONSTRAINT `FK_x_pos_player` FOREIGN KEY (`x_pos`) REFERENCES `location` (`x_pos`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `FK_y_pos_player` FOREIGN KEY (`y_pos`) REFERENCES `location` (`y_pos`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+CREATE TABLE `reports` (
+    `report_id` int(11) NOT NULL AUTO_INCREMENT,
+    CONSTRAINT `PK__reports` PRIMARY KEY (`report_id`),
+    `content` TEXT NOT NULL,
+    `creation_time` TIMESTAMP DEFAULT CURRENT_TIME,
+    `player_id` int(11) NOT NULL,
+    CONSTRAINT `FK__players__reports` FOREIGN KEY (`player_id`)
+	    REFERENCES `players` (`player_id`)
+);
 
-CREATE TABLE IF NOT EXISTS `resource` (
-  `resource_id` int(11) NOT NULL AUTO_INCREMENT,
-  `description` varchar(255) NOT NULL,
-  `resource_name` varchar(255) NOT NULL,
-  `drop_rate` int(11) NOT NULL,
-  PRIMARY KEY (`resource_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+CREATE TABLE `polls` (
+    `poll_id` int(11) NOT NULL AUTO_INCREMENT,
+    CONSTRAINT `PK__polls` PRIMARY KEY (`poll_id`),
+    `type` enum('building', 'election') NOT NULL,
+    `creation_time` TIMESTAMP DEFAULT CURRENT_TIME
+);
 
+CREATE TABLE `votes` (
+`poll_id` int(11) NOT NULL,
+CONSTRAINT `FK__polls__votes` FOREIGN KEY (`poll_id`)
+	   REFERENCES `polls` (`poll_id`),
+`player_id` int(11) NOT NULL,
+CONSTRAINT `FK__players__votes` FOREIGN KEY (`player_id`)
+	   REFERENCES `players` (`player_id`)
+);
 
-CREATE TABLE IF NOT EXISTS `ship` (
-  `ship_id` int(11) NOT NULL AUTO_INCREMENT,
-  `ship_name` varchar(255) NOT NULL,
-  `location_id` int(11) NOT NULL,
-  `module_id` int(11) NOT NULL,
-  PRIMARY KEY (`ship_id`),
-  KEY `FK_location_ship` (`location_id`) USING BTREE,
-  KEY `FK_module_ship` (`module_id`) USING BTREE,
-  CONSTRAINT `FK_location_ship` FOREIGN KEY (`location_id`) REFERENCES `location` (`location_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `FK_module_ship` FOREIGN KEY (`module_id`) REFERENCES `module` (`module_id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+CREATE TABLE `ships` (
+    `ship_id` int(11) NOT NULL AUTO_INCREMENT,
+    CONSTRAINT `PK__ships` PRIMARY KEY (`ship_id`),
+    `fuel` int(11) NOT NULL DEFAULT 0,
+    `player_id` int(11) NOT NULL,
+    CONSTRAINT `FK__players__ships` FOREIGN KEY (`player_id`)
+	    REFERENCES `players` (`player_id`)
+);
 
-CREATE TABLE IF NOT EXISTS `speed` (
-  `speed_id` int(11) NOT NULL AUTO_INCREMENT,
-  `module_id` int(11) NOT NULL,
-  `speed` float NOT NULL,
-  PRIMARY KEY (`speed_id`),
-  KEY `FK_moudule_speed` (`module_id`),
-  CONSTRAINT `FK_moudule_speed` FOREIGN KEY (`module_id`) REFERENCES `module` (`module_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+CREATE TABLE `modules` (
+    `module_id` int(11) NOT NULL AUTO_INCREMENT,
+    CONSTRAINT `PK__modules` PRIMARY KEY (`module_id`),
+    `level` int(11) NOT NULL DEFAULT 0,
+    `state` enum('active', 'inactive') NOT NULL,
+    `type` int(11) NOT NULL,
+    `ship_id` int(11) NOT NULL,
+    CONSTRAINT `FK__ships__modules` FOREIGN KEY (`ship_id`)
+	    REFERENCES `ships` (`ship_id`)
+);
+
+CREATE TABLE `cargos` (
+    `cargo_id` int(11) NOT NULL AUTO_INCREMENT,
+    CONSTRAINT `PK_cargo_id` PRIMARY KEY (`cargo_id`),
+    `module_id` int(11) NOT NULL,
+    CONSTRAINT `FK__modules__cargos` FOREIGN KEY (`module_id`)
+	    REFERENCES `modules` (`module_id`)
+);
+
+CREATE TABLE `items` (
+    `item_id` int(11) NOT NULL AUTO_INCREMENT,
+    CONSTRAINT `PK__items` PRIMARY KEY (`item_id`),
+    `amount` int(11) NOT NULL DEFAULT 0,
+    `cargo_id` int(11) NOT NULL,
+    CONSTRAINT `FK__cargos__items` FOREIGN KEY (`cargo_id`)
+	    REFERENCES `cargos` (`cargo_id`)
+);
+
+CREATE TABLE `resources` (
+    `resource_id` int(11) NOT NULL AUTO_INCREMENT,
+    CONSTRAINT `PK__resources` PRIMARY KEY (`resource_id`),
+    `type` enum('copper', 'silver', 'gold', 'uranium', 'black_matter') NOT NULL,
+    `item_id` int(11) NOT NULL,
+    CONSTRAINT `FK__items__resources` FOREIGN KEY (`item_id`)
+	    REFERENCES `items` (`item_id`)
+);
+
+CREATE TABLE `building_upgrades` (
+    `building_id` int(11) NOT NULL,
+    CONSTRAINT `FK__buildings__building_upgrades` FOREIGN KEY (`building_id`)
+	    REFERENCES `buildings` (`building_id`),
+    `item_id` int(11) NOT NULL,
+    CONSTRAINT `FK__items__building_upgrades` FOREIGN KEY (`item_id`)
+	    REFERENCES `items` (`item_id`)
+);
 
