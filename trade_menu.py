@@ -1,8 +1,12 @@
-from typing import Any, Dict, List
 from discord.ext.modal_paginator import ModalPaginator, PaginatorModal
 import discord
 
+from typing import Any, Dict, List
 
+import data
+
+
+# TODO add default values for the inputs (0)
 class TradeModal(ModalPaginator):
     def __init__(
         self,
@@ -18,10 +22,10 @@ class TradeModal(ModalPaginator):
         self.amount = amount
         self.recipiant = recipiant
 
-        for data in inputs:
-            title: str = data["title"]
-            required: bool = data["required"]
-            questions: List[str] = data["questions"]
+        for data_input in inputs:
+            title: str = data_input["title"]
+            required: bool = data_input["required"]
+            questions: List[str] = data_input["questions"]
             modal = PaginatorModal(title=title, required=required)
             for question in questions:
                 modal.add_input(
@@ -39,7 +43,21 @@ class TradeModal(ModalPaginator):
                 resume += f"{field.label}: {field.value}\n"
 
             answers.append(resume)
-            answers.append(self.amount)
+
+        try:
+            player = data.players[interaction.user]
+            recipiant_player = data.players[self.recipiant]
+            for player in [player, recipiant_player]:
+                for modal in self.modals:
+                    for field in modal.children:
+                        if player.ship.modules[5].get_resource_amount(field.label) < int(field.value):
+                            await interaction.response.send_message(
+                                f"{player.id} has not enough {field.label}", ephemeral=True
+                            )
+                            return
+        except ValueError:
+            await interaction.response.send_message("Invalid input", ephemeral=True)
+            return
 
         # TODO print "ASK/OFFER", "RESOURCE_TYPE", "AMOUNT" (don't forget money) by UI dev
         resume_table = "Offer sent"

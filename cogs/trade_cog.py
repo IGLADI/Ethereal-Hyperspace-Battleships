@@ -87,9 +87,20 @@ class TradeCog(commands.Cog):
 
         sender = data.players[interaction.user]
         recipiant_player = data.players[recipient]
-        if sender == recipiant_player:
-            await interaction.response.send_message("You can't trade with yourself.", ephemeral=True)
-            return
+        # if sender == recipiant_player:
+        #     await interaction.response.send_message("You can't trade with yourself.", ephemeral=True)
+        #     return
+
+        if amount < 0:
+            if data.players[interaction.user].money < abs(amount):
+                await interaction.response.send_message("You don't have enough money to send.", ephemeral=True)
+                return
+        else:
+            if data.players[recipiant_player.id].money < abs(amount):
+                await interaction.response.send_message(
+                    "The recipiant doesn't have enough money to send.", ephemeral=True
+                )
+                return
 
         resources = ["Copper", "Silver", "Gold", "Uranium", "Black Matter"]
         ask_resources = {
