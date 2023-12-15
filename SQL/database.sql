@@ -134,3 +134,25 @@ CREATE TABLE `building_upgrades` (
     CONSTRAINT `FK__items__building_upgrades` FOREIGN KEY (`item_id`)
 	    REFERENCES `items` (`item_id`)
 );
+
+-- default planets
+INSERT INTO `locations` (`location_x_pos`, `location_y_pos`, `name`) VALUES
+(0, 0, "Earth"),
+(0, 5, "Mars"),
+(-5, 5, "Venus"),
+(-5, 0, "Jupiter"),
+(-5, -5, "Mercury");
+-- inserting planet ids manually
+INSERT INTO `planets` VALUES
+(1, 0, 0, 0),
+(2, 3, 0, 5),
+(3, 3, -5, 5),
+(4, 3, -5, 0),
+(5, 3, -5, -5);
+
+-- default guilds
+INSERT INTO `guilds`  VALUES
+(1, 'The Federation', -1, 2),
+(2, 'The Alliance', -1, 3),
+(3, 'The Empire', -1, 4),
+(4, 'The Independents', -1, 5);
