@@ -5,8 +5,8 @@ USE `ethbdb`;
 CREATE TABLE `locations` (
     `location_x_pos` int(11) NOT NULL,
     `location_y_pos` int(11) NOT NULL,
-    `name` varchar(255) NOT NULL,
-    CONSTRAINT `PK_locations` PRIMARY KEY (`location_x_pos`, `location_y_pos`)
+    CONSTRAINT `PK_locations` PRIMARY KEY (`location_x_pos`, `location_y_pos`),
+    `name` varchar(255) NOT NULL UNIQUE
 );
 
 CREATE TABLE `planets` (
@@ -32,8 +32,8 @@ CREATE TABLE `buildings` (
 CREATE TABLE `guilds` (
     `guild_id` int(11) NOT NULL AUTO_INCREMENT,
     CONSTRAINT `PK__guilds` PRIMARY KEY (`guild_id`),
-    `name` varchar(255) NOT NULL,
-    `annoucement_channel` int(11) NOT NULL,
+    `name` varchar(255) NOT NULL UNIQUE,
+    `announcement_channel` int(11) NOT NULL,
     `planet_id` int(11) NOT NULL,
     CONSTRAINT `FK__planets__guilds` FOREIGN KEY (`planet_id`)
 	    REFERENCES `planets` (`planet_id`)
@@ -42,7 +42,7 @@ CREATE TABLE `guilds` (
 CREATE TABLE `players` (
     `player_id` int(11) NOT NULL AUTO_INCREMENT,
     CONSTRAINT `PK__players` PRIMARY KEY (`player_id`),
-    `discord_name` varchar(255) NOT NULL,
+    `discord_name` varchar(255) NOT NULL UNIQUE,
     `class` enum('dwarf', 'martian', 'droid') NOT NULL,
     `money` int(11) NOT NULL DEFAULT 0,
     `reputation` int(11) NOT NULL DEFAULT 0,
