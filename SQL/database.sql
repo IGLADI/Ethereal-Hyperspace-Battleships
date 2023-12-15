@@ -106,6 +106,7 @@ CREATE TABLE `cargos` (
 	    REFERENCES `modules` (`module_id`)
 );
 
+-- TODO: Needs a special constraint because an item should be either linked to a building_upgrades or cargos but not on its own.
 CREATE TABLE `items` (
     `item_id` int(11) NOT NULL AUTO_INCREMENT,
     CONSTRAINT `PK__items` PRIMARY KEY (`item_id`),
