@@ -22,8 +22,9 @@ class TradeModal(ModalPaginator):
         self.amount = amount
         self.recipiant = recipiant
 
-        for data_input in inputs:
+        for data_input in self.inputs:
             title: str = data_input["title"]
+            # TODO set default value to 0
             required: bool = data_input["required"]
             questions: List[str] = data_input["questions"]
             modal = PaginatorModal(title=title, required=required)
@@ -45,14 +46,23 @@ class TradeModal(ModalPaginator):
             answers.append(resume)
 
         try:
-            player = data.players[interaction.user]
-            recipiant_player = data.players[self.recipiant]
-            for player in [player, recipiant_player]:
-                for modal in self.modals:
+            self.player = data.players[interaction.user]
+            self.recipiant_player = data.players[self.recipiant]
+            # check if each player has enough resources
+            # TODO make this a separate funciton
+            for modal in self.modals:
+                if modal == self.modals[0]:
                     for field in modal.children:
-                        if player.ship.modules[5].get_resource_amount(field.label) < int(field.value):
+                        if self.recipiant_player.ship.modules[5].get_resource_amount(field.label) < int(field.value):
                             await interaction.response.send_message(
-                                f"{player.id} has not enough {field.label}", ephemeral=True
+                                "The recipiant doesn't have enough resources to send.", ephemeral=True
+                            )
+                            return
+                else:
+                    for field in modal.children:
+                        if self.player.ship.modules[5].get_resource_amount(field.label) < int(field.value):
+                            await interaction.response.send_message(
+                                "You don't have enough resources to send.", ephemeral=True
                             )
                             return
         except ValueError:
@@ -63,16 +73,22 @@ class TradeModal(ModalPaginator):
         resume_table = "Offer sent"
         await interaction.response.send_message(resume_table)
 
-        offer_paginator = OfferPaginator()
+        offer_paginator = OfferPaginator(self.player, self.recipiant_player, self.modals, self.amount)
 
         # TODO UI dev add a little resume of the transaction and who proposed you the offers (same as aboveg ig)
         await self.recipiant.send("You received a trade offer", view=offer_paginator)
 
 
+# ! TODO CHECK FOR RACING CONDITIONS:
+# (if each player still has the resource on the moment its accepted, make a function from aboves check
 class OfferPaginator(discord.ui.View):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, player, recipiant_player, uppermodals, amount, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.value = None
+        self.player = player
+        self.recipiant_player = recipiant_player
+        self.uppermodals = uppermodals
+        self.amount = amount
 
     @discord.ui.button(label="Accept", style=discord.ButtonStyle.green)
     async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -88,4 +104,18 @@ class OfferPaginator(discord.ui.View):
         self.stop()
 
     async def accept_offer(self, interaction: discord.Interaction) -> None:
-        await interaction.followup.send("Distributing resources", ephemeral=True)
+        for modal in self.uppermodals: 
+            if modal == self.uppermodals[0]:
+                for field in modal.children:
+                    self.recipiant_player.ship.modules[5].remove_resource(field.label, int(field.value))
+                    self.player.ship.modules[5].add_resource(field.label, int(field.value))
+            else:
+                for field in modal.children:
+                    self.player.ship.modules[5].remove_resource(field.label, int(field.value))
+                    self.recipiant_player.ship.modules[5].add_resource(field.label, int(field.value))
+        if self.amount < 0:
+            self.player.money += abs(self.amount)
+            self.recipiant_player.money -= abs(self.amount)
+        else:
+            self.player.money -= abs(self.amount)
+            self.recipiant_player.money += abs(self.amount)
