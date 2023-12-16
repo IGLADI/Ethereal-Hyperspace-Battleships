@@ -79,7 +79,8 @@ CREATE TABLE `votes` (
 	    REFERENCES `polls` (`poll_id`),
     `player_id` int(11) NOT NULL,
     CONSTRAINT `FK__players__votes` FOREIGN KEY (`player_id`)
-	    REFERENCES `players` (`player_id`)
+	    REFERENCES `players` (`player_id`),
+    `polarity` enum('positive', 'negative') NOT NULL
 );
 
 CREATE TABLE `ships` (
