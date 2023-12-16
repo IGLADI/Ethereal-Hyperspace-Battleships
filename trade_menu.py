@@ -45,6 +45,20 @@ class TradeModal(ModalPaginator):
 
             answers.append(resume)
 
+        for modal in self.modals:
+            if modal == self.modals[0]:
+                for field in modal.children:
+                    if int(field.value) < 0:
+                        await interaction.response.send_message(
+                            "You can't ask for negative resources.", ephemeral=True
+                        )
+                        return
+            else:
+                for field in modal.children:
+                    if int(field.value) < 0:
+                        await interaction.response.send_message("You can't offer negative resources.", ephemeral=True)
+                        return
+
         try:
             self.player = data.players[interaction.user]
             self.recipiant_player = data.players[self.recipiant]
@@ -104,7 +118,7 @@ class OfferPaginator(discord.ui.View):
         self.stop()
 
     async def accept_offer(self, interaction: discord.Interaction) -> None:
-        for modal in self.uppermodals: 
+        for modal in self.uppermodals:
             if modal == self.uppermodals[0]:
                 for field in modal.children:
                     self.recipiant_player.ship.modules[5].remove_resource(field.label, int(field.value))

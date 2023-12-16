@@ -91,6 +91,10 @@ class TradeCog(commands.Cog):
             await interaction.response.send_message("You can't trade with yourself.", ephemeral=True)
             return
 
+        if amount < 0:
+            await interaction.response.send_message("Please provide a positive amount of money.", ephemeral=True)
+            return
+
         if send_or_receive_money == "receive":
             amount = -amount
 
