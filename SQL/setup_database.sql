@@ -157,7 +157,7 @@ INSERT INTO `planets` VALUES
 
 -- default guilds
 INSERT INTO `guilds`  VALUES
-(1, 'The Federation', -1, 2),
-(2, 'The Alliance', -1, 3),
-(3, 'The Empire', -1, 4),
-(4, 'The Independents', -1, 5);
+(1, 'The Federation', 2),
+(2, 'The Alliance', 3),
+(3, 'The Empire', 4),
+(4, 'The Independents', 5);
