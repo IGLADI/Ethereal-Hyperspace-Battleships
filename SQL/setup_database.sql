@@ -1,7 +1,11 @@
+-- more info at https://github.com/LordTlasT/EtHB-docs/blob/main/database
+
+-- Create database
 DROP DATABASE IF EXISTS `ethbdb`;
-CREATE DATABASE IF NOT EXISTS `ethbdb`;
+CREATE DATABASE `ethbdb`;
 USE `ethbdb`;
 
+-- Create tables --------------------------------------------------------------
 CREATE TABLE `locations` (
     `location_x_pos` int(11) NOT NULL,
     `location_y_pos` int(11) NOT NULL,
@@ -135,7 +139,8 @@ CREATE TABLE `building_upgrades` (
 	    REFERENCES `items` (`item_id`)
 );
 
--- default planets
+-- Setup default values -------------------------------------------------------
+-- planets
 INSERT INTO `locations` (`location_x_pos`, `location_y_pos`, `name`) VALUES
 (0, 0, "Earth"),
 (0, 5, "Mars"),
