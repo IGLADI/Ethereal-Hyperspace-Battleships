@@ -66,7 +66,7 @@ class TradeCog(commands.Cog):
 
         sender.ship.modules[5].remove_resource(resource, amount_to_give)
         recipient.ship.modules[5].add_resource(resource, amount_to_give)
-        # TODO implement a UI
+        # TODO implement by UI
         message = f"You gave {amount_to_give} {resource} to {recipient.id}."
         await interaction.response.send_message(message)
 
@@ -87,22 +87,26 @@ class TradeCog(commands.Cog):
 
         sender = data.players[interaction.user]
         recipiant_player = data.players[recipient]
-        # if sender == recipiant_player:
-        #     await interaction.response.send_message("You can't trade with yourself.", ephemeral=True)
-        #     return
+        if sender == recipiant_player:
+            await interaction.response.send_message("You can't trade with yourself.", ephemeral=True)
+            return
+
+        if send_or_receive_money == "receive":
+            amount = -amount
 
         if amount < 0:
-            if data.players[interaction.user].money < abs(amount):
-                await interaction.response.send_message("You don't have enough money to send.", ephemeral=True)
-                return
-        else:
             if data.players[recipiant_player.id].money < abs(amount):
                 await interaction.response.send_message(
                     "The recipiant doesn't have enough money to send.", ephemeral=True
                 )
                 return
+        else:
+            if data.players[interaction.user].money < abs(amount):
+                await interaction.response.send_message("You don't have enough money to send.", ephemeral=True)
+                return
 
         resources = ["Copper", "Silver", "Gold", "Uranium", "Black Matter"]
+        # TODO set required to false with default values of 0
         ask_resources = {
             "title": "Resources You Ask",
             "required": True,
@@ -113,10 +117,6 @@ class TradeCog(commands.Cog):
             "required": True,
             "questions": resources,
         }
-
-        if send_or_receive_money == "receive":
-            amount = -amount
-
         inputs = [
             ask_resources,
             give_resources,
