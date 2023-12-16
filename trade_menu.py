@@ -3,6 +3,8 @@ import discord
 
 from typing import Any, Dict, List
 
+from numpy import place
+
 import data
 
 
@@ -31,11 +33,16 @@ class TradeModal(ModalPaginator):
             for question in questions:
                 modal.add_input(
                     label=question,
+                    placeholder="0",
+                    default="0",
+                    required=False,
                 )
 
             self.add_modal(modal)
 
+    # TODO can't send empty offers
     async def on_finish(self, interaction: discord.Interaction[Any]) -> None:
+        # to use for UI dev
         answers: list[str] = []
         for modal in self.modals:
             resume = ""
@@ -45,42 +52,30 @@ class TradeModal(ModalPaginator):
 
             answers.append(resume)
 
-        for modal in self.modals:
-            if modal == self.modals[0]:
-                for field in modal.children:
-                    if int(field.value) < 0:
-                        await interaction.response.send_message(
-                            "You can't ask for negative resources.", ephemeral=True
-                        )
-                        return
-            else:
-                for field in modal.children:
-                    if int(field.value) < 0:
-                        await interaction.response.send_message("You can't offer negative resources.", ephemeral=True)
-                        return
-
         try:
-            self.player = data.players[interaction.user]
-            self.recipiant_player = data.players[self.recipiant]
-            # check if each player has enough resources
-            # TODO make this a separate funciton
             for modal in self.modals:
                 if modal == self.modals[0]:
                     for field in modal.children:
-                        if self.recipiant_player.ship.modules[5].get_resource_amount(field.label) < int(field.value):
+                        if int(field.value) < 0:
                             await interaction.response.send_message(
-                                "The recipiant doesn't have enough resources to send.", ephemeral=True
+                                "You can't ask for negative resources.", ephemeral=True
                             )
                             return
                 else:
                     for field in modal.children:
-                        if self.player.ship.modules[5].get_resource_amount(field.label) < int(field.value):
+                        if int(field.value) < 0:
                             await interaction.response.send_message(
-                                "You don't have enough resources to send.", ephemeral=True
+                                "You can't offer negative resources.", ephemeral=True
                             )
                             return
         except ValueError:
-            await interaction.response.send_message("Invalid input", ephemeral=True)
+            await interaction.followup.send("Invalid input", ephemeral=True)
+            return
+
+        self.player = data.players[interaction.user]
+        self.recipiant_player = data.players[self.recipiant]
+
+        if await check_enough_resources(self.player, self.recipiant_player, self.modals, self.amount) is False:
             return
 
         # TODO print "ASK/OFFER", "RESOURCE_TYPE", "AMOUNT" (don't forget money) by UI dev
@@ -93,8 +88,6 @@ class TradeModal(ModalPaginator):
         await self.recipiant.send("You received a trade offer", view=offer_paginator)
 
 
-# ! TODO CHECK FOR RACING CONDITIONS:
-# (if each player still has the resource on the moment its accepted, make a function from aboves check
 class OfferPaginator(discord.ui.View):
     def __init__(self, player, recipiant_player, uppermodals, amount, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -107,7 +100,6 @@ class OfferPaginator(discord.ui.View):
     @discord.ui.button(label="Accept", style=discord.ButtonStyle.green)
     async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
         # TODO for UI dev
-        await interaction.response.send_message("Offer accepted", ephemeral=True)
         await self.accept_offer(interaction)
         self.stop()
 
@@ -118,6 +110,15 @@ class OfferPaginator(discord.ui.View):
         self.stop()
 
     async def accept_offer(self, interaction: discord.Interaction) -> None:
+        if await check_enough_resources(self.player, self.recipiant_player, self.uppermodals, interaction) is False:
+            return
+        if await check_enough_money(self.player, self.recipiant_player, self.amount, interaction) is False:
+            return
+        self.distribute_resources()
+        # TODO UI dev?
+        await interaction.response.send_message("Offer accepted", ephemeral=True)
+
+    def distribute_resources(self) -> None:
         for modal in self.uppermodals:
             if modal == self.uppermodals[0]:
                 for field in modal.children:
@@ -133,3 +134,32 @@ class OfferPaginator(discord.ui.View):
         else:
             self.player.money -= abs(self.amount)
             self.recipiant_player.money += abs(self.amount)
+
+
+async def check_enough_resources(player, recipiant_player, modals, interaction: discord.Interaction) -> bool:
+    for modal in modals:
+        if modal == modals[0]:
+            for field in modal.children:
+                if recipiant_player.ship.modules[5].get_resource_amount(field.label) < int(field.value):
+                    await interaction.followup.send(
+                        "The recipiant doesn't have enough resources to send.", ephemeral=True
+                    )
+                    return False
+        else:
+            for field in modal.children:
+                if player.ship.modules[5].get_resource_amount(field.label) < int(field.value):
+                    await interaction.followup.send("You don't have enough resources to send.", ephemeral=True)
+                    return False
+    return True
+
+
+async def check_enough_money(player, recipiant_player, amount, interaction: discord.Interaction) -> bool:
+    if amount < 0:
+        if recipiant_player.money < abs(amount):
+            await interaction.followup.send("The recipiant doesn't have enough money to send.", ephemeral=True)
+            return False
+    else:
+        if player.money < abs(amount):
+            await interaction.followup.send("The sender doesn't have enough money to send.", ephemeral=True)
+            return False
+    return True

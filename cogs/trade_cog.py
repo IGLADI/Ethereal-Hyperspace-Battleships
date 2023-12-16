@@ -116,12 +116,12 @@ class TradeCog(commands.Cog):
         # TODO set required to false with default values of 0
         ask_resources = {
             "title": "Resources You Ask",
-            "required": True,
+            "required": False,
             "questions": resources,
         }
         give_resources = {
             "title": "Resources You Offer:",
-            "required": True,
+            "required": False,
             "questions": resources,
         }
         inputs = [
@@ -130,7 +130,7 @@ class TradeCog(commands.Cog):
         ]
         paginator = TradeModal(inputs, amount, recipient, author_id=interaction.user.id)
 
-        # ! TODO fix this, should use paginator.start() instead
+        # TODO fix this, should use paginator.start() instead
         await interaction.response.send_message(
             view=paginator, ephemeral=True, content=(paginator.modals[0].title + f"\n\n1/{len(paginator.modals)}")
         )
