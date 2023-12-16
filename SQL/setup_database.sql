@@ -37,7 +37,6 @@ CREATE TABLE `guilds` (
     `guild_id` int(11) NOT NULL AUTO_INCREMENT,
     CONSTRAINT `PK__guilds` PRIMARY KEY (`guild_id`),
     `name` varchar(255) NOT NULL UNIQUE,
-    `announcement_channel` int(11) NOT NULL,
     `planet_id` int(11) NOT NULL,
     CONSTRAINT `FK__planets__guilds` FOREIGN KEY (`planet_id`)
 	    REFERENCES `planets` (`planet_id`)
