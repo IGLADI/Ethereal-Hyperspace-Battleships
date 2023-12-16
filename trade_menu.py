@@ -3,6 +3,8 @@ import discord
 
 from typing import Any, Dict, List
 
+from numpy import place
+
 import data
 
 
