@@ -5,10 +5,14 @@ import json
 # Make a function to insert_data into database
 def insert_data(connection, table_name, column_names, values):
     # Prepare the INSERT statement with placeholders for the values
-    insert_statement = f"INSERT INTO {table_name}({','.join(column_names)}) VALUES (?, ?, ...);"
-    
+    insert_statement = (
+        f"INSERT INTO {table_name}({','.join(column_names)}) VALUES (?, ?, ...);"
+    )
+
     # Prepare the tuple of values to be inserted
     values_tuple = tuple(values)
+
+
 def get_database_connection():
     """Returns a connection to the database using credentials in config.json"""
     with open("config.json", "r") as f:
