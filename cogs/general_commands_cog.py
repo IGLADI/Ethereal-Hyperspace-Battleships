@@ -5,6 +5,7 @@ from discord.ext import commands
 import data
 from player import Player
 from utils import check_player_exists, get_betted_amount
+from ui.simple_banner import SimpleBanner
 
 
 class GeneralCommands(commands.Cog):
@@ -61,7 +62,8 @@ class GeneralCommands(commands.Cog):
         betted_amount = get_betted_amount(interaction)
         balance = player.money
         balance -= betted_amount
-        await interaction.response.send_message(f"Your current balance is ${balance}.", ephemeral=True)
+        balance_banner = SimpleBanner(user=interaction.user, text=f"Your current balance is ${balance}.")
+        await interaction.response.send_message(embed=balance_banner.embed, ephemeral=True)
 
     # TODO maybe add displayname
     # ! (still keep id and add a check so that only one user can create an account with a name)
@@ -78,14 +80,17 @@ class GeneralCommands(commands.Cog):
 
     @app_commands.command(name="where_am_i", description="Get your location info")
     async def where_am_i(self, interaction: discord.Interaction):
-        '''Returns the location of the player'''
+        """Returns the location of the player"""
         if await check_player_exists(interaction) is False:
             return
 
         player = data.players[interaction.user]
         player_location = player.ship.location
         location_name = player_location.is_planet()
-        await interaction.response.send_message(f"You are currently at {player_location}, also known as {location_name}.", ephemeral=True)
+        await interaction.response.send_message(
+            f"You are currently at {player_location}, also known as {location_name}.", ephemeral=True
+        )
+
 
 async def setup(client: commands.Bot) -> None:
     await client.add_cog(GeneralCommands(client))

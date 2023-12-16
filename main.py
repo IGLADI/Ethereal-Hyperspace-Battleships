@@ -60,7 +60,7 @@ class Client(commands.Bot):
             print(e)
         print("--------------------------------------------")
 
-        #! temporary data storage untill we have a database
+        # ! temporary data storage untill we have a database
         planets["C4MPU5 K441"] = Planet("C4MPU5 K441", 0, 0)
         planets["Earth"] = Planet("Earth", 50, 0)
 
