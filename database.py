@@ -52,6 +52,7 @@ class Database:
 
     def get_results(self):
         """Returns list of results in cursor"""
+        self.connection.commit()
         return [row for row in self.cursor]
 
     def get_guild_player_counts(self):
@@ -62,6 +63,8 @@ class Database:
         GROUP BY g.guild_id;
         """
         self.cursor.execute(statement)
+        results = self.get_results()
+        return results
 
     # We assume this happens after player has chosen main guild
     def store_player(self, discord_id, discord_name, player_class, guild_name):
@@ -78,10 +81,33 @@ class Database:
         )
 
     def player_exists(self, discord_id):
-        """Checks if a player exists in the database using his discord_id."""
+        """Checks if a player exists in the database."""
         statement = """
         SELECT 1 FROM players p
         WHERE p.discord_id = ?"""
         self.cursor.execute(statement, (discord_id,))
         self.connection.commit()
         return self.cursor.rowcount != 0
+
+    def get_player_location_name(self, discord_id):
+        """Retunrs the location name of where the player is located."""
+        statement = """
+        SELECT l.name FROM locations l
+        JOIN players p ON
+            p.x_pos = l.location_x_pos AND
+            p.y_pos = l.location_y_pos
+        WHERE p.discord_id = ?;
+        """
+        self.cursor.execute(statement, (discord_id,))
+        results = self.get_results()
+        return results[0][0] if results else None
+
+    def get_player_coordinates(self, discord_id):
+        """Returns the coordinates of the players as a tuple."""
+        statement = """
+        SELECT p.x_pos, p.y_pos FROM players p
+        WHERE p.discord_id = ?;
+        """
+        self.cursor.execute(statement, (discord_id,))
+        results = self.get_results()
+        return results[0] if results else None
