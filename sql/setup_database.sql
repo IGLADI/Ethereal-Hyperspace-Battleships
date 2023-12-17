@@ -84,24 +84,24 @@ CREATE TABLE `votes` (
     `polarity` BOOLEAN NOT NULL
 );
 
-CREATE TABLE `modules` (
-    `module_id` INT(11) NOT NULL AUTO_INCREMENT,
-    CONSTRAINT `PK__modules` PRIMARY KEY (`module_id`),
-    `level` INT(11) NOT NULL DEFAULT 0,
-    `state` ENUM('active', 'inactive') NULL,
-    `type` INT(11) NOT NULL
-);
-
 CREATE TABLE `ships` (
     `ship_id` INT(11) NOT NULL AUTO_INCREMENT,
     CONSTRAINT `PK__ships` PRIMARY KEY (`ship_id`),
     `fuel` INT(11) NOT NULL DEFAULT 0,
     `player_id` INT(11) NOT NULL,
     CONSTRAINT `FK__players__ships` FOREIGN KEY (`player_id`)
-	    REFERENCES `players` (`player_id`),
-    `module_id` INT(11) NOT NULL,
-    CONSTRAINT `FK__modules__ships` FOREIGN KEY (`module_id`)
-	    REFERENCES `modules` (`module_id`)
+	    REFERENCES `players` (`player_id`)
+);
+
+CREATE TABLE `modules` (
+    `module_id` INT(11) NOT NULL AUTO_INCREMENT,
+    CONSTRAINT `PK__modules` PRIMARY KEY (`module_id`),
+    `level` INT(11) NOT NULL DEFAULT 0,
+    `state` ENUM('active', 'inactive') NULL,
+    `type` INT(11) NOT NULL,
+    `ship_id` int(11) NOT NULL,
+    CONSTRAINT `FK__ships__modules` FOREIGN KEY (`ship_id`)
+	    REFERENCES `ships` (`ship_id`)
 );
 
 CREATE TABLE `cargos` (

@@ -122,3 +122,6 @@ class Database:
             return guild_name
 
         return min(results, key=lambda x: x[1])[0]
+
+    def commit(self):
+        self._connection.commit()

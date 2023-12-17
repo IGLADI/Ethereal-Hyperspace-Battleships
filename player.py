@@ -46,7 +46,7 @@ class Player:
         global _db
         self._money = amount if self._money >= 0 else 0
         _db.player_set_money(self.id, self._money)
-        _db.connection.commit()
+        _db.commit()
 
     # TODO make a secondary module like solar panels (slow but doesn't consume uranium=>players don't get stuck)
     def update_energy(self):
