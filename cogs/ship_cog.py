@@ -1,9 +1,10 @@
 import asyncio
-from os import wait
 from discord import app_commands
 import discord
 from discord.ext import commands
 from typing import Literal
+
+import tabulate
 
 import data
 from ui.simple_banner import SimpleBanner
@@ -29,18 +30,19 @@ class ShipCommands(commands.Cog):
         ship_message += f"\nEnergy: {ship.energy}"
         await interaction.response.send_message(ship_message, ephemeral=True)
 
-    @app_commands.command(name="inventory", description="Get info on your cargo and it's contents")
-    async def cargo_info(self, interaction: discord.Interaction):
+    @app_commands.command(name="inventory", description="Get your ship's inventory")
+    async def inventory(self, interaction: discord.Interaction):
         if await check_player_exists(interaction) is False:
             return
 
         player = data.players[interaction.user]
         ship = player.ship
-        ship_message = f"**{player.id}'s ship**\n"
-        ship_message += "**Cargo:**\n"
-        cargo_info = [str(resource) for resource in ship.modules[5]._capacity]
-        ship_message += f"{' '.join(cargo_info)}"
-        await interaction.response.send_message(ship_message, ephemeral=True)
+        ship_message = []
+        for resource in ship.modules[5]._capacity:
+            ship_message.append({"Resource": resource.name, "Amount": str(resource.amount)})
+        ship_message = tabulate.tabulate(ship_message, headers="keys")
+        banner = SimpleBanner(text=ship_message, user=interaction.user, extra_header="'s Inventory")
+        await interaction.response.send_message(embed=banner.embed, ephemeral=True)
 
     @app_commands.command(name="upgrade_ship", description="Upgrade a module")
     async def upgrade_ship(
