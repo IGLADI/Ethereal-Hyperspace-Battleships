@@ -3,11 +3,9 @@ import discord
 from discord.ext import commands
 
 from typing import Literal
-
+from mariadb import IntegrityError
 from player import Player
 
-import database
-from database import Database
 
 async def check_registered(interaction: discord.Interaction) -> bool:
     """Check if a player is registered, if not sends an error message. Else run the function."""
@@ -58,28 +56,30 @@ class GeneralCommands(commands.Cog):
             )
             return
 
+        sender = Player(sender_id)
+        recipient = Player(recipient_id)
+
         if amount_to_pay <= 0:
             await interaction.response.send_message(
                 "Please provide a positive amount of money.", ephemeral=True
             )
             return
 
-        db = database.Database()
-        if not db.player_exists(recipient_id):
+        if not Player.exists(recipient_id):
             await interaction.response.send_message(
                 "The recipient doesn't have an account.", ephemeral=True
             )
             return
 
-        if db.get_player_money(sender_id) < amount_to_pay:
+        if sender.money < amount_to_pay:
             await interaction.response.send_message(
                 "You don't have enough money.", ephemeral=True
             )
             return
 
-        db.player_change_money(sender_id, -1 * amount_to_pay)
-        db.player_change_money(recipient_id, amount_to_pay)
-        db.connection.commit()
+        sender.money = sender.money - amount_to_pay
+        recipient.money = recipient.money + amount_to_pay
+
         await interaction.response.send_message(
             f"You gave ${amount_to_pay} to {member_recipient.name}."
         )
@@ -87,9 +87,8 @@ class GeneralCommands(commands.Cog):
     @app_commands.check(check_registered)
     @app_commands.command(name="balance", description="Check your balance")
     async def balance(self, interaction: discord.Interaction):
-
-        db = database.Database()
-        balance = db.get_player_money(interaction.user.id)
+        player = Player(interaction.user.id)
+        balance = player.money
         await interaction.response.send_message(
             f"Your current balance is ${balance}.", ephemeral=True
         )
@@ -102,25 +101,24 @@ class GeneralCommands(commands.Cog):
         interaction: discord.Interaction,
         player_class: Literal["martian", "dwarf", "droid"],
     ):
-        db = Database()
-        if db.player_exists(interaction.user.id):
+        if Player.exists(interaction.user.id):
             await interaction.response.send_message(
                 "You are already registered as a player.", ephemeral=True
             )
             return
 
-        # TODO: mariadb errors
-        # - Integrity error: "You are already logged in"
-        # - DataError: "Wrong class."
-        counts = db.get_guild_player_counts()
-        next_guild = database.get_next_guild(counts)
-        db.store_player(
-            interaction.user.id,
-            interaction.user.global_name,
-            player_class,
-            next_guild,
-        )
-        db.connection.commit()
+        print("interaction.user.id:", interaction.user.id)
+
+        try:
+            Player.register(
+                interaction.user.id, interaction.user.global_name, player_class
+            )
+        except IntegrityError:
+            await interaction.response.send_message(
+                f"Duplicate values.",
+                ephemeral=True,
+            )
+            return
 
         await interaction.response.send_message(
             f"Welcome to Ethereal Hyperspace Battleships {interaction.user.name}!",

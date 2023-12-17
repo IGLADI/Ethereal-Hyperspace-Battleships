@@ -45,7 +45,7 @@ CREATE TABLE `guilds` (
 CREATE TABLE `players` (
     `player_id` INT(11) NOT NULL AUTO_INCREMENT,
     CONSTRAINT `PK__players` PRIMARY KEY (`player_id`),
-    `discord_id` decimal(32) NOT NULL UNIQUE,
+    `discord_id` DECIMAL(32) NOT NULL UNIQUE,
     `discord_name` VARCHAR(255) NOT NULL UNIQUE,
     `class` ENUM('dwarf', 'martian', 'droid') NOT NULL,
     `money` INT(11) NOT NULL DEFAULT 1000,

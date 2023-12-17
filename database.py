@@ -28,17 +28,6 @@ def get_connection():
         return None
 
 
-def get_next_guild(results):
-    """Where results is a tuple with guild_name, player_count"""
-    results_names = [result[0] for result in results]
-
-    for guild_name in data.guild_names:
-        if guild_name not in results_names:
-            return guild_name
-
-    return min(results, key=lambda x: x[1])[0]
-
-
 class Database:
     """Database class for interacting with the mariadb database.  Has usefule queries to aid gameplay."""
 
@@ -52,16 +41,6 @@ class Database:
         self.cursor.execute(statement, values)
         self.connection.commit()
         return [row for row in self.cursor]
-
-    def get_guild_player_counts(self):
-        """Get the name of the guild with lowest player count"""
-        statement = """
-        SELECT g.name, COUNT(1) FROM players p
-        JOIN guilds g ON g.guild_id = p.guild_id
-        GROUP BY g.guild_id;
-        """
-        results = self.get_results(statement)
-        return results
 
     # We assume this happens after player has chosen main guild
     def store_player(self, discord_id, discord_name, player_class, guild_name):
@@ -107,7 +86,7 @@ class Database:
         results = self.get_results(statement, (discord_id,))
         return results[0] if results else None
 
-    def get_player_money(self, discord_id) -> int:
+    def player_money(self, discord_id) -> int:
         """Returns the money of the player as an int."""
         statement = """
         SELECT p.money FROM players p
@@ -117,9 +96,29 @@ class Database:
         money = results[0][0] if results else None
         return money
 
-    def player_change_money(self, discord_id, amount):
-        """Change the balance of a player."""
+    def player_set_money(self, discord_id, amount):
+        """Set the balance of a player."""
         statement = """
-        UPDATE players SET money = money + ?
+        UPDATE players SET money = ?
         WHERE discord_id = ?"""
         self.cursor.execute(statement, (amount, discord_id))
+
+    def guild_player_counts(self):
+        """Get the name of the guild with lowest player count"""
+        statement = """
+        SELECT g.name, COUNT(1) FROM players p
+        JOIN guilds g ON g.guild_id = p.guild_id
+        GROUP BY g.guild_id;
+        """
+        results = self.get_results(statement)
+        return results
+
+    def next_guild(self, results) -> str:
+        """Returns the guild a player should join. Currently the guild with the lowest player count."""
+        results_names = [result[0] for result in results]
+
+        for guild_name in data.guild_names:
+            # if guild_name not in results_names:
+            return guild_name
+
+        return min(results, key=lambda x: x[1])[0]

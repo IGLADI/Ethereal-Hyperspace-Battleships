@@ -13,7 +13,9 @@ _db = Database()
 class Player:
     def __init__(self, id):
         self.id = id
-        self._money = 1000
+
+        global _db
+        self._money = _db.player_money(id)
         self._x_pos, self._y_pos = _db.player_coordinates(id)
 
         self._ship = Ship()
@@ -40,10 +42,10 @@ class Player:
 
     @money.setter
     def money(self, amount):
-        if amount >= 0:
-            self._money = amount
-        else:
-            self._money = 0
+        global _db
+        self._money = amount if self._money >= 0 else 0
+        _db.player_set_money(self.id, self._money)
+        _db.connection.commit()
 
     # TODO make a secondary module like solar panels (slow but doesn't consume uranium=>players don't get stuck)
     def update_energy(self):
@@ -66,6 +68,21 @@ class Player:
     def location_name(self) -> str:
         global _db
         return _db.player_location_name(self.id)
+
+    @classmethod
+    def commit(cls):
+        global _db
+        _db.connection.commit()
+
+    @classmethod
+    def register(cls, discord_id, discord_name, player_class):
+        """Registers a new player in the database."""
+        global _db
+        counts = _db.guild_player_counts()
+        next_guild = _db.next_guild(counts)
+        _db.store_player(discord_id, discord_name, player_class, next_guild)
+        _db.connection.commit()
+
     @classmethod
     def exists(cls, discord_id) -> bool:
         """Returns if a player exists with discord_id."""
