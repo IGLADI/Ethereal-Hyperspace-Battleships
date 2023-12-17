@@ -2,7 +2,6 @@ from discord import app_commands
 import discord
 from discord.ext import commands
 
-import data
 from player import Player
 from utils import check_player_exists, get_betted_amount
 
