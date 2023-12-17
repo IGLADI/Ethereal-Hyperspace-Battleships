@@ -100,6 +100,9 @@ class GeneralCommands(commands.Cog):
         self,
         interaction: discord.Interaction,
         player_class: Literal["martian", "dwarf", "droid"],
+        guild_name: Literal[
+            "The Federation", "The Empire", "The Alliance", "The Independents"
+        ],
     ):
         if Player.exists(interaction.user.id):
             await interaction.response.send_message(
@@ -111,7 +114,10 @@ class GeneralCommands(commands.Cog):
 
         try:
             Player.register(
-                interaction.user.id, interaction.user.global_name, player_class
+                interaction.user.id,
+                interaction.user.global_name,
+                player_class,
+                guild_name,
             )
         except IntegrityError:
             await interaction.response.send_message(
@@ -119,6 +125,8 @@ class GeneralCommands(commands.Cog):
                 ephemeral=True,
             )
             return
+
+        Player.get(interaction.user.id)
 
         await interaction.response.send_message(
             f"Welcome to Ethereal Hyperspace Battleships {interaction.user.name}!",

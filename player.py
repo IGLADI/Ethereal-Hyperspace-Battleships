@@ -76,13 +76,11 @@ class Player:
         _db.connection.commit()
 
     @classmethod
-    def register(cls, discord_id, discord_name, player_class):
+    def register(cls, discord_id, discord_name, player_class, guild_name):
         """Registers a new player in the database."""
         global _db
-        counts = _db.guild_player_counts()
-        next_guild = _db.next_guild(counts)
-        _db.store_player(discord_id, discord_name, player_class, next_guild)
-        _db.connection.commit()
+        _db.store_player(discord_id, discord_name, player_class, guild_name)
+        _db.commit()
 
     @classmethod
     def exists(cls, discord_id) -> bool:
