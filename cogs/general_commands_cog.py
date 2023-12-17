@@ -2,6 +2,8 @@ from discord import app_commands
 import discord
 from discord.ext import commands
 
+from typing import Literal
+
 from player import Player
 from utils import check_player_exists, get_betted_amount
 
@@ -93,7 +95,11 @@ class GeneralCommands(commands.Cog):
     # TODO maybe add displayname
     # ! (still keep id and add a check so that only one user can create an account with a name)
     @app_commands.command(name="register", description="Register as a player")
-    async def register(self, interaction: discord.Interaction, player_class: str):
+    async def register(
+        self,
+        interaction: discord.Interaction,
+        player_class: Literal["martian", "dwarf", "droid"],
+    ):
         db = Database()
         if db.player_exists(interaction.user.id):
             await interaction.response.send_message(
