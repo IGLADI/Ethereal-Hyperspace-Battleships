@@ -5,6 +5,7 @@ import math
 import random
 
 import data
+from ui.simple_banner import ErrorBanner
 from utils import check_player_exists
 
 
@@ -21,7 +22,8 @@ class MineCommands(commands.Cog):
             return
         player = data.players[interaction.user]
         if player.ship.energy < 10:
-            await interaction.response.send_message("You don't have enough energy.", ephemeral=True)
+            banner = ErrorBanner(text="You don't have enough energy.", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
 
         # TODO mining module changes energy efficiency

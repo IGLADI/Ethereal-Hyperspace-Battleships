@@ -7,6 +7,7 @@ from typing import Literal
 import data
 from trade_menu import TradeModal
 from utils import check_player_exists
+from ui.simple_banner import ErrorBanner
 
 
 class TradeCog(commands.Cog):
@@ -21,18 +22,20 @@ class TradeCog(commands.Cog):
         if await check_player_exists(interaction) is False:
             return
         if amount_to_pay <= 0:
-            await interaction.response.send_message("Please provide a positive amount of money.", ephemeral=True)
+            banner = ErrorBanner(text="Please provide a positive amount of money.", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
-        if member_recipient not in data.players:
-            await interaction.response.send_message("The recipient doesn't have an account.", ephemeral=True)
+        if not await check_recipiant_has_an_account(member_recipient, interaction):
             return
         sender = data.players[interaction.user]
         recipient = data.players[member_recipient]
         if sender == recipient:
-            await interaction.response.send_message("You can't give money to yourself.", ephemeral=True)
+            banner = ErrorBanner(text="You can't give money to yourself.", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
         if sender.money < amount_to_pay:
-            await interaction.response.send_message("You don't have enough money.", ephemeral=True)
+            banner = ErrorBanner(text="You don't have enough money.", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
 
         sender.money -= amount_to_pay
@@ -50,18 +53,20 @@ class TradeCog(commands.Cog):
         if await check_player_exists(interaction) is False:
             return
         if amount_to_give <= 0:
-            await interaction.response.send_message("Please provide a positive amount of resources.", ephemeral=True)
+            banner = ErrorBanner(text="Please provide a positive amount of resources.", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
-        if recipient not in data.players:
-            await interaction.response.send_message("The recipient doesn't have an account.", ephemeral=True)
+        if not await check_recipiant_has_an_account(recipient, interaction):
             return
         sender = data.players[interaction.user]
         recipient = data.players[recipient]
         if sender == recipient:
-            await interaction.response.send_message("You can't give resources to yourself.", ephemeral=True)
+            banner = ErrorBanner(text="You can't give resources to yourself.", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
         if sender.ship.modules[5].get_resource_amount(resource) < amount_to_give:
-            await interaction.response.send_message("You don't have enough resources.", ephemeral=True)
+            banner = ErrorBanner(text="You don't have enough resources.", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
 
         sender.ship.modules[5].remove_resource(resource, amount_to_give)
@@ -81,21 +86,22 @@ class TradeCog(commands.Cog):
     ):
         if await check_player_exists(interaction) is False:
             return
-        if recipient not in data.players:
-            await interaction.response.send_message("The recipient doesn't have an account.", ephemeral=True)
+        if not await check_recipiant_has_an_account(recipient, interaction):
             return
 
         sender = data.players[interaction.user]
         recipiant_player = data.players[recipient]
         if sender == recipiant_player:
-            await interaction.response.send_message("You can't trade with yourself.", ephemeral=True)
+            banner = ErrorBanner(text="You can't trade with yourself.", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
 
         if send_or_receive_money == "receive":
             amount = -amount
 
         if amount < 0:
-            await interaction.response.send_message("Please provide a positive amount of money.", ephemeral=True)
+            banner = ErrorBanner(text="Please provide a positive amount of money.", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
 
         if send_or_receive_money == "receive":
@@ -103,13 +109,13 @@ class TradeCog(commands.Cog):
 
         if amount < 0:
             if data.players[recipiant_player.id].money < abs(amount):
-                await interaction.response.send_message(
-                    "The recipiant doesn't have enough money to send.", ephemeral=True
-                )
+                banner = ErrorBanner(text="The recipiant doesn't have enough money to send.", user=interaction.user)
+                await interaction.response.send_message(embed=banner.embed, ephemeral=True)
                 return
         else:
             if data.players[interaction.user].money < abs(amount):
-                await interaction.response.send_message("You don't have enough money to send.", ephemeral=True)
+                banner = ErrorBanner(text="You don't have enough money to send.", user=interaction.user)
+                await interaction.response.send_message(embed=banner.embed, ephemeral=True)
                 return
 
         resources = ["Copper", "Silver", "Gold", "Uranium", "Black Matter"]
@@ -138,3 +144,12 @@ class TradeCog(commands.Cog):
 
 async def setup(client: commands.Bot) -> None:
     await client.add_cog(TradeCog(client))
+
+
+async def check_recipiant_has_an_account(recipient: discord.Member, interaction: discord.Interaction) -> bool:
+    if recipient not in data.players:
+        banner = ErrorBanner(text="The recipient doesn't have an account.", user=interaction.user)
+        await interaction.response.send_message(embed=banner.embed, ephemeral=True)
+        return False
+    else:
+        return True

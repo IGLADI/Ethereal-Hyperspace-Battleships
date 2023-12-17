@@ -7,7 +7,7 @@ from typing import Literal
 import tabulate
 
 import data
-from ui.simple_banner import SimpleBanner
+from ui.simple_banner import SimpleBanner, ErrorBanner
 from utils import check_player_exists
 
 
@@ -64,7 +64,8 @@ class ShipCommands(commands.Cog):
                 try:
                     module.upgrade(player.ship.modules[5])
                 except Exception as e:
-                    await interaction.response.send_message(f"Couldn't upgrade {module_name}: {e}", ephemeral=True)
+                    banner = ErrorBanner(text=f"Couldn't upgrade {module_name}: {e}", user=interaction.user)
+                    await interaction.response.send_message(embed=banner.embed, ephemeral=True)
                     return
                 await interaction.response.send_message(
                     f"Upgraded {module_name} to level {module.level}.", ephemeral=True
@@ -83,9 +84,10 @@ class ShipCommands(commands.Cog):
         player = data.players[interaction.user]
         new_amount = player.ship.modules[5].add_cargo(resource, amount)
         if new_amount == 0:
-            await interaction.response.send_message(
-                f"{resource} capacity is full, could not add to your ship.", ephemeral=True
+            banner = ErrorBanner(
+                text=f"{resource} capacity is full, could not add to your ship.", user=interaction.user
             )
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
         elif new_amount < amount:
             await interaction.response.send_message(
                 f"You added {new_amount} tons of {resource} and left "
@@ -105,11 +107,14 @@ class ShipCommands(commands.Cog):
         player = data.players[interaction.user]
         generator_status = player.ship.modules[7].is_on
         if player.ship.modules[7].booting:
-            await interaction.response.send_message("The generator is still booting.", ephemeral=True)
+            banner = ErrorBanner(text="The generator is still booting.", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
         if on is generator_status:
-            status_message = "Generator is already " + ("on" if generator_status else "off")
-            await interaction.response.send_message(status_message, ephemeral=True)
+            banner = ErrorBanner(
+                text="Generator is already " + ("on" if generator_status else "off"), user=interaction.user
+            )
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
 
         if on and not generator_status:

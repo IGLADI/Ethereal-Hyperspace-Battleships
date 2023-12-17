@@ -1,9 +1,12 @@
 import data
+from ui.simple_banner import ErrorBanner
 
 
 async def check_player_exists(interaction):
     if interaction.user not in data.players:
-        await interaction.response.send_message("You are not registered as a player.", ephemeral=True)
+        text = "You are not registered as a player."
+        banner = ErrorBanner(text, interaction.user)
+        await interaction.response.send_message(embed=banner.embed, ephemeral=True)
         return False
     return True
 
