@@ -1,11 +1,17 @@
 import data
 
+import database
+
 
 async def check_player_exists(interaction):
-    if interaction.user not in data.players:
-        await interaction.response.send_message("You are not registered as a player.", ephemeral=True)
-        return False
-    return True
+    db = database.Database()
+    if db.player_exists(interaction.user.id):
+        return True
+
+    await interaction.response.send_message(
+        "You are not registered as a player.", ephemeral=True
+    )
+    return False
 
 
 # TODO make this work with negative betts (with the multiplier)
