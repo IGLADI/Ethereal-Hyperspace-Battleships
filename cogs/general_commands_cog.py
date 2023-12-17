@@ -6,6 +6,9 @@ import data
 from player import Player
 from utils import check_player_exists, get_betted_amount
 
+import database
+from database import Database
+
 
 class GeneralCommands(commands.Cog):
     def __init__(self, client: commands.Bot):
@@ -78,7 +81,6 @@ class GeneralCommands(commands.Cog):
         # - Integrity error: "You are already logged in"
         # - DataError: "Wrong class."
         db.get_guild_player_counts()
-        db.connection.commit()
         results = db.get_results()
         next_guild = database.get_next_guild(results)
         db.store_player(
