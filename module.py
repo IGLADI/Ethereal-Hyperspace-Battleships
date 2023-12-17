@@ -36,7 +36,9 @@ class Module:
         if not self.has_enough_resources(cargo_player):
             raise Exception("Not enough resources to upgrade.")
         self._level += 1
-        self.consume_resources(cargo_player)  # You need to implement this method to consume the required resources.
+        self.consume_resources(
+            cargo_player
+        )  # You need to implement this method to consume the required resources.
 
     def has_enough_resources(self, cargo_player):
         for cost in self._cost:
@@ -49,7 +51,9 @@ class Module:
         return True
 
     def __str__(self):
-        cost_str = "".join(f"\n   - {cost['resource']}: {cost['amount']}" for cost in self._cost)
+        cost_str = "".join(
+            f"\n   - {cost['resource']}: {cost['amount']}" for cost in self._cost
+        )
         if self._level == self._max_level:
             return (
                 f" - **Name: {self._name}**\n"
@@ -465,3 +469,16 @@ class SolarPanel(Module):
 
     def __str__(self):
         return f"{super().__str__()} - Generation: {self._generation} per minute\n"
+
+
+DEFAULT_MODULES = [
+    SolarPanel,
+    TravelModule,
+    MiningModule,
+    Canon,
+    Shield,
+    Fuel,
+    Cargo,
+    Radar,
+    EnergyGenerator,
+]
