@@ -2,9 +2,20 @@ import discord
 
 
 class SimpleBanner(discord.ui.View):
-    def __init__(self, text: str, user: discord.Member, color=discord.Color.green(), extra_header="", *args, **kwargs):
+    def __init__(
+        self,
+        text: str,
+        user: discord.Member,
+        color=discord.Color.green(),
+        extra_header="",
+        is_code_block=False,
+        *args,
+        **kwargs,
+    ):
         super().__init__(*args, **kwargs)
-        self.text = f"```{text}```"
+        self.text = text
+        if is_code_block:
+            self.text = f"```{self.text}```"
         self.user = user
         self.color = color
         self.extra_header = extra_header

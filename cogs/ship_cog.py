@@ -41,7 +41,9 @@ class ShipCommands(commands.Cog):
         for resource in ship.modules[5]._capacity:
             ship_message.append({"Resource": resource.name, "Amount": str(resource.amount)})
         ship_message = tabulate.tabulate(ship_message, headers="keys")
-        banner = SimpleBanner(text=ship_message, user=interaction.user, extra_header="'s Inventory")
+        banner = SimpleBanner(
+            text=ship_message, user=interaction.user, extra_header="'s Inventory", is_code_block=True
+        )
         await interaction.response.send_message(embed=banner.embed, ephemeral=True)
 
     @app_commands.command(name="upgrade_ship", description="Upgrade a module")
