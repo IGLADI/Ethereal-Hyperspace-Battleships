@@ -32,39 +32,64 @@ class GeneralCommands(commands.Cog):
     # Checked for race condition (spamming the command to multiply money because that money can't go under 0)
     # but discord seems to already block it and only start the new command once the first one has been processed
     @app_commands.command(name="pay", description="Gift money to a player")
-    async def pay(self, interaction: discord.Interaction, amount_to_pay: int, member_recipient: discord.Member):
+    async def pay(
+        self,
+        interaction: discord.Interaction,
+        amount_to_pay: int,
+        member_recipient: discord.Member,
+    ):
         if await check_player_exists(interaction) is False:
             return
-        if amount_to_pay <= 0:
-            await interaction.response.send_message("Please provide a positive amount of money.", ephemeral=True)
-            return
-        if member_recipient not in data.players:
-            await interaction.response.send_message("The recipient doesn't have an account.", ephemeral=True)
-            return
-        sender = data.players[interaction.user]
-        recipient = data.players[member_recipient]
-        if sender == recipient:
-            await interaction.response.send_message("You can't give money to yourself.", ephemeral=True)
-            return
-            await interaction.response.send_message("You don't have enough money.", ephemeral=True)
-        # betted_amount = get_betted_amount(interaction)
-        # if sender.money - betted_amount < amount_to_pay:
+
+        sender_id = interaction.user.id
+        recipient_id = member_recipient.id
+
+        if sender_id == recipient_id:
+            await interaction.response.send_message(
+                "You can't give money to yourself.", ephemeral=True
+            )
             return
 
-        sender.money -= amount_to_pay
-        recipient.money += amount_to_pay
-        await interaction.response.send_message(f"You gave ${amount_to_pay} to {member_recipient.name}.")
+        if amount_to_pay <= 0:
+            await interaction.response.send_message(
+                "Please provide a positive amount of money.", ephemeral=True
+            )
+            return
+
+        db = database.Database()
+        if not db.player_exists(recipient_id):
+            await interaction.response.send_message(
+                "The recipient doesn't have an account.", ephemeral=True
+            )
+            return
+
+        # betted_amount = get_betted_amount(interaction)
+        # if sender.money - betted_amount < amount_to_pay:
+        if db.get_player_money(sender_id) < amount_to_pay:
+            await interaction.response.send_message(
+                "You don't have enough money.", ephemeral=True
+            )
+            return
+
+        db.player_change_money(sender_id, -1 * amount_to_pay)
+        db.player_change_money(recipient_id, amount_to_pay)
+        db.connection.commit()
+        await interaction.response.send_message(
+            f"You gave ${amount_to_pay} to {member_recipient.name}."
+        )
 
     @app_commands.command(name="balance", description="Check your balance")
     async def balance(self, interaction: discord.Interaction):
         if await check_player_exists(interaction) is False:
             return
 
-        player = data.players[interaction.user]
-        balance = player.money
-        await interaction.response.send_message(f"Your current balance is ${balance}.", ephemeral=True)
+        db = database.Database()
+        balance = db.get_player_money(interaction.user.id)
         # betted_amount = get_betted_amount(interaction)
         # balance -= betted_amount
+        await interaction.response.send_message(
+            f"Your current balance is ${balance}.", ephemeral=True
+        )
 
     # TODO maybe add displayname
     # ! (still keep id and add a check so that only one user can create an account with a name)

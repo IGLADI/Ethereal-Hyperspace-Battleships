@@ -111,3 +111,21 @@ class Database:
         self.cursor.execute(statement, (discord_id,))
         results = self.get_results()
         return results[0] if results else None
+
+    def get_player_money(self, discord_id) -> int:
+        """Returns the money of the player as an int."""
+        statement = """
+        SELECT p.money FROM players p
+        WHERE p.discord_id = ?;
+        """
+        self.cursor.execute(statement, (discord_id,))
+        results = self.get_results()
+        money = results[0][0] if results else None
+        return money
+
+    def player_change_money(self, discord_id, amount):
+        """Change the balance of a player."""
+        statement = """
+        UPDATE players SET money = money + ?
+        WHERE discord_id = ?"""
+        self.cursor.execute(statement, (amount, discord_id))
