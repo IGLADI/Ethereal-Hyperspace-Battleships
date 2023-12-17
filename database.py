@@ -43,10 +43,16 @@ def get_next_guild(results):
 
 
 class Database:
+    """Database class for interacting with the mariadb database.  Has usefule queries to aid gameplay."""
+
     def __init__(self):
         "creates a connection and cursor object for the class"
         self.connection = get_connection()
         self.cursor = self.connection.cursor()
+
+    def get_results(self):
+        """Returns list of results in cursor"""
+        return [row for row in self.cursor]
 
     def get_guild_player_counts(self):
         """Get the name of the guild with lowest player count"""
@@ -71,6 +77,11 @@ class Database:
             statement, (discord_id, discord_name, player_class, guild_name)
         )
 
-    def get_results(self):
-        """Returns list of results in cursor"""
-        return [row for row in self.cursor]
+    def player_exists(self, discord_id):
+        """Checks if a player exists in the database using his discord_id."""
+        statement = """
+        SELECT 1 FROM players p
+        WHERE p.discord_id = ?"""
+        self.cursor.execute(statement, (discord_id,))
+        self.connection.commit()
+        return self.cursor.rowcount != 0
