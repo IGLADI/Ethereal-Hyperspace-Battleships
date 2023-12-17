@@ -5,10 +5,18 @@ from discord.ext import commands
 from typing import Literal
 
 from player import Player
-from utils import check_player_exists, get_betted_amount
 
 import database
 from database import Database
+
+async def check_registered(interaction: discord.Interaction) -> bool:
+    """Check if a player is registered, if not sends an error message. Else run the function."""
+    if not Player.exists(interaction.user.id):
+        await interaction.response.send_message(
+            "You are not registered as a player.", ephemeral=True
+        )
+        return False
+    return True
 
 
 class GeneralCommands(commands.Cog):
@@ -21,6 +29,7 @@ class GeneralCommands(commands.Cog):
         help_message = "Welcome to Ethereal Hyperspace Battleships!\n"
         help_message += "To start out, please type /register followed by /tutorial.\n"
         # Command list
+
         help_message += "Here is a list of commands:\n"
         help_message += "/help - Get help\n"
         help_message += "/guild - Get guild info\n"
@@ -33,15 +42,13 @@ class GeneralCommands(commands.Cog):
     # Checked for race condition (spamming the command to multiply money because that money can't go under 0)
     # but discord seems to already block it and only start the new command once the first one has been processed
     @app_commands.command(name="pay", description="Gift money to a player")
+    @app_commands.check(check_registered)
     async def pay(
         self,
         interaction: discord.Interaction,
         amount_to_pay: int,
         member_recipient: discord.Member,
     ):
-        if await check_player_exists(interaction) is False:
-            return
-
         sender_id = interaction.user.id
         recipient_id = member_recipient.id
 
@@ -64,8 +71,6 @@ class GeneralCommands(commands.Cog):
             )
             return
 
-        # betted_amount = get_betted_amount(interaction)
-        # if sender.money - betted_amount < amount_to_pay:
         if db.get_player_money(sender_id) < amount_to_pay:
             await interaction.response.send_message(
                 "You don't have enough money.", ephemeral=True
@@ -79,15 +84,12 @@ class GeneralCommands(commands.Cog):
             f"You gave ${amount_to_pay} to {member_recipient.name}."
         )
 
+    @app_commands.check(check_registered)
     @app_commands.command(name="balance", description="Check your balance")
     async def balance(self, interaction: discord.Interaction):
-        if await check_player_exists(interaction) is False:
-            return
 
         db = database.Database()
         balance = db.get_player_money(interaction.user.id)
-        # betted_amount = get_betted_amount(interaction)
-        # balance -= betted_amount
         await interaction.response.send_message(
             f"Your current balance is ${balance}.", ephemeral=True
         )
@@ -126,11 +128,9 @@ class GeneralCommands(commands.Cog):
         )
 
     @app_commands.command(name="where_am_i", description="Get your location info")
+    @app_commands.check(check_registered)
     async def where_am_i(self, interaction: discord.Interaction):
         """Returns the location of the player"""
-        if await check_player_exists(interaction) is False:
-            return
-
         db = database.Database()
         coordinates = db.get_player_coordinates(interaction.user.id)
         location_name = db.get_player_location_name(interaction.user.id)

@@ -4,6 +4,11 @@ from threading import Thread
 import time
 
 
+from database import Database
+
+_db = Database()
+
+
 # TODO when implementing the db, on load of the players call init with values (and put actual values as default values)
 class Player:
     def __init__(self, id):
@@ -47,3 +52,9 @@ class Player:
                         self.ship.add_energy(self.ship.modules[7].generation)
                         self._ship.remove_resource("Uranium", 1)
                 time.sleep(60)
+
+    @classmethod
+    def exists(cls, discord_id) -> bool:
+        """Returns if a player exists with discord_id."""
+        global _db
+        return _db.player_exists(discord_id)
