@@ -1,10 +1,12 @@
 import asyncio
+from os import wait
 from discord import app_commands
 import discord
 from discord.ext import commands
 from typing import Literal
 
 import data
+from ui.simple_banner import SimpleBanner
 from utils import check_player_exists
 
 
@@ -108,28 +110,44 @@ class ShipCommands(commands.Cog):
 
         if on and not generator_status:
             player.ship.modules[7].booting = True
-            await interaction.response.send_message("Booting up the generator...")
-            message = await interaction.followup.send("░░░░░░░░░░ 0%")
-            for percent in range(0, 100, 10):
+            banner = SimpleBanner(
+                text="Booting up the generator...\n\n░░░░░░░░░░ 0%", user=interaction.user, color=discord.Color.red()
+            )
+            await interaction.response.send_message(embed=banner.embed)
+            for percent in range(0, 101, 10):
                 bar = "█" * (percent // 10) + "░" * ((100 - percent) // 10)
-                await message.edit(content=f"{bar} {percent}%")
+                banner = SimpleBanner(
+                    text=f"Booting up the generator...\n\n{bar} {percent}%",
+                    user=interaction.user,
+                    color=discord.Color.red(),
+                )
+                await interaction.edit_original_response(embed=banner.embed)
                 await asyncio.sleep(0.5)
-            await message.delete()
 
-            await interaction.followup.send("Generator is now online!")
+            banner = SimpleBanner(text="Generator is now online!", user=interaction.user)
+            await interaction.edit_original_response(embed=banner.embed)
             player.ship.modules[7].turn_on()
             player.ship.modules[7].booting = False
         elif not on and generator_status:
             player.ship.modules[7].booting = True
-            await interaction.response.send_message("Shutting down the generator...")
-            message = await interaction.followup.send("██████████ 100%")
-            for percent in range(100, 0, -10):
+            banner = SimpleBanner(
+                text="Shutting down the generator...\n\n██████████ 100%",
+                user=interaction.user,
+                color=discord.Color.red(),
+            )
+            await interaction.response.send_message(embed=banner.embed)
+            for percent in range(100, -1, -10):
                 bar = "█" * (percent // 10) + "░" * ((100 - percent) // 10)
-                await message.edit(content=f"{bar} {percent}%")
+                banner = SimpleBanner(
+                    text=f"Shutting down the generator...\n\n{bar} {percent}%",
+                    user=interaction.user,
+                    color=discord.Color.red(),
+                )
+                await interaction.edit_original_response(embed=banner.embed)
                 await asyncio.sleep(0.5)
-            await message.delete()
             player.ship.modules[7].turn_off()
-            await interaction.followup.send("Generator has been shut down.")
+            banner = SimpleBanner(text="Generator is now offline!", user=interaction.user)
+            await interaction.edit_original_response(embed=banner.embed)
             player.ship.modules[7].booting = False
 
 
