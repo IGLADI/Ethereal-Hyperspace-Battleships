@@ -33,14 +33,14 @@ class Database:
 
     def __init__(self):
         "creates a connection and cursor object for the class"
-        self.connection = get_connection()
-        self.cursor = self.connection.cursor()
+        self._connection = get_connection()
+        self._cursor = self._connection.cursor()
 
     def get_results(self, statement, values=None) -> list:
         """Runs a SQL query and returns the tuple(s) of results in cursor"""
-        self.cursor.execute(statement, values)
-        self.connection.commit()
-        return [row for row in self.cursor]
+        self._cursor.execute(statement, values)
+        self._connection.commit()
+        return [row for row in self._cursor]
 
     # We assume this happens after player has chosen main guild
     def store_player(self, discord_id, discord_name, player_class, guild_name):
@@ -52,7 +52,7 @@ class Database:
         JOIN planets p ON g.planet_id = p.planet_id
         WHERE g.name = ?;
         """
-        self.cursor.execute(
+        self._cursor.execute(
             statement, (discord_id, discord_name, player_class, guild_name)
         )
 
@@ -61,9 +61,9 @@ class Database:
         statement = """
         SELECT 1 FROM players p
         WHERE p.discord_id = ?"""
-        self.cursor.execute(statement, (discord_id,))
-        self.connection.commit()
-        return self.cursor.rowcount != 0
+        self._cursor.execute(statement, (discord_id,))
+        self._connection.commit()
+        return self._cursor.rowcount != 0
 
     def player_location_name(self, discord_id) -> str:
         """Retunrs the location name of where the player is located."""
@@ -101,7 +101,7 @@ class Database:
         statement = """
         UPDATE players SET money = ?
         WHERE discord_id = ?"""
-        self.cursor.execute(statement, (amount, discord_id))
+        self._cursor.execute(statement, (amount, discord_id))
 
     def guild_player_counts(self):
         """Get the name of the guild with lowest player count"""
