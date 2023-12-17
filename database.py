@@ -48,8 +48,9 @@ class Database:
         self.connection = get_connection()
         self.cursor = self.connection.cursor()
 
-    def get_results(self):
-        """Returns list of results in cursor"""
+    def get_results(self, statement, values=None) -> list:
+        """Runs a SQL query and returns the tuple(s) of results in cursor"""
+        self.cursor.execute(statement, values)
         self.connection.commit()
         return [row for row in self.cursor]
 
@@ -60,8 +61,7 @@ class Database:
         JOIN guilds g ON g.guild_id = p.guild_id
         GROUP BY g.guild_id;
         """
-        self.cursor.execute(statement)
-        results = self.get_results()
+        results = self.get_results(statement)
         return results
 
     # We assume this happens after player has chosen main guild
@@ -96,8 +96,7 @@ class Database:
             p.y_pos = l.location_y_pos
         WHERE p.discord_id = ?;
         """
-        self.cursor.execute(statement, (discord_id,))
-        results = self.get_results()
+        results = self.get_results(statement, (discord_id,))
         return results[0][0] if results else None
 
     def get_player_coordinates(self, discord_id) -> tuple:
@@ -106,8 +105,7 @@ class Database:
         SELECT p.x_pos, p.y_pos FROM players p
         WHERE p.discord_id = ?;
         """
-        self.cursor.execute(statement, (discord_id,))
-        results = self.get_results()
+        results = self.get_results(statement, (discord_id,))
         return results[0] if results else None
 
     def get_player_money(self, discord_id) -> int:
@@ -116,8 +114,7 @@ class Database:
         SELECT p.money FROM players p
         WHERE p.discord_id = ?;
         """
-        self.cursor.execute(statement, (discord_id,))
-        results = self.get_results()
+        results = self.get_results(statement, (discord_id,))
         money = results[0][0] if results else None
         return money
 
