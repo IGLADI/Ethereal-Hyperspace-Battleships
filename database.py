@@ -1,7 +1,5 @@
 # !!! IMPORTANT !!! ###########################################################
-# Functions starting with 'get' run cursor.execute().  They do not
-# commit the query.  This is the responsibility of the calling
-# function.
+# for now functions that alter the table namely INSERT and UPDATE do not commit the change, because the changes will probably happen in bulk.
 
 import mariadb
 import json
