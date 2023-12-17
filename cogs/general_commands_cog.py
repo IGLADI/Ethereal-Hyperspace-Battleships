@@ -43,12 +43,12 @@ class GeneralCommands(commands.Cog):
             return
         sender = data.players[interaction.user]
         recipient = data.players[member_recipient]
-        betted_amount = get_betted_amount(interaction)
         if sender == recipient:
             await interaction.response.send_message("You can't give money to yourself.", ephemeral=True)
             return
-        if sender.money - betted_amount < amount_to_pay:
             await interaction.response.send_message("You don't have enough money.", ephemeral=True)
+        # betted_amount = get_betted_amount(interaction)
+        # if sender.money - betted_amount < amount_to_pay:
             return
 
         sender.money -= amount_to_pay
@@ -61,10 +61,10 @@ class GeneralCommands(commands.Cog):
             return
 
         player = data.players[interaction.user]
-        betted_amount = get_betted_amount(interaction)
         balance = player.money
-        balance -= betted_amount
         await interaction.response.send_message(f"Your current balance is ${balance}.", ephemeral=True)
+        # betted_amount = get_betted_amount(interaction)
+        # balance -= betted_amount
 
     # TODO maybe add displayname
     # ! (still keep id and add a check so that only one user can create an account with a name)
