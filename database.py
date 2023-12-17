@@ -86,7 +86,7 @@ class Database:
         self.connection.commit()
         return self.cursor.rowcount != 0
 
-    def get_player_location_name(self, discord_id) -> str:
+    def player_location_name(self, discord_id) -> str:
         """Retunrs the location name of where the player is located."""
         statement = """
         SELECT l.name FROM locations l
@@ -98,7 +98,7 @@ class Database:
         results = self.get_results(statement, (discord_id,))
         return results[0][0] if results else None
 
-    def get_player_coordinates(self, discord_id) -> tuple:
+    def player_coordinates(self, discord_id) -> tuple:
         """Returns the coordinates of the players as a tuple."""
         statement = """
         SELECT p.x_pos, p.y_pos FROM players p

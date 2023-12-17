@@ -14,6 +14,8 @@ class Player:
     def __init__(self, id):
         self.id = id
         self._money = 1000
+        self._x_pos, self._y_pos = _db.player_coordinates(id)
+
         self._ship = Ship()
         self._energy_thread = Thread(target=self.update_energy)
         self._energy_thread.daemon = True
@@ -23,6 +25,14 @@ class Player:
     def money(self):
         betted_amount = get_betted_amount(self.id)
         return self._money - betted_amount
+
+    @property
+    def x_pos(self):
+        return self._x_pos
+
+    @property
+    def y_pos(self):
+        return self._y_pos
 
     @property
     def ship(self):
@@ -53,6 +63,9 @@ class Player:
                         self._ship.remove_resource("Uranium", 1)
                 time.sleep(60)
 
+    def location_name(self) -> str:
+        global _db
+        return _db.player_location_name(self.id)
     @classmethod
     def exists(cls, discord_id) -> bool:
         """Returns if a player exists with discord_id."""

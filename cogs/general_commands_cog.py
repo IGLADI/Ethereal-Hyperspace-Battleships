@@ -131,9 +131,9 @@ class GeneralCommands(commands.Cog):
     @app_commands.check(check_registered)
     async def where_am_i(self, interaction: discord.Interaction):
         """Returns the location of the player"""
-        db = database.Database()
-        coordinates = db.get_player_coordinates(interaction.user.id)
-        location_name = db.get_player_location_name(interaction.user.id)
+        player = Player(interaction.user.id)
+        coordinates = (player.x_pos, player.y_pos)
+        location_name = player.location_name()
         await interaction.response.send_message(
             f"You are currently at {coordinates}, also known as {location_name}.",
             ephemeral=True,
