@@ -110,9 +110,8 @@ class GeneralCommands(commands.Cog):
         # TODO: mariadb errors
         # - Integrity error: "You are already logged in"
         # - DataError: "Wrong class."
-        db.get_guild_player_counts()
-        results = db.get_results()
-        next_guild = database.get_next_guild(results)
+        counts = db.get_guild_player_counts()
+        next_guild = database.get_next_guild(counts)
         db.store_player(
             interaction.user.id,
             interaction.user.global_name,

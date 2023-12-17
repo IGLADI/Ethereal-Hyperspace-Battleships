@@ -32,8 +32,7 @@ def get_next_guild(results):
     """Where results is a tuple with guild_name, player_count"""
     results_names = [result[0] for result in results]
 
-    guild_names = [guild.name for guild in data.guilds]
-    for guild_name in guild_names:
+    for guild_name in data.guild_names:
         if guild_name not in results_names:
             return guild_name
 
