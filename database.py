@@ -58,16 +58,18 @@ class Database:
         self.cursor.execute(statement)
 
     # We assume this happens after player has chosen main guild
-    def store_player(self, discord_name, player_class, guild_name):
+    def store_player(self, discord_id, discord_name, player_class, guild_name):
         """Creates a new player in the database with a guild name.  The coordinates of the planet of the main guild are used as the players starting coordinates."""
         statement = """
-        INSERT INTO `players` (`discord_name`, `class`, `guild_id`, `x_pos`, `y_pos`)
-        SELECT ?, ?, g.guild_id, p.location_x_pos, p.location_y_pos
+        INSERT INTO `players` (`discord_id`, `discord_name`, `class`, `guild_id`, `x_pos`, `y_pos`)
+        SELECT ?, ?, ?, g.guild_id, p.location_x_pos, p.location_y_pos
         FROM guilds g
         JOIN planets p ON g.planet_id = p.planet_id
         WHERE g.name = ?;
         """
-        self.cursor.execute(statement, (discord_name, player_class, guild_name))
+        self.cursor.execute(
+            statement, (discord_id, discord_name, player_class, guild_name)
+        )
 
     def get_results(self):
         """Returns list of results in cursor"""
