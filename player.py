@@ -3,6 +3,7 @@ from utils import get_betted_amount
 from threading import Thread
 import time
 
+import data
 
 from database import Database
 
@@ -88,3 +89,13 @@ class Player:
         """Returns if a player exists with discord_id."""
         global _db
         return _db.player_exists(discord_id)
+
+    @classmethod
+    def get(cls, discord_id):
+        """Gets a player from the players cache, if player is not found add it to the cache.
+        Note: This assumes player with discord_id exists in the database."""
+        p = data.players.get(discord_id)
+        if p is None:
+            p = cls(discord_id)
+            data.players[discord_id] = p
+        return p

@@ -56,9 +56,6 @@ class GeneralCommands(commands.Cog):
             )
             return
 
-        sender = Player(sender_id)
-        recipient = Player(recipient_id)
-
         if amount_to_pay <= 0:
             await interaction.response.send_message(
                 "Please provide a positive amount of money.", ephemeral=True
@@ -70,6 +67,9 @@ class GeneralCommands(commands.Cog):
                 "The recipient doesn't have an account.", ephemeral=True
             )
             return
+
+        sender = Player.get(sender_id)
+        recipient = Player.get(recipient_id)
 
         if sender.money < amount_to_pay:
             await interaction.response.send_message(
@@ -87,7 +87,7 @@ class GeneralCommands(commands.Cog):
     @app_commands.check(check_registered)
     @app_commands.command(name="balance", description="Check your balance")
     async def balance(self, interaction: discord.Interaction):
-        player = Player(interaction.user.id)
+        player = Player.get(interaction.user.id)
         balance = player.money
         await interaction.response.send_message(
             f"Your current balance is ${balance}.", ephemeral=True
@@ -129,7 +129,7 @@ class GeneralCommands(commands.Cog):
     @app_commands.check(check_registered)
     async def where_am_i(self, interaction: discord.Interaction):
         """Returns the location of the player"""
-        player = Player(interaction.user.id)
+        player = Player.get(interaction.user.id)
         coordinates = (player.x_pos, player.y_pos)
         location_name = player.location_name()
         await interaction.response.send_message(
