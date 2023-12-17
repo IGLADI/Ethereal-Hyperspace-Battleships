@@ -66,15 +66,33 @@ class GeneralCommands(commands.Cog):
     # TODO maybe add displayname
     # ! (still keep id and add a check so that only one user can create an account with a name)
     @app_commands.command(name="register", description="Register as a player")
-    async def register(self, interaction: discord.Interaction):
-        if interaction.user not in data.players:
-            player = Player(interaction.user)
-            data.players[interaction.user] = player
+    async def register(self, interaction: discord.Interaction, player_class: str):
+        db = Database()
+        if db.player_exists(interaction.user.id):
             await interaction.response.send_message(
-                f"Welcome to Ethereal Hyperspace Battleships {interaction.user.name}!", ephemeral=True
+                "You are already registered as a player.", ephemeral=True
             )
-        else:
-            await interaction.response.send_message("You are already registered as a player.", ephemeral=True)
+            return
+
+        # TODO: mariadb errors
+        # - Integrity error: "You are already logged in"
+        # - DataError: "Wrong class."
+        db.get_guild_player_counts()
+        db.connection.commit()
+        results = db.get_results()
+        next_guild = database.get_next_guild(results)
+        db.store_player(
+            interaction.user.id,
+            interaction.user.global_name,
+            player_class,
+            next_guild,
+        )
+        db.connection.commit()
+
+        await interaction.response.send_message(
+            f"Welcome to Ethereal Hyperspace Battleships {interaction.user.name}!",
+            ephemeral=True,
+        )
 
     @app_commands.command(name="where_am_i", description="Get your location info")
     async def where_am_i(self, interaction: discord.Interaction):
