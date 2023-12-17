@@ -22,13 +22,13 @@ class ShipCommands(commands.Cog):
 
         player = data.players[interaction.user]
         ship = player.ship
-        ship_message = f"**{player.id}'s ship**\n"
-        ship_message += f"**Location:** {ship.location}\n"
-        ship_message += "**Modules:**\n"
-        modules_info = [str(module) for module in ship.modules]
-        ship_message += f"{' '.join(modules_info)}"
-        ship_message += f"\nEnergy: {ship.energy}"
-        await interaction.response.send_message(ship_message, ephemeral=True)
+        header = "'s Ship"
+        modules_info = [f"```{module}```\n" for module in ship.modules]
+        ship_message = f"{' '.join(modules_info)}"
+        ship_message += f"```Location: {ship.location}```"
+        ship_message += "```Energy: " + f"{ship.energy}```"
+        banner = SimpleBanner(text=ship_message, user=interaction.user, extra_header=header)
+        await interaction.response.send_message(embed=banner.embed, ephemeral=True)
 
     @app_commands.command(name="inventory", description="Get your ship's inventory")
     async def inventory(self, interaction: discord.Interaction):

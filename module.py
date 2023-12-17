@@ -49,19 +49,20 @@ class Module:
         return True
 
     def __str__(self):
-        cost_str = "".join(f"\n   - {cost['resource']}: {cost['amount']}" for cost in self._cost)
+        # TODO upgrade cost should be printed in a separate command, else /ship_info will be wayyyyy too long
+        # cost_str = "".join(f"\n   - {cost['resource']}: {cost['amount']}" for cost in self._cost)
         if self._level == self._max_level:
             return (
-                f" - **Name: {self._name}**\n"
+                f" - Name: {self._name}\n"
                 f" - Description: {self._description}\n"
                 f" - Level: {self._level}/{self._max_level}\n"
-                f" - Upgrade Cost: MAX LEVEL\n"
+                # f" - Upgrade Cost: MAX LEVEL\n"
             )
         return (
-            f" - **Name: {self._name}**\n"
+            f" - Name: {self._name}\n"
             f" - Description: {self._description}\n"
             f" - Level: {self._level}/{self._max_level}\n"
-            f" - Upgrade Cost: {cost_str}\n"
+            # f" - Upgrade Cost: {cost_str}\n"
         )
 
 
