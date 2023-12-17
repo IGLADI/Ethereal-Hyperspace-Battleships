@@ -4,7 +4,7 @@ from discord.ext import commands
 
 import data
 from player import Player
-from utils import check_player_exists, get_betted_amount
+from utils import check_player_exists
 from ui.simple_banner import SimpleBanner
 
 
@@ -32,9 +32,7 @@ class GeneralCommands(commands.Cog):
             return
 
         player = data.players[interaction.user]
-        betted_amount = get_betted_amount(interaction)
         balance = player.money
-        balance -= betted_amount
         balance_banner = SimpleBanner(user=interaction.user, text=f"Your current balance is ${balance}.")
         await interaction.response.send_message(embed=balance_banner.embed, ephemeral=True)
 
