@@ -7,135 +7,135 @@ USE `ethbdb`;
 
 -- Create tables --------------------------------------------------------------
 CREATE TABLE `locations` (
-    `location_x_pos` int(11) NOT NULL,
-    `location_y_pos` int(11) NOT NULL,
+    `location_x_pos` INT(11) NOT NULL,
+    `location_y_pos` INT(11) NOT NULL,
     CONSTRAINT `PK_locations` PRIMARY KEY (`location_x_pos`, `location_y_pos`),
-    `name` varchar(255) NOT NULL UNIQUE
+    `name` VARCHAR(255) NOT NULL UNIQUE
 );
 
 CREATE TABLE `planets` (
-    `planet_id` int(11) NOT NULL AUTO_INCREMENT,
+    `planet_id` INT(11) NOT NULL AUTO_INCREMENT,
     CONSTRAINT `PK__planets` PRIMARY KEY (`planet_id`),
-    `free_slots` int(11) NOT NULL,
-    `location_x_pos` int(11) NOT NULL,
-    `location_y_pos` int(11) NOT NULL,
+    `free_slots` INT(11) NOT NULL,
+    `location_x_pos` INT(11) NOT NULL,
+    `location_y_pos` INT(11) NOT NULL,
     CONSTRAINT `FK__locations__planets` FOREIGN KEY (`location_x_pos`, `location_y_pos`)
 	    REFERENCES `locations` (`location_x_pos`, `location_y_pos`)
 );
 
 CREATE TABLE `buildings` (
-    `building_id` int(11) NOT NULL AUTO_INCREMENT,
+    `building_id` INT(11) NOT NULL AUTO_INCREMENT,
     CONSTRAINT `PK__buildings` PRIMARY KEY (`building_id`),
-    `level` int(11) NOT NULL DEFAULT 1,
-    `building_type` varchar(255) NOT NULL,
-    `planet_id` int(11) NOT NULL,
+    `level` INT(11) NOT NULL DEFAULT 1,
+    `building_type` VARCHAR(255) NOT NULL,
+    `planet_id` INT(11) NOT NULL,
     CONSTRAINT `FK__planets__buildings` FOREIGN KEY (`planet_id`)
 	    REFERENCES `planets` (`planet_id`)
 );
 
 CREATE TABLE `guilds` (
-    `guild_id` int(11) NOT NULL AUTO_INCREMENT,
+    `guild_id` INT(11) NOT NULL AUTO_INCREMENT,
     CONSTRAINT `PK__guilds` PRIMARY KEY (`guild_id`),
-    `name` varchar(255) NOT NULL UNIQUE,
-    `planet_id` int(11) NOT NULL,
+    `name` VARCHAR(255) NOT NULL UNIQUE,
+    `planet_id` INT(11) NOT NULL,
     CONSTRAINT `FK__planets__guilds` FOREIGN KEY (`planet_id`)
 	    REFERENCES `planets` (`planet_id`)
 );
 
 CREATE TABLE `players` (
-    `player_id` int(11) NOT NULL AUTO_INCREMENT,
+    `player_id` INT(11) NOT NULL AUTO_INCREMENT,
     CONSTRAINT `PK__players` PRIMARY KEY (`player_id`),
     `discord_id` decimal(32) NOT NULL UNIQUE,
-    `discord_name` varchar(255) NOT NULL UNIQUE,
-    `class` enum('dwarf', 'martian', 'droid') NOT NULL,
-    `money` int(11) NOT NULL DEFAULT 0,
-    `reputation` int(11) NOT NULL DEFAULT 0,
-    `x_pos` int(11) NOT NULL,
-    `y_pos` int(11) NOT NULL,
-    `guild_id` int(11) NOT NULL,
+    `discord_name` VARCHAR(255) NOT NULL UNIQUE,
+    `class` ENUM('dwarf', 'martian', 'droid') NOT NULL,
+    `money` INT(11) NOT NULL DEFAULT 0,
+    `reputation` INT(11) NOT NULL DEFAULT 0,
+    `x_pos` INT(11) NOT NULL,
+    `y_pos` INT(11) NOT NULL,
+    `guild_id` INT(11) NOT NULL,
     CONSTRAINT `FK__guilds__players` FOREIGN KEY (`guild_id`)
 	    REFERENCES `guilds` (`guild_id`)
 );
 
 CREATE TABLE `reports` (
-    `report_id` int(11) NOT NULL AUTO_INCREMENT,
+    `report_id` INT(11) NOT NULL AUTO_INCREMENT,
     CONSTRAINT `PK__reports` PRIMARY KEY (`report_id`),
     `content` TEXT NOT NULL,
     `creation_time` TIMESTAMP DEFAULT CURRENT_TIME,
-    `player_id` int(11) NOT NULL,
+    `player_id` INT(11) NOT NULL,
     CONSTRAINT `FK__players__reports` FOREIGN KEY (`player_id`)
 	    REFERENCES `players` (`player_id`)
 );
 
 CREATE TABLE `polls` (
-    `poll_id` int(11) NOT NULL AUTO_INCREMENT,
+    `poll_id` INT(11) NOT NULL AUTO_INCREMENT,
     CONSTRAINT `PK__polls` PRIMARY KEY (`poll_id`),
-    `type` enum('building', 'election') NOT NULL,
+    `type` ENUM('building', 'election') NOT NULL,
     `creation_time` TIMESTAMP DEFAULT CURRENT_TIME
 );
 
 CREATE TABLE `votes` (
-    `poll_id` int(11) NOT NULL,
+    `poll_id` INT(11) NOT NULL,
     CONSTRAINT `FK__polls__votes` FOREIGN KEY (`poll_id`)
 	    REFERENCES `polls` (`poll_id`),
-    `player_id` int(11) NOT NULL,
+    `player_id` INT(11) NOT NULL,
     CONSTRAINT `FK__players__votes` FOREIGN KEY (`player_id`)
 	    REFERENCES `players` (`player_id`),
-    `polarity` enum('positive', 'negative') NOT NULL
+    `polarity` BOOLEAN NOT NULL
 );
 
 CREATE TABLE `modules` (
-    `module_id` int(11) NOT NULL AUTO_INCREMENT,
+    `module_id` INT(11) NOT NULL AUTO_INCREMENT,
     CONSTRAINT `PK__modules` PRIMARY KEY (`module_id`),
-    `level` int(11) NOT NULL DEFAULT 0,
-    `state` enum('active', 'inactive') NULL,
-    `type` int(11) NOT NULL
+    `level` INT(11) NOT NULL DEFAULT 0,
+    `state` ENUM('active', 'inactive') NULL,
+    `type` INT(11) NOT NULL
 );
 
 CREATE TABLE `ships` (
-    `ship_id` int(11) NOT NULL AUTO_INCREMENT,
+    `ship_id` INT(11) NOT NULL AUTO_INCREMENT,
     CONSTRAINT `PK__ships` PRIMARY KEY (`ship_id`),
-    `fuel` int(11) NOT NULL DEFAULT 0,
-    `player_id` int(11) NOT NULL,
+    `fuel` INT(11) NOT NULL DEFAULT 0,
+    `player_id` INT(11) NOT NULL,
     CONSTRAINT `FK__players__ships` FOREIGN KEY (`player_id`)
 	    REFERENCES `players` (`player_id`),
-    `module_id` int(11) NOT NULL,
+    `module_id` INT(11) NOT NULL,
     CONSTRAINT `FK__modules__ships` FOREIGN KEY (`module_id`)
 	    REFERENCES `modules` (`module_id`)
 );
 
 CREATE TABLE `cargos` (
-    `cargo_id` int(11) NOT NULL AUTO_INCREMENT,
+    `cargo_id` INT(11) NOT NULL AUTO_INCREMENT,
     CONSTRAINT `PK_cargo_id` PRIMARY KEY (`cargo_id`),
-    `module_id` int(11) NOT NULL,
+    `module_id` INT(11) NOT NULL,
     CONSTRAINT `FK__modules__cargos` FOREIGN KEY (`module_id`)
 	    REFERENCES `modules` (`module_id`)
 );
 
 -- TODO: Needs a special constraint because an item should be either linked to a building_upgrades or cargos but not on its own.
 CREATE TABLE `items` (
-    `item_id` int(11) NOT NULL AUTO_INCREMENT,
+    `item_id` INT(11) NOT NULL AUTO_INCREMENT,
     CONSTRAINT `PK__items` PRIMARY KEY (`item_id`),
-    `amount` int(11) NOT NULL DEFAULT 0,
-    `cargo_id` int(11) NULL,
+    `amount` INT(11) NOT NULL DEFAULT 0,
+    `cargo_id` INT(11) NULL,
     CONSTRAINT `FK__cargos__items` FOREIGN KEY (`cargo_id`)
 	    REFERENCES `cargos` (`cargo_id`)
 );
 
 CREATE TABLE `resources` (
-    `resource_id` int(11) NOT NULL AUTO_INCREMENT,
+    `resource_id` INT(11) NOT NULL AUTO_INCREMENT,
     CONSTRAINT `PK__resources` PRIMARY KEY (`resource_id`),
-    `type` enum('copper', 'silver', 'gold', 'uranium', 'black_matter') NOT NULL,
-    `item_id` int(11) NOT NULL,
+    `type` ENUM('copper', 'silver', 'gold', 'uranium', 'black_matter') NOT NULL,
+    `item_id` INT(11) NOT NULL,
     CONSTRAINT `FK__items__resources` FOREIGN KEY (`item_id`)
 	    REFERENCES `items` (`item_id`)
 );
 
 CREATE TABLE `building_upgrades` (
-    `building_id` int(11) NOT NULL,
+    `building_id` INT(11) NOT NULL,
     CONSTRAINT `FK__buildings__building_upgrades` FOREIGN KEY (`building_id`)
 	    REFERENCES `buildings` (`building_id`),
-    `item_id` int(11) NOT NULL,
+    `item_id` INT(11) NOT NULL,
     CONSTRAINT `FK__items__building_upgrades` FOREIGN KEY (`item_id`)
 	    REFERENCES `items` (`item_id`)
 );
