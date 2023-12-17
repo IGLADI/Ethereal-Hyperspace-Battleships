@@ -80,7 +80,7 @@ class Database:
             statement, (discord_id, discord_name, player_class, guild_name)
         )
 
-    def player_exists(self, discord_id):
+    def player_exists(self, discord_id) -> bool:
         """Checks if a player exists in the database."""
         statement = """
         SELECT 1 FROM players p
@@ -89,7 +89,7 @@ class Database:
         self.connection.commit()
         return self.cursor.rowcount != 0
 
-    def get_player_location_name(self, discord_id):
+    def get_player_location_name(self, discord_id) -> str:
         """Retunrs the location name of where the player is located."""
         statement = """
         SELECT l.name FROM locations l
@@ -102,7 +102,7 @@ class Database:
         results = self.get_results()
         return results[0][0] if results else None
 
-    def get_player_coordinates(self, discord_id):
+    def get_player_coordinates(self, discord_id) -> tuple:
         """Returns the coordinates of the players as a tuple."""
         statement = """
         SELECT p.x_pos, p.y_pos FROM players p
