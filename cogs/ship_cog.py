@@ -5,6 +5,7 @@ from discord.ext import commands
 from typing import Literal
 
 import data
+import asyncio
 from utils import check_player_exists
 
 
@@ -66,30 +67,21 @@ class ShipCommands(commands.Cog):
                 return
         await interaction.response.send_message(f"Couldn't find module {module_name}.", ephemeral=True)
 
-    # ! For debugging purposes
-    @app_commands.command(name="add_cargo", description="For debugging purposes")
-    async def add_cargo(
-        self, interaction: discord.Interaction, resource: Literal["Copper", "Silver", "Gold", "Uranium"], amount: int
-    ):
+    @app_commands.command(name="travel", description="Travel to a new location")
+    async def travel(self, interaction: discord.Interaction, x_coordinate: int, y_coordinate: int):
         if await check_player_exists(interaction) is False:
             return
-
-        player = data.players[interaction.user]
-        new_amount = player.ship.modules[5].add_cargo(resource, amount)
-        if new_amount == 0:
-            await interaction.response.send_message(
-                f"{resource} capacity is full, could not add to your ship.", ephemeral=True
-            )
-        elif new_amount < amount:
-            await interaction.response.send_message(
-                f"You added {new_amount} tons of {resource} and left "
-                f"{amount - new_amount} tons behind, because you reached maximum capacity.",
-                ephemeral=True,
-            )
+          
+        ship = player.ship
+        try:
+            sleep = ship.travel(x_coordinate, y_coordinate)
+            await interaction.response.send_message(f"{player.id} traveling to ({x_coordinate}, {y_coordinate}). Estimated duration = {sleep}.")
+        except Exception as e:
+            await interaction.response.send_message(f"Couldn't travel: {e}", ephemeral=True)
+            return
         else:
-            await interaction.response.send_message(
-                f"You added {amount} tons of {resource} to your ship.", ephemeral=True
-            )
+            await asyncio.sleep(sleep)
+            await interaction.followup.send(f"{player.id} arrived at ({x_coordinate}, {y_coordinate}).")
 
     @app_commands.command(name="toggle_energy_generator", description="Toggle on of the energy generator")
     async def toggle_energy_generator(self, interaction: discord.Interaction, on: bool):
@@ -131,7 +123,6 @@ class ShipCommands(commands.Cog):
             player.ship.modules[7].turn_off()
             await interaction.followup.send("Generator has been shut down.")
             player.ship.modules[7].booting = False
-
 
 async def setup(client: commands.Bot) -> None:
     await client.add_cog(ShipCommands(client))

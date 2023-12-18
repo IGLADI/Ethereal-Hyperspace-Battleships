@@ -20,3 +20,7 @@ class Location:
             if self.x == planet.location.x and self.y == planet.location.y:
                 return f"at {planet.name}"
         return "floating in space"
+    
+    def distance_to(self, location):
+        '''Returns the distance between two locations'''
+        return ((self.x - location.x) ** 2 + (self.y - location.y) ** 2) ** 0.5
