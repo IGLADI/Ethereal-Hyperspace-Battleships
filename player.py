@@ -95,3 +95,7 @@ class Player:
             p = cls(discord_id)
             data.players[discord_id] = p
         return p
+    
+    def report_bug(self, bug_report: str):
+        global _db
+        _db.store_bug_report(bug_report, self.id)

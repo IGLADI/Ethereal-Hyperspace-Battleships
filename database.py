@@ -179,3 +179,13 @@ class Database:
         """
         results = self.get_results(statement, (x_pos, y_pos))
         return results[0][0] if results else None
+    
+    def store_bug_report(self, bug_report, discord_id):
+        """Stores a bug report in the database."""
+        statement = """
+        INSERT INTO bug_reports (player_id, content)
+        SELECT p.player_id, ?
+        FROM players p
+        WHERE p.discord_id = ?;
+        """
+        self._cursor.execute(statement, (bug_report, discord_id))

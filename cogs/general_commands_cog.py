@@ -145,6 +145,15 @@ class GeneralCommands(commands.Cog):
             ephemeral=True,
         )
 
+    @app_commands.command(name="bug_report", description="Report a bug")
+    async def bug_report(self, interaction: discord.Interaction, bug_report: str):
+        """Report a bug"""
+        player = Player.get(interaction.user.id)
+        player.report_bug(bug_report)
+        await interaction.response.send_message(
+            f"Your bug report has been sent. Thank you for your feedback!",
+            ephemeral=True,
+        )
 
 async def setup(client: commands.Bot) -> None:
     await client.add_cog(GeneralCommands(client))
