@@ -7,7 +7,7 @@ from typing import Literal
 import data
 from ui.trade_menu import TradeModal
 from utils import check_player_exists
-from ui.simple_banner import ErrorBanner, SimpleBanner
+from ui.simple_banner import ErrorBanner, SuccessBanner
 
 
 class TradeCog(commands.Cog):
@@ -40,7 +40,7 @@ class TradeCog(commands.Cog):
 
         sender.money -= amount_to_pay
         recipient.money += amount_to_pay
-        banner = SimpleBanner(text=f"You gave ${amount_to_pay} to {member_recipient.name}.", user=interaction.user)
+        banner = SuccessBanner(text=f"You gave ${amount_to_pay} to {member_recipient.name}.", user=interaction.user)
         await interaction.response.send_message(embed=banner.embed)
 
     @app_commands.command(name="give_resources", description="Give resources to another player")
@@ -74,7 +74,7 @@ class TradeCog(commands.Cog):
         recipient.ship.modules[5].add_resource(resource, amount_to_give)
         # TODO implement by UI
         message = f"You gave {amount_to_give} {resource} to {recipient.id}."
-        banner = SimpleBanner(text=message, user=interaction.user)
+        banner = SuccessBanner(text=message, user=interaction.user)
         await interaction.response.send_message(embed=banner.embed)
 
     # TODO should implement better texts
@@ -93,10 +93,10 @@ class TradeCog(commands.Cog):
 
         sender = data.players[interaction.user]
         recipiant_player = data.players[recipient]
-        # if sender == recipiant_player:
-        #     banner = ErrorBanner(text="You can't trade with yourself.", user=interaction.user)
-        #     await interaction.response.send_message(embed=banner.embed, ephemeral=True)
-        #     return
+        if sender == recipiant_player:
+            banner = ErrorBanner(text="You can't trade with yourself.", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
+            return
 
         if send_or_receive_money == "receive":
             amount = -amount

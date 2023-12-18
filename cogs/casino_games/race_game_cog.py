@@ -14,6 +14,7 @@ from ui.simple_banner import ErrorBanner
 from utils import check_player_exists
 
 
+# TODO use banners (this is the hello world app so temporary let behind until we complete more of the important stuff)
 # TODO add imgs (AI/start w hardcoded)
 # TODO add casino info
 class RaceGame(commands.Cog):

@@ -7,7 +7,7 @@ from typing import Literal
 import tabulate
 
 import data
-from ui.simple_banner import SimpleBanner, ErrorBanner
+from ui.simple_banner import ErrorBanner, LoadingBanner, NormalBanner, SuccessBanner
 from utils import check_player_exists
 
 
@@ -27,7 +27,7 @@ class ShipCommands(commands.Cog):
         ship_message = f"{' '.join(modules_info)}"
         ship_message += f"```Location: {ship.location}```"
         ship_message += "```Energy: " + f"{ship.energy}```"
-        banner = SimpleBanner(text=ship_message, user=interaction.user, extra_header=header)
+        banner = NormalBanner(text=ship_message, user=interaction.user, extra_header=header)
         await interaction.response.send_message(embed=banner.embed, ephemeral=True)
 
     @app_commands.command(name="inventory", description="Get your ship's inventory")
@@ -41,7 +41,7 @@ class ShipCommands(commands.Cog):
         for resource in ship.modules[5]._capacity:
             ship_message.append({"Resource": resource.name, "Amount": str(resource.amount)})
         ship_message = tabulate.tabulate(ship_message, headers="keys")
-        banner = SimpleBanner(
+        banner = NormalBanner(
             text=ship_message, user=interaction.user, extra_header="'s Inventory", is_code_block=True
         )
         await interaction.response.send_message(embed=banner.embed, ephemeral=True)
@@ -67,7 +67,7 @@ class ShipCommands(commands.Cog):
                     banner = ErrorBanner(text=f"Couldn't upgrade {module_name}: {e}", user=interaction.user)
                     await interaction.response.send_message(embed=banner.embed, ephemeral=True)
                     return
-                banner = SimpleBanner(f"Upgraded {module_name} to level {module.level}.", user=interaction.user)
+                banner = SuccessBanner(f"Upgraded {module_name} to level {module.level}.", user=interaction.user)
                 await interaction.response.send_message(embed=banner.embed, ephemeral=True)
                 return
         await interaction.response.send_message(f"Couldn't find module {module_name}.", ephemeral=True)
@@ -123,43 +123,38 @@ class ShipCommands(commands.Cog):
 
         if on and not generator_status:
             player.ship.modules[7].booting = True
-            banner = SimpleBanner(
-                text="Booting up the generator...\n\n░░░░░░░░░░ 0%", user=interaction.user, color=discord.Color.red()
-            )
+            banner = LoadingBanner(text="Booting up the generator...\n\n░░░░░░░░░░ 0%", user=interaction.user)
             await interaction.response.send_message(embed=banner.embed)
             for percent in range(0, 101, 10):
                 bar = "█" * (percent // 10) + "░" * ((100 - percent) // 10)
-                banner = SimpleBanner(
+                banner = LoadingBanner(
                     text=f"Booting up the generator...\n\n{bar} {percent}%",
                     user=interaction.user,
-                    color=discord.Color.red(),
                 )
                 await interaction.edit_original_response(embed=banner.embed)
                 await asyncio.sleep(0.5)
 
-            banner = SimpleBanner(text="Generator is now online!", user=interaction.user)
+            banner = SuccessBanner(text="Generator is now online!", user=interaction.user)
             await interaction.edit_original_response(embed=banner.embed)
             player.ship.modules[7].turn_on()
             player.ship.modules[7].booting = False
         elif not on and generator_status:
             player.ship.modules[7].booting = True
-            banner = SimpleBanner(
+            banner = LoadingBanner(
                 text="Shutting down the generator...\n\n██████████ 100%",
                 user=interaction.user,
-                color=discord.Color.red(),
             )
             await interaction.response.send_message(embed=banner.embed)
             for percent in range(100, -1, -10):
                 bar = "█" * (percent // 10) + "░" * ((100 - percent) // 10)
-                banner = SimpleBanner(
+                banner = LoadingBanner(
                     text=f"Shutting down the generator...\n\n{bar} {percent}%",
                     user=interaction.user,
-                    color=discord.Color.red(),
                 )
                 await interaction.edit_original_response(embed=banner.embed)
                 await asyncio.sleep(0.5)
             player.ship.modules[7].turn_off()
-            banner = SimpleBanner(text="Generator is now offline!", user=interaction.user)
+            banner = SuccessBanner(text="Generator is now offline!", user=interaction.user)
             await interaction.edit_original_response(embed=banner.embed)
             player.ship.modules[7].booting = False
 

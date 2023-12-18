@@ -5,7 +5,7 @@ import math
 import random
 
 import data
-from ui.simple_banner import ErrorBanner, SimpleBanner
+from ui.simple_banner import ErrorBanner, SuccessBanner
 from utils import check_player_exists
 
 
@@ -34,7 +34,7 @@ class MineCommands(commands.Cog):
         ]
         amount = math.floor((random.random() * mining_bonus) / 2)
         player.ship.modules[5].add_cargo(resource, amount)
-        banner = SimpleBanner(text=f"You mined {amount} tons of {resource}.", user=interaction.user)
+        banner = SuccessBanner(text=f"You mined {amount} tons of {resource}.", user=interaction.user)
         await interaction.response.send_message(embed=banner.embed, ephemeral=True)
 
 

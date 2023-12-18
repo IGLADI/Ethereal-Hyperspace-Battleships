@@ -5,7 +5,7 @@ from discord.ext import commands
 import data
 from player import Player
 from utils import check_player_exists
-from ui.simple_banner import ErrorBanner, SimpleBanner
+from ui.simple_banner import ErrorBanner, NormalBanner, SuccessBanner
 
 
 class GeneralCommands(commands.Cog):
@@ -24,7 +24,8 @@ class GeneralCommands(commands.Cog):
         help_message += "/resources - Get info on resources and mining\n"
         help_message += "/balance - Check your money\n"
         help_message += "/pay - Give money to a player\n"
-        await interaction.response.send_message(help_message, ephemeral=True)
+        banner = NormalBanner(text=help_message, user=interaction.user)
+        await interaction.response.send_message(embed=banner.embed, ephemeral=True)
 
     @app_commands.command(name="balance", description="Check your balance")
     async def balance(self, interaction: discord.Interaction):
@@ -33,7 +34,7 @@ class GeneralCommands(commands.Cog):
 
         player = data.players[interaction.user]
         balance = player.money
-        balance_banner = SimpleBanner(user=interaction.user, text=f"Your current balance is ${balance}.")
+        balance_banner = NormalBanner(user=interaction.user, text=f"Your current balance is ${balance}.")
         await interaction.response.send_message(embed=balance_banner.embed, ephemeral=True)
 
     # TODO maybe add displayname
@@ -43,7 +44,7 @@ class GeneralCommands(commands.Cog):
         if interaction.user not in data.players:
             player = Player(interaction.user)
             data.players[interaction.user] = player
-            banner = SimpleBanner(text="Welcome to Ethereal Hyperspace Battleships!", user=interaction.user)
+            banner = SuccessBanner(text="Welcome to Ethereal Hyperspace Battleships!", user=interaction.user)
             await interaction.response.send_message(embed=banner.embed, ephemeral=True)
         else:
             banner = ErrorBanner(text="You are already registered as a player.", user=interaction.user)
@@ -58,7 +59,7 @@ class GeneralCommands(commands.Cog):
         player = data.players[interaction.user]
         player_location = player.ship.location
         location_name = player_location.is_planet()
-        banner = SimpleBanner(
+        banner = NormalBanner(
             text=f"You are currently at {player_location}, also known as {location_name}.", user=interaction.user
         )
         await interaction.response.send_message(embed=banner.embed, ephemeral=True)

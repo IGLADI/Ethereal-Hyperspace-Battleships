@@ -7,7 +7,7 @@ class SimpleBanner(discord.ui.View):
         self,
         text: str,
         user: discord.Member,
-        color=discord.Color.green(),
+        color=discord.Color.light_gray(),
         extra_header="",
         is_code_block=False,
         text_color=None,
@@ -34,3 +34,18 @@ class SimpleBanner(discord.ui.View):
 class ErrorBanner(SimpleBanner):
     def __init__(self, text: str, user: discord.Member, *args, **kwargs):
         super().__init__(text, user, color=discord.Color.red(), text_color="red", *args, **kwargs)
+
+
+class NormalBanner(SimpleBanner):
+    def __init__(self, text: str, user: discord.Member, *args, **kwargs):
+        super().__init__(text, user, *args, **kwargs)
+
+
+class LoadingBanner(SimpleBanner):
+    def __init__(self, text: str, user: discord.Member, *args, **kwargs):
+        super().__init__(text, user, color=discord.Color.orange(), *args, **kwargs)
+
+
+class SuccessBanner(SimpleBanner):
+    def __init__(self, text: str, user: discord.Member, *args, **kwargs):
+        super().__init__(text, user, color=discord.Color.green(), *args, **kwargs)
