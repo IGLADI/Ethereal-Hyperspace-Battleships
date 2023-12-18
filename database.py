@@ -38,20 +38,6 @@ class Database:
         self._cursor.execute(statement, values)
         return [row for row in self._cursor]
 
-    # We assume this happens after player has chosen main guild
-    def store_player(self, discord_id, discord_name, player_class, guild_name):
-        """Creates a new player in the database with a guild name.  The coordinates of the planet of the main guild are used as the players starting coordinates."""
-        statement = """
-        INSERT INTO `players` (`discord_id`, `discord_name`, `class`, `guild_id`, `x_pos`, `y_pos`)
-        SELECT ?, ?, ?, g.guild_id, p.location_x_pos, p.location_y_pos
-        FROM guilds g
-        JOIN planets p ON g.planet_id = p.planet_id
-        WHERE g.name = ?;
-        """
-        self._cursor.execute(
-            statement, (discord_id, discord_name, player_class, guild_name)
-        )
-
     def player_exists(self, discord_id) -> bool:
         """Checks if a player exists in the database."""
         statement = """
@@ -98,15 +84,6 @@ class Database:
         WHERE discord_id = ?"""
         self._cursor.execute(statement, (amount, discord_id))
 
-    def store_ship(self, discord_id):
-        """Store a ship for a player."""
-        statement = """
-        INSERT INTO ships (player_id)
-        SELECT player_id FROM players
-        WHERE discord_id = ?
-        """
-        self._cursor.execute(statement, (discord_id,))
-
     def player_ship_id(self, discord_id) -> int:
         """Return ship_id for player_id"""
         statement = """
@@ -118,33 +95,6 @@ class Database:
         if len(results):
             return results[0][0]
         return None
-
-    def store_module(self, ship_id, module_type):
-        """Store module with a ship id."""
-        statement = """
-        INSERT INTO modules (`type`, `ship_id`) VALUES (?, ?)
-        """
-        self._cursor.execute(statement, (module_type, ship_id))
-
-    def store_cargo_module(self, ship_id):
-        """Store a cargo module with a ship id."""
-        statement = """
-        INSERT INTO cargo_modules (`module_id`) 
-        SELECT m.module_id FROM modules m
-        WHERE m.ship_id = ? AND m.type = 'Cargo'
-        """
-        self.store_module(ship_id, "Cargo")
-        self._cursor.execute(statement, (ship_id,))
-
-    def store_fuel_module(self, ship_id):
-        """Store a fuel module with a ship id."""
-        statement = """
-        INSERT INTO fuel_modules (`module_id`)
-        SELECT m.module_id FROM modules m
-        WHERE m.ship_id = ? AND m.type = 'Fuel'
-        """
-        self.store_module(ship_id, "Fuel")
-        self._cursor.execute(statement, (ship_id,))
 
     def fuel_module_fuel(self, module_id) -> int:
         """Return fuel in a fuel module by module_id"""
@@ -175,6 +125,7 @@ class Database:
         return results[0][0] if results else None
 
     def module_ship_id(self, module_id) -> int:
+        """Return ship_id for module"""
         statement = """
         SELECT ship_id FROM modules
         WHERE module_id = ?
@@ -183,6 +134,7 @@ class Database:
         return results[0][0] if results else None
 
     def module_level(self, module_id) -> int:
+        """Return module level"""
         statement = """
         SELECT level FROM modules
         WHERE module_id = ?
@@ -196,3 +148,146 @@ class Database:
         WHERE module_id = ?
         """
         self._cursor.execute(statement, (module_level, module_id))
+
+    def item_type(self, item_id) -> int:
+        """Return amount for item_id."""
+        statement = """
+        SELECT type FROM items
+        WHERE item_id = ?
+        """
+        results = self.get_results(statement, (item_id,))
+        return results[0][0] if results else None
+
+    def item_amount(self, item_id) -> int:
+        """Return amount for item_id."""
+        statement = """
+        SELECT amount FROM items
+        WHERE item_id = ?
+        """
+        results = self.get_results(statement, (item_id,))
+        return results[0][0] if results else None
+
+    def item_set_amount(self, item_id, amount):
+        self._cursor.execute(
+            """
+            UPDATE items SET amount = ?
+            WHERE item_id = ?
+            """,
+            (amount, item_id),
+        )
+
+    def item_delete(self, item_id):
+        """Delete an item by item id."""
+        self._cursor.execute(
+            """
+            DELETE FROM items
+            WHERE item_id = ?
+            """,
+            (item_id,),
+        )
+
+    def cargo_item_ids(self, cargo_module_id) -> list:
+        """Returns a list of item ids."""
+        statement = """
+        SELECT item_id FROM items
+        WHERE cargo_module_id = ?
+        """
+        results = self.get_results(statement, (cargo_module_id,))
+        ids = [result[0] for result in results]
+        return ids
+
+    def player_set_x_pos(self, player_id, x_pos):
+        """Set x_pos for player id"""
+        self._cursor.execute(
+            """
+            UPDATE players SET x_pos = ?
+            WHERE player_id = ?
+            """,
+            (x_pos, player_id),
+        )
+
+    def player_set_y_pos(self, player_id, y_pos):
+        """Set y_pos for player id"""
+        self._cursor.execute(
+            """
+            UPDATE players SET y_pos = ?
+            WHERE player_id = ?
+            """,
+            (y_pos, player_id),
+        )
+
+    # Storing commands ########################################################
+
+    def store_item(self, name, item_type, cargo_module_id, amount=1):
+        """Store an item to a cargo_module_id."""
+        statement = """
+        INSERT INTO items (name, type, cargo_module_id, amount)
+        VALUES (?, ?, ?, ?)
+        """
+        self._cursor.execute(statement, (name, item_type, cargo_module_id, amount))
+
+    def store_contribution(self, item_id, building_id):
+        statement = """
+        INSERT INTO contributions
+        VALUES (?, ?)
+        """
+        self._cursor.execute(statement, (building_id, item_id))
+
+    # We assume this happens after player has chosen main guild
+    def store_player(self, discord_id, discord_name, player_class, guild_name):
+        """Creates a new player in the database with a guild name.  The coordinates of the planet of the main guild are used as the players starting coordinates."""
+        self._cursor.execute(
+            """
+            INSERT INTO `players` (`discord_id`, `discord_name`, `class`, `guild_id`, `x_pos`, `y_pos`)
+            SELECT ?, ?, ?, g.guild_id, p.location_x_pos, p.location_y_pos
+            FROM guilds g
+            JOIN planets p ON g.planet_id = p.planet_id
+            WHERE g.name = ?;
+            """,
+            (discord_id, discord_name, player_class, guild_name),
+        )
+
+    def store_building(self, building_type, planet_id):
+        self._cursor.execute(
+            """
+            INSERT INTO buildings (type, planet_id) VALUES
+            (?, ?)
+            """,
+            (building_type, planet_id),
+        )
+
+    def store_ship(self, discord_id):
+        """Store a ship for a player."""
+        statement = """
+        INSERT INTO ships (player_id)
+        SELECT player_id FROM players
+        WHERE discord_id = ?
+        """
+        self._cursor.execute(statement, (discord_id,))
+
+    def store_module(self, ship_id, module_type):
+        """Store module with a ship id."""
+        statement = """
+        INSERT INTO modules (`type`, `ship_id`) VALUES (?, ?)
+        """
+        self._cursor.execute(statement, (module_type, ship_id))
+
+    def store_cargo_module(self, ship_id):
+        """Store a cargo module with a ship id."""
+        statement = """
+        INSERT INTO cargo_modules (`module_id`) 
+        SELECT m.module_id FROM modules m
+        WHERE m.ship_id = ? AND m.type = 'Cargo'
+        """
+        self.store_module(ship_id, "Cargo")
+        self._cursor.execute(statement, (ship_id,))
+
+    def store_fuel_module(self, ship_id):
+        """Store a fuel module with a ship id."""
+        statement = """
+        INSERT INTO fuel_modules (`module_id`)
+        SELECT m.module_id FROM modules m
+        WHERE m.ship_id = ? AND m.type = 'Fuel'
+        """
+        self.store_module(ship_id, "Fuel")
+        self._cursor.execute(statement, (ship_id,))
