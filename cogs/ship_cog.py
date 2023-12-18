@@ -59,6 +59,10 @@ class ShipCommands(commands.Cog):
 
         player = data.players[interaction.user]
         ship = player.ship
+        if ship.is_traveling:
+            await interaction.response.send_message("Wait untill you arrive before you start a new journey!", ephemeral=True)
+            return
+        
         try:
             sleep = ship.travel(x_coordinate, y_coordinate)
             await interaction.response.send_message(f"{player.id} traveling to ({x_coordinate}, {y_coordinate}). Estimated duration = {sleep}.")
@@ -68,6 +72,18 @@ class ShipCommands(commands.Cog):
         else:
             await asyncio.sleep(sleep)
             await interaction.followup.send(f"{player.id} arrived at ({x_coordinate}, {y_coordinate}).")
+
+    # TODO: implement ship.scan()
+    @app_commands.command(name="scan", description="Use your radar to scan the area")
+    async def scan(self, interaction: discord.Interaction):
+        if await check_player_exists(interaction) is False:
+            return
+
+        player = data.players[interaction.user]
+        ship = player.ship
+
+        found = ship.scan()
+        await interaction.response.send_message(f"Scanned the area. Found {found} .", ephemeral=True)
         
 
 async def setup(client: commands.Bot) -> None:
