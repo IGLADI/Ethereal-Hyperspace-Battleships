@@ -4,9 +4,9 @@ import discord
 from discord.ext import commands
 from typing import Literal
 
-import data
 import asyncio
 from utils import check_player_exists
+from player import Player
 
 
 class ShipCommands(commands.Cog):
@@ -18,7 +18,7 @@ class ShipCommands(commands.Cog):
         if await check_player_exists(interaction) is False:
             return
 
-        player = data.players[interaction.user]
+        player = Player.get(interaction.user.id)
         ship = player.ship
         ship_message = f"**{player.id}'s ship**\n"
         ship_message += f"**Location:** {ship.location}\n"
@@ -33,7 +33,7 @@ class ShipCommands(commands.Cog):
         if await check_player_exists(interaction) is False:
             return
 
-        player = data.players[interaction.user]
+        player = Player.get(interaction.user.id)
         ship = player.ship
         ship_message = f"**{player.id}'s ship**\n"
         ship_message += "**Cargo:**\n"
@@ -52,7 +52,7 @@ class ShipCommands(commands.Cog):
         if await check_player_exists(interaction) is False:
             return
 
-        player = data.players[interaction.user]
+        player = Player.get(interaction.user.id)
         ship = player.ship
         for module in ship.modules:
             if module_name == module.name:
@@ -72,6 +72,7 @@ class ShipCommands(commands.Cog):
         if await check_player_exists(interaction) is False:
             return
           
+        player = Player.get(interaction.user.id)
         ship = player.ship
         if ship.is_traveling:
             await interaction.response.send_message("Wait untill you arrive before you start a new journey!", ephemeral=True)
@@ -93,7 +94,7 @@ class ShipCommands(commands.Cog):
         if await check_player_exists(interaction) is False:
             return
 
-        player = data.players[interaction.user]
+        player = Player.get(interaction.user.id)
         ship = player.ship
 
         found = ship.scan()
@@ -104,7 +105,7 @@ class ShipCommands(commands.Cog):
         if await check_player_exists(interaction) is False:
             return
 
-        player = data.players[interaction.user]
+        player = Player.get(interaction.user.id)
         generator_status = player.ship.modules[7].is_on
         if player.ship.modules[7].booting:
             await interaction.response.send_message("The generator is still booting.", ephemeral=True)

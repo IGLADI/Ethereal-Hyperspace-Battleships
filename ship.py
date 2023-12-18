@@ -128,6 +128,7 @@ class Ship:
         locations = []
         for i in range(location.get_x() - scan_range, location.get_x() + scan_range):
             for j in range(location.get_y() - scan_range, location.get_y() + scan_range):
-                # TODO Use database to fix this (way easier than using data.py file)!
-                    locations.append()
+                is_location = _db.location_from_coos(i, j)
+                if is_location != None:
+                    locations.append(is_location)
         return locations

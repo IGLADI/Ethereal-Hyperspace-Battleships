@@ -170,3 +170,12 @@ class Database:
         """
         results = self.get_results(statement, (module_id,))
         return results[0][0] if results else None
+
+    def location_from_coos(self, x_pos, y_pos) -> str:
+        """Returns the location name from coordinates."""
+        statement = """
+        SELECT name FROM locations
+        WHERE location_x_pos = ? AND location_y_pos = ?
+        """
+        results = self.get_results(statement, (x_pos, y_pos))
+        return results[0][0] if results else None
