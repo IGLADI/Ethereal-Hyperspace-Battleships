@@ -43,9 +43,8 @@ class GeneralCommands(commands.Cog):
         if interaction.user not in data.players:
             player = Player(interaction.user)
             data.players[interaction.user] = player
-            await interaction.response.send_message(
-                f"Welcome to Ethereal Hyperspace Battleships {interaction.user.name}!", ephemeral=True
-            )
+            banner = SimpleBanner(text="Welcome to Ethereal Hyperspace Battleships!", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
         else:
             banner = ErrorBanner(text="You are already registered as a player.", user=interaction.user)
             await interaction.response.send_message(embed=banner.embed, ephemeral=True)
