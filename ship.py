@@ -15,13 +15,32 @@ from module import (
     DEFAULT_MODULES,
 )
 
+_MODULE_MAPS = {
+    "Module": Module,
+    "SolarPanel": SolarPanel,
+    "TravelModule": TravelModule,
+    "MiningModule": MiningModule,
+    "Canon": Canon,
+    "Shield": Shield,
+    "Fuel": Fuel,
+    "Cargo": Cargo,
+    "Radar": Radar,
+    "EnergyGenerator": EnergyGenerator,
+}
+
 _db = Database()
 
 
 class Ship:
     def __init__(self, ship_id):
         global _db
-        modules = _db.ship_modules()
+        module_ids = _db.ship_module_ids(ship_id)
+
+        modules = {}
+        for module_id in module_ids:
+            type = _db.module_type(module_id)
+            module = _MODULE_MAPS.get(type)
+            modules[type] = module(module_id)
 
         self.id = ship_id
         self._modules = modules

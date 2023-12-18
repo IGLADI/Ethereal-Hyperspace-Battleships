@@ -127,11 +127,11 @@ class Database:
         self._cursor.execute(statement, (module_type, ship_id))
 
     def store_cargo(self, ship_id):
-        """Store module with a ship id."""
+        """Store a cargo with a ship id."""
         statement = """
         INSERT INTO cargos (`module_id`) 
         SELECT m.module_id FROM modules m
-        WHERE m.ship_id = ?
+        WHERE m.ship_id = ? AND m.type = 'Cargo'
         """
         self.store_module(ship_id, "Cargo")
         self._cursor.execute(statement, (ship_id,))
@@ -145,3 +145,28 @@ class Database:
         results = self.get_results(statement, (ship_id,))
         ids = [result[0] for result in results]
         return ids
+
+    def module_type(self, module_id) -> str:
+        """Return the module type for a module_id."""
+        statement = """
+        SELECT type FROM modules
+        WHERE module_id = ?
+        """
+        results = self.get_results(statement, (module_id,))
+        return results[0][0] if results else None
+
+    def module_ship_id(self, module_id) -> int:
+        statement = """
+        SELECT ship_id FROM modules
+        WHERE module_id = ?
+        """
+        results = self.get_results(statement, (module_id,))
+        return results[0][0] if results else None
+
+    def module_level(self, module_id) -> int:
+        statement = """
+        SELECT level FROM modules
+        WHERE module_id = ?
+        """
+        results = self.get_results(statement, (module_id,))
+        return results[0][0] if results else None

@@ -7,11 +7,16 @@ _db = Database()
 
 # The comments show the properties of each module at each level. These can be changed as we need to balance the game.
 class Module:
-    def __init__(self, name, description, max_level, cost):
-        self._name = name
+    def __init__(self, module_id, name, description, max_level, cost):
+        global _db
+        level = _db.module_level(module_id)
+        ship_id = _db.module_ship_id(module_id)
+
+        self.id = module_id
+        self.ship_id = ship_id
         self._description = description
         # TODO: insert db code here
-        self._level = 1
+        self._level = level
         self._max_level = max_level
         self._cost = cost
 
@@ -80,8 +85,9 @@ class Module:
 
 
 class TravelModule(Module):
-    def __init__(self):
+    def __init__(self, module_id):
         super().__init__(
+            module_id,
             "Travel Module",
             "Increases the distance the ship can travel.",
             6,
@@ -119,8 +125,9 @@ class TravelModule(Module):
 
 
 class MiningModule(Module):
-    def __init__(self):
+    def __init__(self, module_id):
         super().__init__(
+            module_id,
             "Mining Module",
             "Increases the amount of resources the ship can mine.",
             5,
@@ -163,8 +170,9 @@ class MiningModule(Module):
 
 
 class Cargo(Module):
-    def __init__(self):
+    def __init__(self, module_id):
         super().__init__(
+            module_id,
             "Cargo",
             "Increases the amount of cargo the ship can hold.",
             6,
@@ -233,8 +241,9 @@ class Cargo(Module):
 
 
 class Canon(Module):
-    def __init__(self):
+    def __init__(self, module_id):
         super().__init__(
+            module_id,
             "Canon",
             "Increases the ship's attack damage.",
             5,
@@ -274,8 +283,9 @@ class Canon(Module):
 
 
 class Shield(Module):
-    def __init__(self):
+    def __init__(self, module_id):
         super().__init__(
+            module_id,
             "Shield",
             "Increases the ship's defense.",
             5,
@@ -315,8 +325,9 @@ class Shield(Module):
 
 
 class Fuel(Module):
-    def __init__(self):
+    def __init__(self, module_id):
         super().__init__(
+            module_id,
             "Fuel",
             "Holds the ship's fuel.",
             1,
@@ -341,8 +352,9 @@ class Fuel(Module):
 
 
 class Radar(Module):
-    def __init__(self):
+    def __init__(self, module_id):
         super().__init__(
+            module_id,
             "Radar",
             "Increases the ship's radar range.",
             7,
@@ -379,8 +391,9 @@ class Radar(Module):
 
 # generation = amount / minute
 class EnergyGenerator(Module):
-    def __init__(self):
+    def __init__(self, module_id):
         super().__init__(
+            module_id,
             "Energy Generator",
             "Increases the ship's energy generation.",
             7,
@@ -430,8 +443,9 @@ class EnergyGenerator(Module):
 
 
 class SolarPanel(Module):
-    def __init__(self):
+    def __init__(self, module_id):
         super().__init__(
+            module_id,
             "Solar Panel",
             "Increases the ship's energy generation.",
             7,

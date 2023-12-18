@@ -101,7 +101,8 @@ CREATE TABLE `modules` (
     `type` ENUM("SolarPanel", "TravelModule", "MiningModule", "Canon", "Shield", "Fuel", "Cargo", "Radar", "EnergyGenerator") NOT NULL,
     `ship_id` INT(11) NOT NULL,
     CONSTRAINT `FK__ships__modules` FOREIGN KEY (`ship_id`)
-	    REFERENCES `ships` (`ship_id`)
+	    REFERENCES `ships` (`ship_id`),
+    CONSTRAINT `UN__modules` UNIQUE (type, ship_id)
 );
 
 CREATE TABLE `cargos` (
