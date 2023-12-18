@@ -38,7 +38,6 @@ class TradeModal(ModalPaginator):
 
             self.add_modal(modal)
 
-    # TODO can't send empty offers
     async def on_finish(self, interaction: discord.Interaction[Any]) -> None:
         # to use for UI dev
         answers: list[str] = []
@@ -50,10 +49,12 @@ class TradeModal(ModalPaginator):
 
             answers.append(resume)
 
+        total_resources = 0
         try:
             for modal in self.modals:
                 if modal == self.modals[0]:
                     for field in modal.children:
+                        total_resources += int(field.value)
                         if int(field.value) < 0:
                             await interaction.response.send_message(
                                 "You can't ask for negative resources.", ephemeral=True
@@ -61,19 +62,26 @@ class TradeModal(ModalPaginator):
                             return
                 else:
                     for field in modal.children:
+                        total_resources += int(field.value)
                         if int(field.value) < 0:
                             await interaction.response.send_message(
                                 "You can't offer negative resources.", ephemeral=True
                             )
                             return
         except ValueError:
-            await interaction.followup.send("Invalid input", ephemeral=True)
+            await interaction.response.send_message("Invalid input", ephemeral=True)
             return
+        else:
+            if total_resources == 0:
+                await interaction.response.send_message(
+                    "You can't send an empty offer, if you want to send money use /pay.", ephemeral=True
+                )
+                return
 
         self.player = data.players[interaction.user]
         self.recipiant_player = data.players[self.recipiant]
 
-        if await check_enough_resources(self.player, self.recipiant_player, self.modals, self.amount) is False:
+        if await check_enough_resources(self.player, self.recipiant_player, self.modals, interaction) is False:
             return
 
         # TODO print "ASK/OFFER", "RESOURCE_TYPE", "AMOUNT" (don't forget money) by UI dev
@@ -139,14 +147,14 @@ async def check_enough_resources(player, recipiant_player, modals, interaction: 
         if modal == modals[0]:
             for field in modal.children:
                 if recipiant_player.ship.modules[5].get_resource_amount(field.label) < int(field.value):
-                    await interaction.followup.send(
+                    await interaction.response.send_message(
                         "The recipiant doesn't have enough resources to send.", ephemeral=True
                     )
                     return False
         else:
             for field in modal.children:
                 if player.ship.modules[5].get_resource_amount(field.label) < int(field.value):
-                    await interaction.followup.send("You don't have enough resources to send.", ephemeral=True)
+                    await interaction.response.send_message("You don't have enough resources to send.", ephemeral=True)
                     return False
     return True
 
@@ -154,10 +162,10 @@ async def check_enough_resources(player, recipiant_player, modals, interaction: 
 async def check_enough_money(player, recipiant_player, amount, interaction: discord.Interaction) -> bool:
     if amount < 0:
         if recipiant_player.money < abs(amount):
-            await interaction.followup.send("The recipiant doesn't have enough money to send.", ephemeral=True)
+            await interaction.response.send_message("The recipiant doesn't have enough money to send.", ephemeral=True)
             return False
     else:
         if player.money < abs(amount):
-            await interaction.followup.send("The sender doesn't have enough money to send.", ephemeral=True)
+            await interaction.response.send_message("The sender doesn't have enough money to send.", ephemeral=True)
             return False
     return True
