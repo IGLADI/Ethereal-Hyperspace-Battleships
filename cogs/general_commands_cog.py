@@ -21,6 +21,7 @@ class GeneralCommands(commands.Cog):
     def __init__(self, client: commands.Bot):
         self.client = client
 
+    # TODO add any additional commands here
     @app_commands.command(name="help", description="Provides a list of bot commands")
     async def help(
         self, 
