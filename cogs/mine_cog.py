@@ -30,7 +30,10 @@ class MineCommands(commands.Cog):
             ]
             amount = math.floor((random.random() * mining_bonus) / 2)
             player.ship.modules[5].add_cargo(resource, amount)
-            await interaction.response.send_message(f"You mined {amount} tons of {resource}.", ephemeral=True)
+            if i == 0:
+                await interaction.response.send_message(f"You mined {amount} tons of {resource}.", ephemeral=True)
+            else:
+                await interaction.followup.send(f"You mined {amount} tons of {resource}.", ephemeral=True)
 
 
 async def setup(client: commands.Bot) -> None:
