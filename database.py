@@ -36,65 +36,78 @@ class Database:
     def get_results(self, statement, values=None) -> list:
         """Returns result of query."""
         self._cursor.execute(statement, values)
-        return [row for row in self._cursor]
+        return list(self._cursor)
+
+    def get_only_result(self, statement, values=None):
+        """get_results but returns the only result."""
+        results = self.get_results(statement, values)
+        return results[0][0] if results else None
 
     def player_exists(self, discord_id) -> bool:
         """Checks if a player exists in the database."""
-        statement = """
-        SELECT 1 FROM players p
-        WHERE p.discord_id = ?"""
-        self._cursor.execute(statement, (discord_id,))
+        self._cursor.execute(
+            """
+            SELECT 1 FROM players p
+            WHERE p.discord_id = ?
+            """,
+            (discord_id,),
+        )
         return self._cursor.rowcount != 0
 
     def player_location_name(self, discord_id) -> str:
         """Retunrs the location name of where the player is located."""
-        statement = """
-        SELECT l.name FROM locations l
-        JOIN players p ON
-            p.x_pos = l.location_x_pos AND
-            p.y_pos = l.location_y_pos
-        WHERE p.discord_id = ?;
-        """
-        results = self.get_results(statement, (discord_id,))
-        return results[0][0] if results else None
+        return self.get_only_result(
+            """
+            SELECT l.name FROM locations l
+            JOIN players p ON
+                p.x_pos = l.location_x_pos AND
+                p.y_pos = l.location_y_pos
+            WHERE p.discord_id = ?;
+            """,
+            (discord_id,),
+        )
 
     def player_coordinates(self, discord_id) -> tuple:
         """Returns the coordinates of the players as a tuple."""
-        statement = """
-        SELECT p.x_pos, p.y_pos FROM players p
-        WHERE p.discord_id = ?;
-        """
-        results = self.get_results(statement, (discord_id,))
+        results = self.get_results(
+            """
+            SELECT p.x_pos, p.y_pos FROM players p
+            WHERE p.discord_id = ?;
+            """,
+            (discord_id,),
+        )
         return results[0] if results else None
 
     def player_money(self, discord_id) -> int:
         """Returns the money of the player as an int."""
-        statement = """
-        SELECT p.money FROM players p
-        WHERE p.discord_id = ?;
-        """
-        results = self.get_results(statement, (discord_id,))
-        money = results[0][0] if results else None
-        return money
+        return self.get_only_result(
+            """
+            SELECT p.money FROM players p
+            WHERE p.discord_id = ?;
+            """,
+            (discord_id,),
+        )
 
     def player_set_money(self, discord_id, amount):
         """Set the balance of a player."""
-        statement = """
-        UPDATE players SET money = ?
-        WHERE discord_id = ?"""
-        self._cursor.execute(statement, (amount, discord_id))
+        self._cursor.execute(
+            """
+            UPDATE players SET money = ?
+            WHERE discord_id = ?
+            """,
+            (amount, discord_id),
+        )
 
     def player_ship_id(self, discord_id) -> int:
         """Return ship_id for player_id"""
-        statement = """
-        SELECT ship_id FROM ships s
-        JOIN players p ON p.player_id = s.player_id
-        WHERE p.discord_id = ?
-        """
-        results = self.get_results(statement, (discord_id,))
-        if len(results):
-            return results[0][0]
-        return None
+        return self.get_only_result(
+            """
+            SELECT ship_id FROM ships s
+            JOIN players p ON p.player_id = s.player_id
+            WHERE p.discord_id = ?
+            """,
+            (discord_id,),
+        )
 
     def player_set_x_pos(self, discord_id, x_pos) -> int:
         """Set x_pos for player id"""
@@ -118,12 +131,13 @@ class Database:
 
     def fuel_module_fuel(self, module_id) -> int:
         """Return fuel in a fuel module by module_id"""
-        statement = """
-        SELECT fuel FROM fuel_modules
-        WHERE module_id = ?
-        """
-        results = self.get_results(statement, (module_id,))
-        return results[0][0] if results else None
+        return self.get_only_result(
+            """
+            SELECT fuel FROM fuel_modules
+            WHERE module_id = ?
+            """,
+            (module_id,),
+        )
 
     def ship_module_ids(self, ship_id) -> list:
         """Returns a list of module_ids."""
@@ -137,64 +151,72 @@ class Database:
 
     def module_type(self, module_id) -> str:
         """Return the module type for a module_id."""
-        statement = """
-        SELECT type FROM modules
-        WHERE module_id = ?
-        """
-        results = self.get_results(statement, (module_id,))
-        return results[0][0] if results else None
+        return self.get_only_result(
+            """
+            SELECT type FROM modules
+            WHERE module_id = ?
+            """,
+            (module_id,),
+        )
 
     def module_ship_id(self, module_id) -> int:
         """Return ship_id for module"""
-        statement = """
+        return self.get_only_result(
+            """
         SELECT ship_id FROM modules
         WHERE module_id = ?
-        """
-        results = self.get_results(statement, (module_id,))
-        return results[0][0] if results else None
+        """,
+            (module_id,),
+        )
 
     def module_level(self, module_id) -> int:
         """Return module level"""
-        statement = """
-        SELECT level FROM modules
-        WHERE module_id = ?
-        """
-        results = self.get_results(statement, (module_id,))
-        return results[0][0] if results else None
+        return self.get_only_result(
+            """
+            SELECT level FROM modules
+            WHERE module_id = ?
+            """,
+            (module_id,),
+        )
 
     def module_set_level(self, module_id, module_level):
-        statement = """
+        self._cursor.execute(
+            """
         UPDATE modules SET level = ?
         WHERE module_id = ?
-        """
-        self._cursor.execute(statement, (module_level, module_id))
+        """,
+            (module_level, module_id),
+        )
 
     def item_type(self, item_id) -> int:
         """Return amount for item_id."""
-        statement = """
-        SELECT type FROM items
-        WHERE item_id = ?
-        """
-        results = self.get_results(statement, (item_id,))
-        return results[0][0] if results else None
+        return self.get_only_result(
+            """
+            SELECT type FROM items
+            WHERE item_id = ?
+            """,
+            (item_id,),
+        )
 
     def item_amount(self, item_id) -> int:
         """Return amount for item_id."""
-        statement = """
-        SELECT amount FROM items
-        WHERE item_id = ?
-        """
-        results = self.get_results(statement, (item_id,))
-        return results[0][0] if results else None
+        return self.get_only_result(
+            """
+            SELECT amount FROM items
+            WHERE item_id = ?
+            """,
+            (item_id,),
+        )
 
     def item_name(self, item_id) -> str:
         """Return amount for item_id."""
-        statement = """
-        SELECT name FROM items
-        WHERE item_id = ?
-        """
-        results = self.get_results(statement, (item_id,))
-        return results[0][0] if results else None
+        return self.get_only_result(
+            """
+            SELECT name FROM items
+            WHERE item_id = ?
+            """,
+            (item_id,),
+        )
 
     def item_set_amount(self, item_id, amount):
         self._cursor.execute(
@@ -209,8 +231,15 @@ class Database:
         """Delete an item by item id."""
         self._cursor.execute(
             """
+            DELETE FROM contributions
+            WHERE item_id = ?;
+            """,
+            (item_id,),
+        )
+        self._cursor.execute(
+            """
             DELETE FROM items
-            WHERE item_id = ?
+            WHERE item_id = ?;
             """,
             (item_id,),
         )
@@ -295,8 +324,9 @@ class Database:
         """Store a fuel module with a ship id."""
         statement = """
         INSERT INTO fuel_modules (`module_id`)
-        SELECT m.module_id FROM modules m
-        WHERE m.ship_id = ? AND m.type = 'Fuel'
+        SELECT module_id FROM modules
+        WHERE ship_id = ? AND type = 'Fuel'
+        RETURNING module_id
         """
         self.store_module(ship_id, "Fuel")
         self._cursor.execute(statement, (ship_id,))
