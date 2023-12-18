@@ -4,7 +4,7 @@ from discord.ext import commands
 import math
 import random
 
-import data
+from player import Player
 from utils import check_player_exists
 
 
@@ -14,16 +14,12 @@ class MineCommands(commands.Cog):
 
     # Chances of getting a resource:
     # Copper: 35% | Silver: 30% |Gold: 25% | Uranium: 7% | Black Matter: 3%
-    # TODO mine X times (avoid spamming /mine)
     @app_commands.command(name="mine", description="Mine a random resource")
     async def mine(self, interaction: discord.Interaction, amount: int = 1):
         if await check_player_exists(interaction) is False:
             return
-        if data.players[interaction.user].ship.is_traveling:
-            await interaction.response.send_message("You can't mine while traveling!", ephemeral=True)
-            return
         
-        player = data.players[interaction.user]
+        player = Player.get(interaction.user.id)
         if player.ship.energy < 10:
             await interaction.response.send_message("You don't have enough energy.", ephemeral=True)
             return

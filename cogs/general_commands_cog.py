@@ -22,18 +22,67 @@ class GeneralCommands(commands.Cog):
         self.client = client
 
     @app_commands.command(name="help", description="Provides a list of bot commands")
-    async def help(self, interaction: discord.Interaction):
+    async def help(
+        self, 
+        interaction: discord.Interaction, 
+        page: Literal[
+            'main', 'guild', 'resources', 'travel', 'economic'
+        ] = 'main'
+        ):
+
+        # Main page command list
+        def help_main():
+            help_message = "Here is a list of general commands:\n"
+            help_message += "/help {page name} - Show the commands from that page\n"
+            return help_message
+        
+        # Guild page command list
+        def help_guild():
+            help_message = "Here is a list of guild commands:\n"
+            help_message += "/guild - Get guild info\n"
+            help_message += "/guild_members - Get guild members\n"
+            help_message += "/guild_leave - Leave your guild\n"
+            help_message += "/guild_join {guild name} - Join a guild\n"
+            help_message += "/guild_create {guild name} - Create a guild\n"
+            return help_message
+        
+        # Resources page command list
+        def help_resources():
+            help_message = "Here is a list of resources commands:\n"
+            help_message += "/resources - Get info on resources and mining\n"
+            help_message += "/mine - Mine a random resource\n"
+            help_message += "/inventory - Check your cargo\n"
+            help_message += "/sell {resource} {amount} - Sell resources\n"
+            help_message += "/buy {resource} {amount} - Buy resources\n"
+            return help_message
+        
+        # Travel page command list
+        def help_travel():
+            help_message = "Here is a list of travel commands:\n"
+            help_message += "/where_am_i - Get your location info\n"
+            help_message += "/travel {x} {y} - Travel to a location\n"
+            return help_message
+        
+        # Economic page command list
+        def help_economic():
+            help_message = "Here is a list of economic commands:\n"
+            help_message += "/balance - Check your money\n"
+            help_message += "/pay {amount} {player} - Give money to a player\n"
+            return help_message
+        
+        switch_dict = {
+            'main': help_main,
+            'guild': help_guild,
+            'resources': help_resources,
+            'travel': help_travel,
+            'economic': help_economic        
+        }
+
         # Welcome message and tutorial
         help_message = "Welcome to Ethereal Hyperspace Battleships!\n"
-        help_message += "To start out, please type /register followed by /tutorial.\n"
-        # Command list
+        help_function = switch_dict.get(page)
+        help_message += help_function()
 
-        help_message += "Here is a list of commands:\n"
-        help_message += "/help - Get help\n"
-        help_message += "/guild - Get guild info\n"
-        help_message += "/resources - Get info on resources and mining\n"
-        help_message += "/balance - Check your money\n"
-        help_message += "/pay - Give money to a player\n"
         await interaction.response.send_message(help_message, ephemeral=True)
 
     # ? TODO maybe add a min lvl to give money (avoid spamming discord acounts)
