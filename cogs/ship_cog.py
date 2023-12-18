@@ -99,9 +99,14 @@ class ShipCommands(commands.Cog):
             )
 
     @app_commands.command(name="toggle_energy_generator", description="Toggle on of the energy generator")
-    async def toggle_energy_generator(self, interaction: discord.Interaction, on: bool):
+    async def toggle_energy_generator(self, interaction: discord.Interaction, on: Literal["on", "off"]):
         if await check_player_exists(interaction) is False:
             return
+
+        if on == "on":
+            on = True
+        elif on == "off":
+            on = False
 
         player = data.players[interaction.user]
         generator_status = player.ship.modules[7].is_on
