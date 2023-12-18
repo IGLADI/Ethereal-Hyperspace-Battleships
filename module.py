@@ -1,12 +1,22 @@
+from database import Database
 from resources import Resource
+
+
+_db = Database()
 
 
 # The comments show the properties of each module at each level. These can be changed as we need to balance the game.
 class Module:
-    def __init__(self, name, description, max_level, cost):
-        self._name = name
+    def __init__(self, module_id, name, description, max_level, cost):
+        global _db
+        level = _db.module_level(module_id)
+        ship_id = _db.module_ship_id(module_id)
+
+        self.id = module_id
+        self.ship_id = ship_id
         self._description = description
-        self._level = 1
+        # TODO: insert db code here
+        self._level = level
         self._max_level = max_level
         self._cost = cost
 
@@ -36,7 +46,9 @@ class Module:
         if not self.has_enough_resources(cargo_player):
             raise Exception("Not enough resources to upgrade.")
         self._level += 1
-        self.consume_resources(cargo_player)  # You need to implement this method to consume the required resources.
+        self.consume_resources(
+            cargo_player
+        )  # You need to implement this method to consume the required resources.
 
     def has_enough_resources(self, cargo_player):
         for cost in self._cost:
@@ -49,7 +61,9 @@ class Module:
         return True
 
     def __str__(self):
-        cost_str = "".join(f"\n   - {cost['resource']}: {cost['amount']}" for cost in self._cost)
+        cost_str = "".join(
+            f"\n   - {cost['resource']}: {cost['amount']}" for cost in self._cost
+        )
         if self._level == self._max_level:
             return (
                 f" - **Name: {self._name}**\n"
@@ -64,10 +78,16 @@ class Module:
             f" - Upgrade Cost: {cost_str}\n"
         )
 
+    @classmethod
+    def store(cls, ship_id):
+        global _db
+        _db.store_module(ship_id, cls.__name__)
+
 
 class TravelModule(Module):
-    def __init__(self):
+    def __init__(self, module_id):
         super().__init__(
+            module_id,
             "Travel Module",
             "Increases the distance the ship can travel.",
             6,
@@ -105,8 +125,9 @@ class TravelModule(Module):
 
 
 class MiningModule(Module):
-    def __init__(self):
+    def __init__(self, module_id):
         super().__init__(
+            module_id,
             "Mining Module",
             "Increases the amount of resources the ship can mine.",
             5,
@@ -130,6 +151,7 @@ class MiningModule(Module):
     # gold cost levels:     0,      200,    300,    400,      500
     def upgrade(self, cargo_player):
         super().upgrade(cargo_player)
+
         if self.level == 2:
             self._mining_bonus += 1
         elif self.level == 3 or self.level == 4:
@@ -148,8 +170,9 @@ class MiningModule(Module):
 
 
 class Cargo(Module):
-    def __init__(self):
+    def __init__(self, module_id):
         super().__init__(
+            module_id,
             "Cargo",
             "Increases the amount of cargo the ship can hold.",
             6,
@@ -189,25 +212,6 @@ class Cargo(Module):
                 resource.amount -= amount
                 return
 
-    # ! REMOVE THIS FUNCTION WHEN DONE DEBUGGING
-    def add_cargo(self, resource, amount):
-        if resource.lower() == "copper":
-            max_amount = self._max_capacity - self._capacity[0].amount
-        elif resource.lower() == "silver":
-            max_amount = self._max_capacity - self._capacity[1].amount
-        elif resource.lower() == "gold":
-            max_amount = self._max_capacity - self._capacity[2].amount
-        elif resource.lower() == "uranium":
-            max_amount = self._max_capacity - self._capacity[3].amount
-        elif resource.lower() == "black matter":
-            max_amount = self._max_capacity - self._capacity[4].amount
-        if amount > max_amount:
-            amount = max_amount
-        for cargo in self._capacity:
-            if cargo.name.lower() == resource.lower():
-                cargo.amount += amount
-        return amount
-
     # max_capacity levels:  300,    400,    500,    600,      800,      1000
     # money cost levels:    100,    300,    900,    2700,     8100,     24300
     # copper cost levels:   0       200,    300,    400,      500,      600
@@ -230,10 +234,16 @@ class Cargo(Module):
         capacity_str = "".join(f"\n   - {str(cargo)}" for cargo in self._capacity)
         return f"{super().__str__()} - Capacity: {capacity_str} \n - Max Capacity: {self._max_capacity} tons\n"
 
+    @classmethod
+    def store(cls, ship_id):
+        global _db
+        _db.store_cargo(ship_id)
+
 
 class Canon(Module):
-    def __init__(self):
+    def __init__(self, module_id):
         super().__init__(
+            module_id,
             "Canon",
             "Increases the ship's attack damage.",
             5,
@@ -273,8 +283,9 @@ class Canon(Module):
 
 
 class Shield(Module):
-    def __init__(self):
+    def __init__(self, module_id):
         super().__init__(
+            module_id,
             "Shield",
             "Increases the ship's defense.",
             5,
@@ -314,8 +325,9 @@ class Shield(Module):
 
 
 class Fuel(Module):
-    def __init__(self):
+    def __init__(self, module_id):
         super().__init__(
+            module_id,
             "Fuel",
             "Holds the ship's fuel.",
             1,
@@ -340,8 +352,9 @@ class Fuel(Module):
 
 
 class Radar(Module):
-    def __init__(self):
+    def __init__(self, module_id):
         super().__init__(
+            module_id,
             "Radar",
             "Increases the ship's radar range.",
             7,
@@ -378,9 +391,62 @@ class Radar(Module):
 
 # generation = amount / minute
 class EnergyGenerator(Module):
-    def __init__(self):
+    def __init__(self, module_id):
         super().__init__(
+            module_id,
             "Energy Generator",
+            "Increases the ship's energy generation.",
+            7,
+            [
+                {"resource": "Money", "amount": 0},
+                {"resource": "Copper", "amount": 50},
+                {"resource": "Silver", "amount": 50},
+                {"resource": "Gold", "amount": 50},
+            ],
+        )
+        self._generation = 10
+        self._is_on = True
+        self.booting = False
+
+    @property
+    def generation(self):
+        return self._generation
+
+    @property
+    def is_on(self):
+        return self._is_on
+
+    # generation levels:    10,     20,     30,     50,     70,     100,    130
+    # money cost levels:    1000,   2000,   4000,   8000,   16000,  32000,  64000
+    # copper cost levels:   50,     200,    350,    500,    650,    800,    950
+    # silver cost levels:   50,     200,    350,    500,    650,    800,    950
+    # gold cost levels:     50,     200,    350,    500,    650,    800,    950
+    def upgrade(self, cargo_player):
+        super().upgrade(cargo_player)
+        if self.level == 2 or self.level == 3:
+            self._generation += 10
+        elif self.level == 4 or self.level == 5:
+            self._generation += 20
+        else:
+            self._generation += 30
+        for i in range(1, 4):
+            self._cost[i]["amount"] += 150
+
+    def __str__(self):
+        return f"{super().__str__()} - Generation: {self._generation} per minute\n"
+
+    def turn_on(self):
+        self._is_on = True
+
+    def turn_off(self):
+        self._is_on = False
+
+
+class SolarPanel(Module):
+    def __init__(self, module_id):
+        super().__init__(
+            module_id,
+            "Solar Panel",
             "Increases the ship's energy generation.",
             7,
             [
@@ -396,7 +462,7 @@ class EnergyGenerator(Module):
     def generation(self):
         return self._generation
 
-    # generation levels:    1,      2,      3,      5,      7,      10,     10
+    # generation levels:    1,      2,      3,      5,      7,      10,     13
     # money cost levels:    1000,   2000,   4000,   8000,   16000,  32000,  64000
     # copper cost levels:   50,     200,    350,    500,    650,    800,    950
     # silver cost levels:   50,     200,    350,    500,    650,    800,    950
@@ -414,3 +480,16 @@ class EnergyGenerator(Module):
 
     def __str__(self):
         return f"{super().__str__()} - Generation: {self._generation} per minute\n"
+
+
+DEFAULT_MODULES = [
+    SolarPanel,
+    TravelModule,
+    MiningModule,
+    Canon,
+    Shield,
+    Fuel,
+    Cargo,
+    Radar,
+    EnergyGenerator,
+]

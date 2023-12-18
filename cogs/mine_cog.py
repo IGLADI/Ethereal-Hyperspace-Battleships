@@ -14,6 +14,7 @@ class MineCommands(commands.Cog):
 
     # Chances of getting a resource:
     # Copper: 35% | Silver: 30% |Gold: 25% | Uranium: 7% | Black Matter: 3%
+    # TODO mine X times (avoid spamming /mine)
     @app_commands.command(name="mine", description="Mine a random resource")
     async def mine(self, interaction: discord.Interaction):
         if await check_player_exists(interaction) is False:
@@ -23,13 +24,32 @@ class MineCommands(commands.Cog):
             return
         
         player = data.players[interaction.user]
+        if player.ship.energy < 10:
+            await interaction.response.send_message("You don't have enough energy.", ephemeral=True)
+            return
+
+        # TODO mining module changes energy efficiency
+        player.ship.remove_energy(10)
         mining_bonus = player.ship.modules[1].mining_bonus
         resource = random.choices(["Copper", "Silver", "Gold", "Uranium", "Black Matter"], weights=[35, 30, 25, 7, 3])[
             0
         ]
         amount = math.floor((random.random() * mining_bonus) / 2)
-        player.ship.modules[5].add_cargo(resource, amount)
-        await interaction.response.send_message(f"You mined {amount} tons of {resource}.", ephemeral=True)
+        new_amount = player.ship.modules[5].add_cargo(resource, amount)
+        if new_amount == 0:
+            await interaction.response.send_message(
+                f"{resource} capacity is full, could not add to your ship.", ephemeral=True
+            )
+        elif new_amount < amount:
+            await interaction.response.send_message(
+                f"You added {new_amount} tons of {resource} and left "
+                f"{amount - new_amount} tons behind, because you reached maximum capacity.",
+                ephemeral=True,
+            )
+        else:
+            await interaction.response.send_message(
+                f"You added {amount} tons of {resource} to your ship.", ephemeral=True
+            )
 
 
 async def setup(client: commands.Bot) -> None:
