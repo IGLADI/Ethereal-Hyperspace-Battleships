@@ -5,7 +5,7 @@ from discord.ext import commands
 from typing import Literal
 
 import data
-from trade_menu import TradeModal
+from ui.trade_menu import TradeModal
 from utils import check_player_exists
 
 
