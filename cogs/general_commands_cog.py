@@ -58,9 +58,10 @@ class GeneralCommands(commands.Cog):
         player = data.players[interaction.user]
         player_location = player.ship.location
         location_name = player_location.is_planet()
-        await interaction.response.send_message(
-            f"You are currently at {player_location}, also known as {location_name}.", ephemeral=True
+        banner = SimpleBanner(
+            text=f"You are currently at {player_location}, also known as {location_name}.", user=interaction.user
         )
+        await interaction.response.send_message(embed=banner.embed, ephemeral=True)
 
 
 async def setup(client: commands.Bot) -> None:

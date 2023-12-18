@@ -67,9 +67,8 @@ class ShipCommands(commands.Cog):
                     banner = ErrorBanner(text=f"Couldn't upgrade {module_name}: {e}", user=interaction.user)
                     await interaction.response.send_message(embed=banner.embed, ephemeral=True)
                     return
-                await interaction.response.send_message(
-                    f"Upgraded {module_name} to level {module.level}.", ephemeral=True
-                )
+                banner = SimpleBanner(f"Upgraded {module_name} to level {module.level}.", user=interaction.user)
+                await interaction.response.send_message(embed=banner.embed, ephemeral=True)
                 return
         await interaction.response.send_message(f"Couldn't find module {module_name}.", ephemeral=True)
 
