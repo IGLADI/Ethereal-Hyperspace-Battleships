@@ -1,11 +1,10 @@
-from ship import Ship
-from utils import get_betted_amount
 from threading import Thread
 import time
 
 import data
-
 from database import Database
+from ship import Ship
+from utils import get_betted_amount
 
 _db = Database()
 

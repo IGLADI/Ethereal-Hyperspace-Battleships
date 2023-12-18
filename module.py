@@ -204,25 +204,6 @@ class Cargo(Module):
                 resource.amount -= amount
                 return
 
-    # ! REMOVE THIS FUNCTION WHEN DONE DEBUGGING
-    def add_cargo(self, resource, amount):
-        if resource.lower() == "copper":
-            max_amount = self._max_capacity - self._capacity[0].amount
-        elif resource.lower() == "silver":
-            max_amount = self._max_capacity - self._capacity[1].amount
-        elif resource.lower() == "gold":
-            max_amount = self._max_capacity - self._capacity[2].amount
-        elif resource.lower() == "uranium":
-            max_amount = self._max_capacity - self._capacity[3].amount
-        elif resource.lower() == "black matter":
-            max_amount = self._max_capacity - self._capacity[4].amount
-        if amount > max_amount:
-            amount = max_amount
-        for cargo in self._capacity:
-            if cargo.name.lower() == resource.lower():
-                cargo.amount += amount
-        return amount
-
     # max_capacity levels:  300,    400,    500,    600,      800,      1000
     # money cost levels:    100,    300,    900,    2700,     8100,     24300
     # copper cost levels:   0       200,    300,    400,      500,      600
