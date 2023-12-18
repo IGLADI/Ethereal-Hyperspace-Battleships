@@ -5,7 +5,7 @@ from discord.ext import commands
 import data
 from player import Player
 from utils import check_player_exists
-from ui.simple_banner import SimpleBanner
+from ui.simple_banner import ErrorBanner, SimpleBanner
 
 
 class GeneralCommands(commands.Cog):
@@ -47,7 +47,8 @@ class GeneralCommands(commands.Cog):
                 f"Welcome to Ethereal Hyperspace Battleships {interaction.user.name}!", ephemeral=True
             )
         else:
-            await interaction.response.send_message("You are already registered as a player.", ephemeral=True)
+            banner = ErrorBanner(text="You are already registered as a player.", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
 
     @app_commands.command(name="where_am_i", description="Get your location info")
     async def where_am_i(self, interaction: discord.Interaction):
