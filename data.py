@@ -20,3 +20,15 @@ general_channels = [
     {"type": "forum", "name": "questions", "position": 2},
     {"type": "voice", "name": "general", "position": 3},
 ]
+
+RESOURCE_NAMES = ["Copper", "Silver", "Gold", "Uranium", "Black Matter"]
+BUILDING_TYPES = [
+    "repair station",
+    "shop",
+    "outpost",
+    "factory",
+    "mining station",
+    "sace warp",
+    "trading station",
+    "casino",
+]
