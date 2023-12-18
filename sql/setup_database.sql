@@ -105,22 +105,31 @@ CREATE TABLE `modules` (
     CONSTRAINT `UN__modules` UNIQUE (type, ship_id)
 );
 
-CREATE TABLE `cargos` (
-    `cargo_id` INT(11) NOT NULL AUTO_INCREMENT,
-    CONSTRAINT `PK_cargo_id` PRIMARY KEY (`cargo_id`),
+CREATE TABLE `fuel_modules` (
+    `fuel_module_id` INT(11) NOT NULL AUTO_INCREMENT,
+    CONSTRAINT `PK_fuel_module_id` PRIMARY KEY (`fuel_module_id`),
+    `fuel` int(11) NOT NULL DEFAULT 100,
     `module_id` INT(11) NOT NULL,
-    CONSTRAINT `FK__modules__cargos` FOREIGN KEY (`module_id`)
+    CONSTRAINT `FK__modules__fuel_modules` FOREIGN KEY (`module_id`)
 	    REFERENCES `modules` (`module_id`)
 );
 
--- TODO: Needs a special constraint because an item should be either linked to a building_upgrades or cargos but not on its own.
+CREATE TABLE `cargo_modules` (
+    `cargo_module_id` INT(11) NOT NULL AUTO_INCREMENT,
+    CONSTRAINT `PK_cargo_module_id` PRIMARY KEY (`cargo_module_id`),
+    `module_id` INT(11) NOT NULL,
+    CONSTRAINT `FK__modules__cargo_modules` FOREIGN KEY (`module_id`)
+	    REFERENCES `modules` (`module_id`)
+);
+
+-- TODO: Needs a special constraint because an item should be exclusively linked to a building_upgrades or cargos but not on its own.
 CREATE TABLE `items` (
     `item_id` INT(11) NOT NULL AUTO_INCREMENT,
     CONSTRAINT `PK__items` PRIMARY KEY (`item_id`),
     `amount` INT(11) NOT NULL DEFAULT 0,
-    `cargo_id` INT(11) NULL,
-    CONSTRAINT `FK__cargos__items` FOREIGN KEY (`cargo_id`)
-	    REFERENCES `cargos` (`cargo_id`)
+    `cargo_module_id` INT(11) NULL,
+    CONSTRAINT `FK__cargo_modules__items` FOREIGN KEY (`cargo_module_id`)
+	    REFERENCES `cargo_modules` (`cargo_module_id`)
 );
 
 CREATE TABLE `resources` (

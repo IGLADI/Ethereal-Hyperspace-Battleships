@@ -41,11 +41,14 @@ class Module:
         return self._cost
 
     def upgrade(self, cargo_player):
+        global _db
         if self._level == self._max_level:
             raise Exception("Module is already at max level.")
         if not self.has_enough_resources(cargo_player):
             raise Exception("Not enough resources to upgrade.")
         self._level += 1
+        _db.module_set_level(self.id, self._level)
+
         self.consume_resources(
             cargo_player
         )  # You need to implement this method to consume the required resources.
@@ -237,7 +240,7 @@ class Cargo(Module):
     @classmethod
     def store(cls, ship_id):
         global _db
-        _db.store_cargo(ship_id)
+        _db.store_cargo_module(ship_id)
 
 
 class Canon(Module):
@@ -254,6 +257,7 @@ class Canon(Module):
                 {"resource": "Gold", "amount": 150},
             ],
         )
+
         self._strength = 100
 
     @property
@@ -338,7 +342,10 @@ class Fuel(Module):
                 {"resource": "Gold", "amount": 0},
             ],
         )
-        self._fuel = 100
+        global _db
+        fuel = _db.fuel_module_fuel(module_id)
+
+        self._fuel = fuel
 
     @property
     def fuel(self):
@@ -349,6 +356,11 @@ class Fuel(Module):
 
     def __str__(self):
         return f"{super().__str__()} - Current Fuel: {self._fuel}%\n"
+
+    @classmethod
+    def store(cls, ship_id):
+        global _db
+        _db.store_fuel_module(ship_id)
 
 
 class Radar(Module):

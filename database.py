@@ -126,15 +126,34 @@ class Database:
         """
         self._cursor.execute(statement, (module_type, ship_id))
 
-    def store_cargo(self, ship_id):
-        """Store a cargo with a ship id."""
+    def store_cargo_module(self, ship_id):
+        """Store a cargo module with a ship id."""
         statement = """
-        INSERT INTO cargos (`module_id`) 
+        INSERT INTO cargo_modules (`module_id`) 
         SELECT m.module_id FROM modules m
         WHERE m.ship_id = ? AND m.type = 'Cargo'
         """
         self.store_module(ship_id, "Cargo")
         self._cursor.execute(statement, (ship_id,))
+
+    def store_fuel_module(self, ship_id):
+        """Store a fuel module with a ship id."""
+        statement = """
+        INSERT INTO fuel_modules (`module_id`)
+        SELECT m.module_id FROM modules m
+        WHERE m.ship_id = ? AND m.type = 'Fuel'
+        """
+        self.store_module(ship_id, "Fuel")
+        self._cursor.execute(statement, (ship_id,))
+
+    def fuel_module_fuel(self, module_id) -> int:
+        """Return fuel in a fuel module by module_id"""
+        statement = """
+        SELECT fuel FROM fuel_modules
+        WHERE module_id = ?
+        """
+        results = self.get_results(statement, (module_id,))
+        return results[0][0] if results else None
 
     def ship_module_ids(self, ship_id) -> list:
         """Returns a list of module_ids."""
@@ -170,3 +189,10 @@ class Database:
         """
         results = self.get_results(statement, (module_id,))
         return results[0][0] if results else None
+
+    def module_set_level(self, module_id, module_level):
+        statement = """
+        UPDATE modules SET level = ?
+        WHERE module_id = ?
+        """
+        self._cursor.execute(statement, (module_level, module_id))
