@@ -96,6 +96,26 @@ class Database:
             return results[0][0]
         return None
 
+    def player_set_x_pos(self, discord_id, x_pos) -> int:
+        """Set x_pos for player id"""
+        self._cursor.execute(
+            """
+            UPDATE players SET x_pos = ?
+            WHERE discord_id = ?
+            """,
+            (x_pos, discord_id),
+        )
+
+    def player_set_y_pos(self, discord_id, y_pos) -> int:
+        """Set y_pos for player id"""
+        self._cursor.execute(
+            """
+            UPDATE players SET y_pos = ?
+            WHERE discord_id = ?
+            """,
+            (y_pos, discord_id),
+        )
+
     def fuel_module_fuel(self, module_id) -> int:
         """Return fuel in a fuel module by module_id"""
         statement = """
@@ -167,6 +187,15 @@ class Database:
         results = self.get_results(statement, (item_id,))
         return results[0][0] if results else None
 
+    def item_name(self, item_id) -> str:
+        """Return amount for item_id."""
+        statement = """
+        SELECT name FROM items
+        WHERE item_id = ?
+        """
+        results = self.get_results(statement, (item_id,))
+        return results[0][0] if results else None
+
     def item_set_amount(self, item_id, amount):
         self._cursor.execute(
             """
@@ -186,35 +215,15 @@ class Database:
             (item_id,),
         )
 
-    def cargo_item_ids(self, cargo_module_id) -> list:
+    def cargo_resource_ids(self, cargo_module_id) -> list:
         """Returns a list of item ids."""
         statement = """
         SELECT item_id FROM items
-        WHERE cargo_module_id = ?
+        WHERE cargo_module_id = ? AND type = 'resource'
         """
         results = self.get_results(statement, (cargo_module_id,))
         ids = [result[0] for result in results]
         return ids
-
-    def player_set_x_pos(self, player_id, x_pos):
-        """Set x_pos for player id"""
-        self._cursor.execute(
-            """
-            UPDATE players SET x_pos = ?
-            WHERE player_id = ?
-            """,
-            (x_pos, player_id),
-        )
-
-    def player_set_y_pos(self, player_id, y_pos):
-        """Set y_pos for player id"""
-        self._cursor.execute(
-            """
-            UPDATE players SET y_pos = ?
-            WHERE player_id = ?
-            """,
-            (y_pos, player_id),
-        )
 
     # Storing commands ########################################################
 

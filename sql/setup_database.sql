@@ -16,7 +16,7 @@ CREATE TABLE `locations` (
 CREATE TABLE `planets` (
     `planet_id` INT(11) NOT NULL AUTO_INCREMENT,
     CONSTRAINT `PK__planets` PRIMARY KEY (`planet_id`),
-    `free_slots` INT(11) NOT NULL,
+    `slots` INT(11) NOT NULL,
     `location_x_pos` INT(11) NOT NULL,
     `location_y_pos` INT(11) NOT NULL,
     CONSTRAINT `FK__locations__planets` FOREIGN KEY (`location_x_pos`, `location_y_pos`)
@@ -27,7 +27,7 @@ CREATE TABLE `buildings` (
     `building_id` INT(11) NOT NULL AUTO_INCREMENT,
     CONSTRAINT `PK__buildings` PRIMARY KEY (`building_id`),
     `level` INT(11) NOT NULL DEFAULT 1,
-    `building_type` VARCHAR(255) NOT NULL,
+    `type` ENUM('repair station', 'shop', 'outpost', 'factory', 'mining station', 'sace warp', 'trading station', 'casino') NOT NULL,
     `planet_id` INT(11) NOT NULL,
     CONSTRAINT `FK__planets__buildings` FOREIGN KEY (`planet_id`)
 	    REFERENCES `planets` (`planet_id`)
@@ -98,7 +98,7 @@ CREATE TABLE `modules` (
     CONSTRAINT `PK__modules` PRIMARY KEY (`module_id`),
     `level` INT(11) NOT NULL DEFAULT 0,
     `state` ENUM('active', 'inactive') NULL,
-    `type` ENUM("SolarPanel", "TravelModule", "MiningModule", "Canon", "Shield", "Fuel", "Cargo", "Radar", "EnergyGenerator") NOT NULL,
+    `type` ENUM('SolarPanel', 'TravelModule', 'MiningModule', 'Canon', 'Shield', 'Fuel', 'Cargo', 'Radar', 'EnergyGenerator') NOT NULL,
     `ship_id` INT(11) NOT NULL,
     CONSTRAINT `FK__ships__modules` FOREIGN KEY (`ship_id`)
 	    REFERENCES `ships` (`ship_id`),
@@ -122,42 +122,36 @@ CREATE TABLE `cargo_modules` (
 	    REFERENCES `modules` (`module_id`)
 );
 
--- TODO: Needs a special constraint because an item should be exclusively linked to a building_upgrades or cargos but not on its own.
 CREATE TABLE `items` (
     `item_id` INT(11) NOT NULL AUTO_INCREMENT,
     CONSTRAINT `PK__items` PRIMARY KEY (`item_id`),
-    `amount` INT(11) NOT NULL DEFAULT 0,
-    `cargo_module_id` INT(11) NULL,
+    `name` varchar(255) NOT NULL,
+    `type` ENUM('resource') NOT NULL,
+    `amount` INT(11) NOT NULL DEFAULT 1,
+    `cargo_module_id` int(11) NOT NULL,
     CONSTRAINT `FK__cargo_modules__items` FOREIGN KEY (`cargo_module_id`)
-	    REFERENCES `cargo_modules` (`cargo_module_id`)
+	    REFERENCES `cargo_modules` (`cargo_module_id`),
+    CONSTRAINT `UN__items` UNIQUE (`name`, `cargo_module_id`)
 );
 
-CREATE TABLE `resources` (
-    `resource_id` INT(11) NOT NULL AUTO_INCREMENT,
-    CONSTRAINT `PK__resources` PRIMARY KEY (`resource_id`),
-    `type` ENUM('copper', 'silver', 'gold', 'uranium', 'black_matter') NOT NULL,
-    `item_id` INT(11) NOT NULL,
-    CONSTRAINT `FK__items__resources` FOREIGN KEY (`item_id`)
-	    REFERENCES `items` (`item_id`)
-);
-
-CREATE TABLE `building_upgrades` (
+-- TODO UPDATE DOCUMENATION
+CREATE TABLE `contributions` (
     `building_id` INT(11) NOT NULL,
-    CONSTRAINT `FK__buildings__building_upgrades` FOREIGN KEY (`building_id`)
+    CONSTRAINT `FK__buildings__contributions` FOREIGN KEY (`building_id`)
 	    REFERENCES `buildings` (`building_id`),
     `item_id` INT(11) NOT NULL,
-    CONSTRAINT `FK__items__building_upgrades` FOREIGN KEY (`item_id`)
+    CONSTRAINT `FK__items__contributions` FOREIGN KEY (`item_id`)
 	    REFERENCES `items` (`item_id`)
 );
 
 -- Setup default values -------------------------------------------------------
 -- planets
 INSERT INTO `locations` (`location_x_pos`, `location_y_pos`, `name`) VALUES
-(0, 0, "Earth"),
-(0, 5, "Mars"),
-(-5, 5, "Venus"),
-(-5, 0, "Jupiter"),
-(-5, -5, "Mercury");
+(0, 0, 'Earth'),
+(0, 5, 'Mars'),
+(-5, 5, 'Venus'),
+(-5, 0, 'Jupiter'),
+(-5, -5, 'Mercury');
 -- inserting planet ids manually
 INSERT INTO `planets` VALUES
 (1, 0, 0, 0),
