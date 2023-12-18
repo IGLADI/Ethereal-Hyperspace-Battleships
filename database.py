@@ -37,7 +37,7 @@ class Database:
         self._cursor = self._connection.cursor()
 
     def get_results(self, statement, values=None) -> list:
-        """Runs a SQL query and returns the tuple(s) of results in cursor"""
+        """Returns result of query."""
         self._cursor.execute(statement, values)
         self._connection.commit()
         return [row for row in self._cursor]
