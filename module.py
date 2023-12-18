@@ -1,4 +1,8 @@
+from database import Database
 from resources import Resource
+
+
+_db = Database()
 
 
 # The comments show the properties of each module at each level. These can be changed as we need to balance the game.
@@ -6,6 +10,7 @@ class Module:
     def __init__(self, name, description, max_level, cost):
         self._name = name
         self._description = description
+        # TODO: insert db code here
         self._level = 1
         self._max_level = max_level
         self._cost = cost
@@ -67,6 +72,11 @@ class Module:
             f" - Level: {self._level}/{self._max_level}\n"
             f" - Upgrade Cost: {cost_str}\n"
         )
+
+    @classmethod
+    def store(cls, ship_id):
+        global _db
+        _db.store_module(ship_id, cls.__name__)
 
 
 class TravelModule(Module):
@@ -134,6 +144,7 @@ class MiningModule(Module):
     # gold cost levels:     0,      200,    300,    400,      500
     def upgrade(self, cargo_player):
         super().upgrade(cargo_player)
+
         if self.level == 2:
             self._mining_bonus += 1
         elif self.level == 3 or self.level == 4:
@@ -233,6 +244,11 @@ class Cargo(Module):
     def __str__(self):
         capacity_str = "".join(f"\n   - {str(cargo)}" for cargo in self._capacity)
         return f"{super().__str__()} - Capacity: {capacity_str} \n - Max Capacity: {self._max_capacity} tons\n"
+
+    @classmethod
+    def store(cls, ship_id):
+        global _db
+        _db.store_cargo(ship_id)
 
 
 class Canon(Module):

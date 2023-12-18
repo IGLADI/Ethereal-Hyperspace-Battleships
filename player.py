@@ -13,13 +13,16 @@ _db = Database()
 # TODO when implementing the db, on load of the players call init with values (and put actual values as default values)
 class Player:
     def __init__(self, id):
-        self.id = id
-
         global _db
-        self._money = _db.player_money(id)
-        self._x_pos, self._y_pos = _db.player_coordinates(id)
+        ship_id = _db.player_ship_id(id)
+        money = _db.player_money(id)
+        x_pos, y_pos = _db.player_coordinates(id)
 
-        self._ship = Ship()
+        self.id = id
+        self._ship = Ship(ship_id)
+        self._money = money
+        self._x_pos = x_pos
+        self._y_pos = y_pos
         self._energy_thread = Thread(target=self.update_energy)
         self._energy_thread.daemon = True
         self._energy_thread.start()
@@ -46,23 +49,24 @@ class Player:
         global _db
         self._money = amount if self._money >= 0 else 0
         _db.player_set_money(self.id, self._money)
-        _db.commit()
 
     # TODO make a secondary module like solar panels (slow but doesn't consume uranium=>players don't get stuck)
     def update_energy(self):
         while True:
             if self.ship.energy < 100:
                 # generate solar energy
-                self.ship.add_energy(self.ship.modules[8].generation)
+                self.ship.add_energy(self.ship.modules["EnergyGenerator"].generation)
                 # generate with energy generator
-                if self.ship.modules[7].is_on:
+                if self.ship.modules["EnergyGenerator"].is_on:
                     # always use 1 uranium for now, will probably add a different rendement per level later on
-                    for resource in self.ship.modules[5]._capacity:
+                    for resource in self.ship.modules["Cargo"]._capacity:
                         if resource.name == "Uranium":
                             uranium_amount = resource.amount
                             break
                     if uranium_amount >= 1:
-                        self.ship.add_energy(self.ship.modules[7].generation)
+                        self.ship.add_energy(
+                            self.ship.modules["EnergyGenerator"].generation
+                        )
                         self._ship.remove_resource("Uranium", 1)
                 time.sleep(60)
 
@@ -71,16 +75,11 @@ class Player:
         return _db.player_location_name(self.id)
 
     @classmethod
-    def commit(cls):
-        global _db
-        _db.connection.commit()
-
-    @classmethod
     def register(cls, discord_id, discord_name, player_class, guild_name):
         """Registers a new player in the database."""
         global _db
         _db.store_player(discord_id, discord_name, player_class, guild_name)
-        _db.commit()
+        Ship.store(discord_id)
 
     @classmethod
     def exists(cls, discord_id) -> bool:

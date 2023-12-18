@@ -1,6 +1,3 @@
-# !!! IMPORTANT !!! ###########################################################
-# for now functions that alter the table namely INSERT and UPDATE do not commit the change, because the changes will probably happen in bulk.
-
 import mariadb
 import json
 import data
@@ -21,7 +18,7 @@ def get_connection():
         connection = mariadb.connect(
             host=host, user=user, password=password, port=3306, database=database
         )
-        connection.autocommit = False
+        connection.autocommit = True
         return connection
     except mariadb.Error as e:
         print("Error connecting to MariaDB:", e)
@@ -39,7 +36,6 @@ class Database:
     def get_results(self, statement, values=None) -> list:
         """Returns result of query."""
         self._cursor.execute(statement, values)
-        self._connection.commit()
         return [row for row in self._cursor]
 
     # We assume this happens after player has chosen main guild
@@ -62,7 +58,6 @@ class Database:
         SELECT 1 FROM players p
         WHERE p.discord_id = ?"""
         self._cursor.execute(statement, (discord_id,))
-        self._connection.commit()
         return self._cursor.rowcount != 0
 
     def player_location_name(self, discord_id) -> str:
@@ -103,25 +98,50 @@ class Database:
         WHERE discord_id = ?"""
         self._cursor.execute(statement, (amount, discord_id))
 
-    def guild_player_counts(self):
-        """Get the name of the guild with lowest player count"""
+    def store_ship(self, discord_id):
+        """Store a ship for a player."""
         statement = """
-        SELECT g.name, COUNT(1) FROM players p
-        JOIN guilds g ON g.guild_id = p.guild_id
-        GROUP BY g.guild_id;
+        INSERT INTO ships (player_id)
+        SELECT player_id FROM players
+        WHERE discord_id = ?
         """
-        results = self.get_results(statement)
-        return results
+        self._cursor.execute(statement, (discord_id,))
 
-    def next_guild(self, results) -> str:
-        """Returns the guild a player should join. Currently the guild with the lowest player count."""
-        results_names = [result[0] for result in results]
+    def player_ship_id(self, discord_id) -> int:
+        """Return ship_id for player_id"""
+        statement = """
+        SELECT ship_id FROM ships s
+        JOIN players p ON p.player_id = s.player_id
+        WHERE p.discord_id = ?
+        """
+        results = self.get_results(statement, (discord_id,))
+        if len(results):
+            return results[0][0]
+        return None
 
-        for guild_name in data.guild_names:
-            # if guild_name not in results_names:
-            return guild_name
+    def store_module(self, ship_id, module_type):
+        """Store module with a ship id."""
+        statement = """
+        INSERT INTO modules (`type`, `ship_id`) VALUES (?, ?)
+        """
+        self._cursor.execute(statement, (module_type, ship_id))
 
-        return min(results, key=lambda x: x[1])[0]
+    def store_cargo(self, ship_id):
+        """Store module with a ship id."""
+        statement = """
+        INSERT INTO cargos (`module_id`) 
+        SELECT m.module_id FROM modules m
+        WHERE m.ship_id = ?
+        """
+        self.store_module(ship_id, "Cargo")
+        self._cursor.execute(statement, (ship_id,))
 
-    def commit(self):
-        self._connection.commit()
+    def ship_module_ids(self, ship_id) -> list:
+        """Returns a list of module_ids."""
+        statement = """
+        SELECT module_id FROM modules
+        WHERE ship_id = ?
+        """
+        results = self.get_results(statement, (ship_id,))
+        ids = [result[0] for result in results]
+        return ids
