@@ -14,7 +14,7 @@ class TradeCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    # ? TODO maybe add a min lvl to give money (avoid spamming discord acounts)
+    # ? TODO maybe add a min lvl to give money (avoid spamming discord acounts)/start with 0 money
     # Checked for race condition (spamming the command to multiply money because that money can't go under 0)
     # but discord seems to already block it and only start the new command once the first one has been processed
     @app_commands.command(name="pay", description="Gift money to a player")
@@ -91,10 +91,10 @@ class TradeCog(commands.Cog):
 
         sender = data.players[interaction.user]
         recipiant_player = data.players[recipient]
-        if sender == recipiant_player:
-            banner = ErrorBanner(text="You can't trade with yourself.", user=interaction.user)
-            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
-            return
+        # if sender == recipiant_player:
+        #     banner = ErrorBanner(text="You can't trade with yourself.", user=interaction.user)
+        #     await interaction.response.send_message(embed=banner.embed, ephemeral=True)
+        #     return
 
         if send_or_receive_money == "receive":
             amount = -amount
@@ -136,10 +136,8 @@ class TradeCog(commands.Cog):
         ]
         paginator = TradeModal(inputs, amount, recipient, author_id=interaction.user.id)
 
-        # TODO fix this, should use paginator.start() instead
-        await interaction.response.send_message(
-            view=paginator, ephemeral=True, content=(paginator.modals[0].title + f"\n\n1/{len(paginator.modals)}")
-        )
+        await paginator.send(interaction)
+        # await interaction.response.send_message(ephemeral=True, view=paginator, content=paginator.inputs[0]["title"])
 
 
 async def setup(client: commands.Bot) -> None:
