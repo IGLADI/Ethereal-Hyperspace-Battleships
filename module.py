@@ -1,5 +1,5 @@
 from database import Database
-from resources import Resource
+from item import Item, Resource
 
 
 _db = Database()
@@ -10,15 +10,17 @@ class Module:
     def __init__(self, module_id, name, description, max_level, cost):
         global _db
         level = _db.module_level(module_id)
-        ship_id = _db.module_ship_id(module_id)
 
-        self.id = module_id
-        self.ship_id = ship_id
+        self._id = module_id
+        self._name = name
         self._description = description
-        # TODO: insert db code here
         self._level = level
         self._max_level = max_level
         self._cost = cost
+
+    @property
+    def id(self):
+        return self._id
 
     @property
     def name(self):
@@ -40,20 +42,19 @@ class Module:
     def cost(self):
         return self._cost
 
-    def upgrade(self, cargo_player):
+    def upgrade(self, cargo):
+        """Uses resources in cargo to upgrade module."""
         global _db
         if self._level == self._max_level:
             raise Exception("Module is already at max level.")
-        if not self.has_enough_resources(cargo_player):
+        if not self.has_enough_resources(cargo):
             raise Exception("Not enough resources to upgrade.")
         self._level += 1
-        _db.module_set_level(self.id, self._level)
-
-        self.consume_resources(
-            cargo_player
-        )  # You need to implement this method to consume the required resources.
+        _db.module_set_level(self.id, self.level)
+        cargo.consume_resource()
 
     def has_enough_resources(self, cargo_player):
+        """Utility function to check if a player has enough resources to upgrade a module."""
         for cost in self._cost:
             resource_name = cost["resource"]
             required_amount = cost["amount"]
@@ -186,34 +187,45 @@ class Cargo(Module):
                 {"resource": "Gold", "amount": 150},
             ],
         )
-        self._max_capacity = 300
-        self._capacity = []
-        self._capacity.append(Resource("Copper", 0, self._max_capacity))
-        self._capacity.append(Resource("Silver", 0, self._max_capacity))
-        self._capacity.append(Resource("Gold", 0, self._max_capacity))
-        self._capacity.append(Resource("Uranium", 0, self._max_capacity))
-        self._capacity.append(Resource("Black Matter", 0, self._max_capacity))
+        global _db
+        cargo_module_id = _db.cargo_module_id(module_id)
+        item_ids = _db.cargo_resource_ids(cargo_module_id)
 
-    # individual per resource
-    @property
-    def max_capacity(self):
-        return self._max_capacity
+        self._id = cargo_module_id
+        self._capacity = 0
+        self._max_capacity = 300
+        self._resources = {}
+
+        for item_id in item_ids:
+            name = _db.item_name(item_id)
+            self._resources[name] = Resource(item_id)
+            self._capacity += self._resources[name].amount
 
     @property
     def capacity(self):
         return self._capacity
 
-    def get_resource_amount(self, resource_name):
-        for resource in self._capacity:
-            if resource.name.lower() == resource_name.lower():
-                return resource.amount
-        return 0
+    @property
+    def max_capacity(self):
+        return self._max_capacity
+
+    @property
+    def resources(self):
+        return self._resources
+
+    @capacity.setter
+    def capacity(self, capacity: int):
+        self._capacity = capacity
 
     def consume_resource(self, resource_name, amount):
-        for resource in self._capacity:
-            if resource.name.lower() == resource_name.lower():
-                resource.amount -= amount
-                return
+        resource = self._resources.get(resource_name)
+        if not resource:
+            raise DataError(f"404 {resource_name} not found.")
+
+        resource.amount -= amount
+
+        if resource.amount == 0:
+            self.resources.pop(resource_name)
 
     # max_capacity levels:  300,    400,    500,    600,      800,      1000
     # money cost levels:    100,    300,    900,    2700,     8100,     24300
@@ -233,14 +245,29 @@ class Cargo(Module):
             for i in range(1, 4):
                 self._cost[i]["amount"] += 100
 
+    def add_resource(self, resource_name, amount):
+        """Adds a resource to the module, creates a new one or stack with existing resource."""
+        resource = self.resources.get(resource_name)
+        if resource:
+            resource.amount += amount
+            return
+
+        resource_id = Resource.store(
+            name=resource_name, amount=amount, cargo_module_id=self.id
+        )
+        resource = Resource(resource_id)
+        self.resources[resource_name] = resource
+
     def __str__(self):
-        capacity_str = "".join(f"\n   - {str(cargo)}" for cargo in self._capacity)
-        return f"{super().__str__()} - Capacity: {capacity_str} \n - Max Capacity: {self._max_capacity} tons\n"
+        resources_str = "".join(
+            f"\n   - {resource}" for resource in self.resources.values()
+        )
+        return f"{super().__str__()} - Capacity: {resources_str} \n - Storage: {self.capacity}/{self._max_capacity} tons\n"
 
     @classmethod
-    def store(cls, ship_id):
+    def store(cls, ship_id) -> int:
         global _db
-        _db.store_cargo_module(ship_id)
+        return _db.store_cargo_module(ship_id)
 
 
 class Canon(Module):
@@ -494,14 +521,14 @@ class SolarPanel(Module):
         return f"{super().__str__()} - Generation: {self._generation} per minute\n"
 
 
-DEFAULT_MODULES = [
-    SolarPanel,
-    TravelModule,
-    MiningModule,
-    Canon,
-    Shield,
-    Fuel,
-    Cargo,
-    Radar,
-    EnergyGenerator,
-]
+DEFAULT_MODULES = {
+    "SolarPanel": SolarPanel,
+    "TravelModule": TravelModule,
+    "MiningModule": MiningModule,
+    "Canon": Canon,
+    "Shield": Shield,
+    "Fuel": Fuel,
+    "Cargo": Cargo,
+    "Radar": Radar,
+    "EnergyGenerator": EnergyGenerator,
+}
