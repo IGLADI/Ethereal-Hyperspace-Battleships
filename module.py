@@ -42,15 +42,21 @@ class Module:
     def cost(self):
         return self._cost
 
-    def upgrade(self, cargo):
-        """Uses resources in cargo to upgrade module."""
+    @level.setter
+    def level(self, level):
         global _db
+        if level > self.max_level:
+            raise ValueError("Module is already at max level")
+        self._level = level
+        _db.module_set_level(self.id, level)
+
+    def upgrade(self, cargo):
+        """Uses resources in cargo of player to upgrade module."""
         if self._level == self._max_level:
             raise Exception("Module is already at max level.")
         if not self.has_enough_resources(cargo):
             raise Exception("Not enough resources to upgrade.")
         self._level += 1
-        _db.module_set_level(self.id, self.level)
         cargo.consume_resource()
 
     def has_enough_resources(self, cargo_player):
@@ -193,7 +199,7 @@ class Cargo(Module):
 
         self._id = cargo_module_id
         self._capacity = 0
-        self._max_capacity = 300
+        self._max_capacity = 600
         self._resources = {}
 
         for item_id in item_ids:
@@ -215,6 +221,8 @@ class Cargo(Module):
 
     @capacity.setter
     def capacity(self, capacity: int):
+        if self._capacity + capacity > self.max_capacity:
+            raise ValueError("Storage exceeded")
         self._capacity = capacity
 
     def consume_resource(self, resource_name, amount):
@@ -250,13 +258,15 @@ class Cargo(Module):
         resource = self.resources.get(resource_name)
         if resource:
             resource.amount += amount
+            self._capacity += amount
             return
 
         resource_id = Resource.store(
             name=resource_name, amount=amount, cargo_module_id=self.id
         )
         resource = Resource(resource_id)
-        self.resources[resource_name] = resource
+        self._resources[resource_name] = resource
+        self._capacity += resource.amount
 
     def __str__(self):
         resources_str = "".join(
