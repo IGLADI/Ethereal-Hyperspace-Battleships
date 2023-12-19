@@ -102,10 +102,10 @@ class TravelModule(Module):
             "Increases the distance the ship can travel.",
             6,
             [
-                {"resource": "Money", "amount": 0},
-                {"resource": "Copper", "amount": 200},
-                {"resource": "Silver", "amount": 0},
-                {"resource": "Gold", "amount": 0},
+                {"resource": "rock", "amount": 0},
+                {"resource": "copper", "amount": 200},
+                {"resource": "silver", "amount": 0},
+                {"resource": "gold", "amount": 0},
             ],
         )
         self._max_distance = 1000
@@ -115,7 +115,7 @@ class TravelModule(Module):
         return self._max_distance
 
     # max_distance levels:  1000,   1500,   1900,   2200,     2400,     2500
-    # money cost levels:    100,    300,    900,    2700,     8100,     24300
+    # rock cost levels:    100,    300,    900,    2700,     8100,     24300
     # copper cost levels:   200,    200,    300,    400,      500,      600
     # silver cost levels:   0,      200,    300,    400,      500,      600
     # gold cost levels:     0,      200,    300,    400,      500,      600
@@ -142,10 +142,10 @@ class MiningModule(Module):
             "Increases the amount of resources the ship can mine.",
             5,
             [
-                {"resource": "Money", "amount": 0},
-                {"resource": "Copper", "amount": 150},
-                {"resource": "Silver", "amount": 150},
-                {"resource": "Gold", "amount": 150},
+                {"resource": "rock", "amount": 0},
+                {"resource": "copper", "amount": 150},
+                {"resource": "silver", "amount": 150},
+                {"resource": "gold", "amount": 150},
             ],
         )
         self._mining_bonus = 100
@@ -155,7 +155,7 @@ class MiningModule(Module):
         return self._mining_bonus
 
     # mining_bonus levels:  100,    101,    103,    105,      110
-    # money cost levels:    100,    300,    900,    2700,     8100
+    # rock cost levels:    100,    300,    900,    2700,     8100
     # copper cost levels:   0,      200,    300,    400,      500
     # silver cost levels:   200,    200,    300,    400,      500
     # gold cost levels:     0,      200,    300,    400,      500
@@ -187,10 +187,10 @@ class Cargo(Module):
             "Increases the amount of cargo the ship can hold.",
             6,
             [
-                {"resource": "Money", "amount": 0},
-                {"resource": "Copper", "amount": 150},
-                {"resource": "Silver", "amount": 150},
-                {"resource": "Gold", "amount": 150},
+                {"resource": "rock", "amount": 0},
+                {"resource": "copper", "amount": 150},
+                {"resource": "silver", "amount": 150},
+                {"resource": "gold", "amount": 150},
             ],
         )
         global _db
@@ -236,7 +236,7 @@ class Cargo(Module):
             self.resources.pop(resource_name)
 
     # max_capacity levels:  300,    400,    500,    600,      800,      1000
-    # money cost levels:    100,    300,    900,    2700,     8100,     24300
+    # rock cost levels:    100,    300,    900,    2700,     8100,     24300
     # copper cost levels:   0       200,    300,    400,      500,      600
     # silver cost levels:   0,      200,    300,    400,      500,      600
     # gold cost levels:     200,    200,    300,    400,      500,      600
@@ -288,10 +288,10 @@ class Canon(Module):
             "Increases the ship's attack damage.",
             5,
             [
-                {"resource": "Money", "amount": 0},
-                {"resource": "Copper", "amount": 150},
-                {"resource": "Silver", "amount": 150},
-                {"resource": "Gold", "amount": 150},
+                {"resource": "rock", "amount": 0},
+                {"resource": "copper", "amount": 150},
+                {"resource": "silver", "amount": 150},
+                {"resource": "gold", "amount": 150},
             ],
         )
 
@@ -302,7 +302,7 @@ class Canon(Module):
         return self._strength
 
     # strength levels:      100,    110,    130,    145,    150
-    # money cost levels:    200,    600,    1200,   3600,   10800
+    # rock cost levels:    200,    600,    1200,   3600,   10800
     # copper cost levels:   150,    300,    450,    600,    750
     # silver cost levels:   150,    300,    450,    600,    750
     # gold cost levels:     150,    300,    450,    600,    750
@@ -331,10 +331,10 @@ class Shield(Module):
             "Increases the ship's defense.",
             5,
             [
-                {"resource": "Money", "amount": 0},
-                {"resource": "Copper", "amount": 150},
-                {"resource": "Silver", "amount": 150},
-                {"resource": "Gold", "amount": 150},
+                {"resource": "rock", "amount": 0},
+                {"resource": "copper", "amount": 150},
+                {"resource": "silver", "amount": 150},
+                {"resource": "gold", "amount": 150},
             ],
         )
         self._defense = 100
@@ -344,7 +344,7 @@ class Shield(Module):
         return self._defense
 
     # defense levels:       100,    110,    130,    145,    150
-    # money cost levels:    200,    600,    1200,   3600,   10800
+    # rock cost levels:    200,    600,    1200,   3600,   10800
     # copper cost levels:   150,    300,    450,    600,    750
     # silver cost levels:   150,    300,    450,    600,    750
     # gold cost levels:     150,    300,    450,    600,    750
@@ -373,10 +373,10 @@ class Fuel(Module):
             "Holds the ship's fuel.",
             1,
             [
-                {"resource": "Money", "amount": 0},
-                {"resource": "Copper", "amount": 0},
-                {"resource": "Silver", "amount": 0},
-                {"resource": "Gold", "amount": 0},
+                {"resource": "rock", "amount": 0},
+                {"resource": "copper", "amount": 0},
+                {"resource": "silver", "amount": 0},
+                {"resource": "gold", "amount": 0},
             ],
         )
         global _db
@@ -408,10 +408,10 @@ class Radar(Module):
             "Increases the ship's radar range.",
             7,
             [
-                {"resource": "Money", "amount": 0},
-                {"resource": "Copper", "amount": 50},
-                {"resource": "Silver", "amount": 50},
-                {"resource": "Gold", "amount": 50},
+                {"resource": "rock", "amount": 0},
+                {"resource": "copper", "amount": 50},
+                {"resource": "silver", "amount": 50},
+                {"resource": "gold", "amount": 50},
             ],
         )
         self._radar_range = 50
@@ -421,7 +421,7 @@ class Radar(Module):
         return self._radar_range
 
     # radar_range levels:   50,     60,     70,     80,     90,     95,     100
-    # money cost levels:    500,    1000,   2000,   4000,   8000,   16000,  32000
+    # rock cost levels:    500,    1000,   2000,   4000,   8000,   16000,  32000
     # copper cost levels:   50,     200,    350,    500,    650,    800,    950
     # silver cost levels:   50,     200,    350,    500,    650,    800,    950
     # gold cost levels:     50,     200,    350,    500,    650,    800,    950
@@ -447,10 +447,10 @@ class EnergyGenerator(Module):
             "Increases the ship's energy generation.",
             7,
             [
-                {"resource": "Money", "amount": 0},
-                {"resource": "Copper", "amount": 50},
-                {"resource": "Silver", "amount": 50},
-                {"resource": "Gold", "amount": 50},
+                {"resource": "rock", "amount": 0},
+                {"resource": "copper", "amount": 50},
+                {"resource": "silver", "amount": 50},
+                {"resource": "gold", "amount": 50},
             ],
         )
         self._generation = 10
@@ -466,7 +466,7 @@ class EnergyGenerator(Module):
         return self._is_on
 
     # generation levels:    10,     20,     30,     50,     70,     100,    130
-    # money cost levels:    1000,   2000,   4000,   8000,   16000,  32000,  64000
+    # rock cost levels:    1000,   2000,   4000,   8000,   16000,  32000,  64000
     # copper cost levels:   50,     200,    350,    500,    650,    800,    950
     # silver cost levels:   50,     200,    350,    500,    650,    800,    950
     # gold cost levels:     50,     200,    350,    500,    650,    800,    950
@@ -499,10 +499,10 @@ class SolarPanel(Module):
             "Increases the ship's energy generation.",
             7,
             [
-                {"resource": "Money", "amount": 0},
-                {"resource": "Copper", "amount": 50},
-                {"resource": "Silver", "amount": 50},
-                {"resource": "Gold", "amount": 50},
+                {"resource": "rock", "amount": 0},
+                {"resource": "copper", "amount": 50},
+                {"resource": "silver", "amount": 50},
+                {"resource": "gold", "amount": 50},
             ],
         )
         self._generation = 1
@@ -512,7 +512,7 @@ class SolarPanel(Module):
         return self._generation
 
     # generation levels:    1,      2,      3,      5,      7,      10,     13
-    # money cost levels:    1000,   2000,   4000,   8000,   16000,  32000,  64000
+    # rock cost levels:    1000,   2000,   4000,   8000,   16000,  32000,  64000
     # copper cost levels:   50,     200,    350,    500,    650,    800,    950
     # silver cost levels:   50,     200,    350,    500,    650,    800,    950
     # gold cost levels:     50,     200,    350,    500,    650,    800,    950
