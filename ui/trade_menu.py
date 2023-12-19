@@ -53,7 +53,6 @@ class TradeModal(ModalPaginator):
         return f"{offer_table}{page_counter}{current_modal}"
 
     async def on_finish(self, interaction: discord.Interaction[Any]) -> None:
-        # to use for UI dev
         answers: list[str] = []
         for modal in self.modals:
             resume = ""
@@ -152,13 +151,11 @@ class OfferPaginator(discord.ui.View):
 
     @discord.ui.button(label="Accept", style=discord.ButtonStyle.green)
     async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
-        # TODO for UI dev
         await self.accept_offer(interaction)
         self.stop()
 
     @discord.ui.button(label="Deny", style=discord.ButtonStyle.red)
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
-        # TODO for UI dev
         await interaction.response.send_message("Offer denied", ephemeral=True)
         self.stop()
 
@@ -168,7 +165,6 @@ class OfferPaginator(discord.ui.View):
         if await check_enough_money(self.player, self.recipiant_player, self.amount, interaction) is False:
             return
         self.distribute_resources()
-        # TODO UI dev?
         await interaction.response.send_message("Offer accepted", ephemeral=True)
         await self.og_interaction.user.send(
             f"{interaction.user.mention} accepted your offer:\n\n{self.upper_self.get_offer_table()}"

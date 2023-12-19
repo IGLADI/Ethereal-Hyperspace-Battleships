@@ -1,3 +1,4 @@
+from email import message
 import discord
 from discord import app_commands
 from discord.ext import commands
@@ -43,6 +44,10 @@ class TradeCog(commands.Cog):
         banner = SuccessBanner(text=f"You gave ${amount_to_pay} to {member_recipient.name}.", user=interaction.user)
         await interaction.response.send_message(embed=banner.embed)
 
+        message = f"{interaction.user.mention} gave you ${amount_to_pay}."
+        banner = SuccessBanner(text=message, user=member_recipient)
+        await member_recipient.send(embed=banner.embed)
+
     @app_commands.command(name="give_resources", description="Give resources to another player")
     async def give_resources(
         self,
@@ -60,8 +65,8 @@ class TradeCog(commands.Cog):
         if not await check_recipiant_has_an_account(recipient, interaction):
             return
         sender = data.players[interaction.user]
-        recipient = data.players[recipient]
-        if sender == recipient:
+        recipient_player = data.players[recipient]
+        if sender == recipient_player:
             banner = ErrorBanner(text="You can't give resources to yourself.", user=interaction.user)
             await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
@@ -71,11 +76,15 @@ class TradeCog(commands.Cog):
             return
 
         sender.ship.modules[5].remove_resource(resource, amount_to_give)
-        recipient.ship.modules[5].add_resource(resource, amount_to_give)
-        # TODO implement by UI
-        message = f"You gave {amount_to_give} {resource} to {recipient.id}."
+        recipient_player.ship.modules[5].add_resource(resource, amount_to_give)
+
+        message = f"You gave {amount_to_give} {resource} to {recipient_player.id}."
         banner = SuccessBanner(text=message, user=interaction.user)
         await interaction.response.send_message(embed=banner.embed)
+
+        message = f"{interaction.user.mention} gave you {amount_to_give} {resource}."
+        banner = SuccessBanner(text=message, user=recipient)
+        await recipient.send(embed=banner.embed)
 
     # TODO should implement better texts
     @app_commands.command(name="trade", description="Trade resources with another player")
