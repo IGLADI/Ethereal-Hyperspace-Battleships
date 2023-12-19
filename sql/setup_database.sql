@@ -125,7 +125,7 @@ CREATE TABLE `cargo_modules` (
 CREATE TABLE `items` (
     `item_id` INT(11) NOT NULL AUTO_INCREMENT,
     CONSTRAINT `PK__items` PRIMARY KEY (`item_id`),
-    `name` varchar(255) NOT NULL,
+    `name` ENUM('rock', 'copper', 'silver', 'gold', 'uranium', 'black matter') NOT NULL,
     `type` ENUM('resource') NOT NULL,
     `amount` INT(11) NOT NULL DEFAULT 1,
     `cargo_module_id` int(11) NULL,
