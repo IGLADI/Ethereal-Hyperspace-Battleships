@@ -123,9 +123,9 @@ class Player:
         old_location = Location(self._x_pos, self._y_pos)
         new_location = Location(x_coordinate, y_coordinate)
         distance = int(old_location.distance_to(new_location))
-         # TODO fix this
-        #if distance > self.ship._modules[0].max_distance:
-         #   raise Exception("You can't travel that far! You need to upgrade your travel module.")
+
+        if distance > self.ship._modules["TravelModule"].max_distance:
+            raise Exception("You can't travel that far! You need to upgrade your travel module.")
         
         def travel_thread():
             self._is_traveling = True
