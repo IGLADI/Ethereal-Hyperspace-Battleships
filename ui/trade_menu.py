@@ -1,7 +1,11 @@
 from discord.ext.modal_paginator import ModalPaginator, PaginatorModal
 import discord
+from discord.ext.modal_paginator import CustomButton
+import discord_colorize
 
 from typing import Any, Dict, List
+
+from tabulate import tabulate
 
 import data
 
@@ -37,6 +41,13 @@ class TradeModal(ModalPaginator):
                 )
 
             self.add_modal(modal)
+
+    @property
+    def page_string(self) -> str:
+        offer_table = self.get_offer_table()
+        page_counter = f"\n{self.current_page + 1}/{len(self.modals)}"
+        current_modal = f"\nEdditing {self.current_modal.title}\n"
+        return f"{offer_table}{page_counter}{current_modal}"
 
     async def on_finish(self, interaction: discord.Interaction[Any]) -> None:
         # to use for UI dev
@@ -78,30 +89,67 @@ class TradeModal(ModalPaginator):
                 )
                 return
 
+        modal = self.modals[0]
+        modal2 = self.modals[1]
+        for field in modal.children:
+            for field2 in modal2.children:
+                if field.label == field2.label and field.value != "0" and field2.value != "0":
+                    await interaction.response.send_message(
+                        "You can't ask and offer the same resource.", ephemeral=True
+                    )
+                    return
+
         self.player = data.players[interaction.user]
         self.recipiant_player = data.players[self.recipiant]
 
         if await check_enough_resources(self.player, self.recipiant_player, self.modals, interaction) is False:
             return
 
-        # TODO print "ASK/OFFER", "RESOURCE_TYPE", "AMOUNT" (don't forget money) by UI dev
-        resume_table = "Offer sent"
-        await interaction.response.send_message(resume_table)
+        await interaction.response.send_message("Offer sent")
 
-        offer_paginator = OfferPaginator(self.player, self.recipiant_player, self.modals, self.amount)
+        offer_paginator = OfferPaginator(
+            self.player, self.recipiant_player, self.modals, self.amount, interaction, self
+        )
 
-        # TODO UI dev add a little resume of the transaction and who proposed you the offers (same as aboveg ig)
-        await self.recipiant.send("You received a trade offer", view=offer_paginator)
+        resume_table = self.get_offer_table()
+        await self.recipiant.send(f"You received a trade offer:\n\n{resume_table}", view=offer_paginator)
+
+    def get_offer_table(self) -> str:
+        message = f"Trade between {self.interaction.user.mention} and {self.recipiant.mention}:\n"
+        headers = ["RESOURCE", "ASK", "OFFER"]
+        values = []
+        try:
+            for modal in self.modals:
+                if modal == self.modals[0]:
+                    for field in modal.children:
+                        if field.value != "0":
+                            values.append([field.label, int(field.value), ""])
+                else:
+                    for field in modal.children:
+                        if field.value != "0":
+                            values.append([field.label, "", int(field.value)])
+            message += f"```{tabulate(values, headers=headers)}```"
+            if self.amount < 0:
+                message += f"Money offered: ${abs(self.amount)}.\n"
+            elif self.amount > 0:
+                message += f"Money asked: ${abs(self.amount)}.\n"
+        except ValueError:
+            invalid_input = discord_colorize.Colors().colorize("Invalid input", fg="red")
+            message += f"```ansi\n{invalid_input}\n```"
+        # self.current_modal.title
+        return message
 
 
 class OfferPaginator(discord.ui.View):
-    def __init__(self, player, recipiant_player, uppermodals, amount, *args, **kwargs):
+    def __init__(self, player, recipiant_player, uppermodals, amount, og_interaction, upper_self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.value = None
         self.player = player
         self.recipiant_player = recipiant_player
         self.uppermodals = uppermodals
         self.amount = amount
+        self.og_interaction = og_interaction
+        self.upper_self = upper_self
 
     @discord.ui.button(label="Accept", style=discord.ButtonStyle.green)
     async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -123,6 +171,9 @@ class OfferPaginator(discord.ui.View):
         self.distribute_resources()
         # TODO UI dev?
         await interaction.response.send_message("Offer accepted", ephemeral=True)
+        await self.og_interaction.user.send(
+            f"{interaction.user.mention} accepted your offer:\n\n{self.upper_self.get_offer_table()}"
+        )
 
     def distribute_resources(self) -> None:
         for modal in self.uppermodals:
