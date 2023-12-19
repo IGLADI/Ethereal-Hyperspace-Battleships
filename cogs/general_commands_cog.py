@@ -84,8 +84,8 @@ class GeneralCommands(commands.Cog):
             f"You gave ${amount_to_pay} to {member_recipient.name}."
         )
 
-    @app_commands.check(check_registered)
     @app_commands.command(name="balance", description="Check your balance")
+    @app_commands.check(check_registered)
     async def balance(self, interaction: discord.Interaction):
         player = Player.get(interaction.user.id)
         balance = player.money
