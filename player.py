@@ -9,15 +9,14 @@ from utils import get_betted_amount
 _db = Database()
 
 
-# TODO when implementing the db, on load of the players call init with values (and put actual values as default values)
 class Player:
-    def __init__(self, id):
+    def __init__(self, discord_id):
         global _db
         ship_id = _db.player_ship_id(id)
         money = _db.player_money(id)
         x_pos, y_pos = _db.player_coordinates(id)
 
-        self.id = id
+        self._id = discord_id
         self._ship = Ship(ship_id)
         self._money = money
         self._x_pos = x_pos
@@ -25,6 +24,10 @@ class Player:
         self._energy_thread = Thread(target=self.update_energy)
         self._energy_thread.daemon = True
         self._energy_thread.start()
+
+    @property
+    def id(self):
+        return self._id
 
     @property
     def money(self):
@@ -38,6 +41,17 @@ class Player:
     @property
     def y_pos(self):
         return self._y_pos
+
+    @x_pos.setter
+    def x_pos(self, x_pos):
+        _db.player_set_x_pos(self.id, x_pos)
+        self._x_pos = x_pos
+
+    @y_pos.setter
+    def y_pos(self, y_pos):
+        global _db
+        _db.player_set_y_pos(self.id, y_pos)
+        self._y_pos = y_pos
 
     @property
     def ship(self):
