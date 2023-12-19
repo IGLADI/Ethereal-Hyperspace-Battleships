@@ -2,9 +2,19 @@ from discord import app_commands
 import discord
 from discord.ext import commands
 
-import data
+from typing import Literal
+from mariadb import IntegrityError
 from player import Player
-from utils import check_player_exists, get_betted_amount
+
+
+async def check_registered(interaction: discord.Interaction) -> bool:
+    """Check if a player is registered, if not sends an error message. Else run the function."""
+    if not Player.exists(interaction.user.id):
+        await interaction.response.send_message(
+            "You are not registered as a player.", ephemeral=True
+        )
+        return False
+    return True
 
 
 class GeneralCommands(commands.Cog):
@@ -17,6 +27,7 @@ class GeneralCommands(commands.Cog):
         help_message = "Welcome to Ethereal Hyperspace Battleships!\n"
         help_message += "To start out, please type /register followed by /tutorial.\n"
         # Command list
+
         help_message += "Here is a list of commands:\n"
         help_message += "/help - Get help\n"
         help_message += "/guild - Get guild info\n"
@@ -25,41 +36,66 @@ class GeneralCommands(commands.Cog):
         help_message += "/pay - Give money to a player\n"
         await interaction.response.send_message(help_message, ephemeral=True)
 
-
+    @app_commands.check(check_registered)
     @app_commands.command(name="balance", description="Check your balance")
     async def balance(self, interaction: discord.Interaction):
-        if await check_player_exists(interaction) is False:
-            return
-
-        player = data.players[interaction.user]
-        betted_amount = get_betted_amount(interaction)
-        balance = player.money
-        balance -= betted_amount
-        await interaction.response.send_message(f"Your current balance is ${balance}.", ephemeral=True)
+        player = Player.get(interaction.user.id)
+        await interaction.response.send_message(
+            f"Your current balance is ${player.money}.", ephemeral=True
+        )
 
     # TODO maybe add displayname
     # ! (still keep id and add a check so that only one user can create an account with a name)
     @app_commands.command(name="register", description="Register as a player")
-    async def register(self, interaction: discord.Interaction):
-        if interaction.user not in data.players:
-            player = Player(interaction.user)
-            data.players[interaction.user] = player
+    async def register(
+        self,
+        interaction: discord.Interaction,
+        player_class: Literal["martian", "dwarf", "droid"],
+        guild_name: Literal[
+            "The Federation", "The Empire", "The Alliance", "The Independents"
+        ],
+    ):
+        if Player.exists(interaction.user.id):
             await interaction.response.send_message(
-                f"Welcome to Ethereal Hyperspace Battleships {interaction.user.name}!", ephemeral=True
+                "You are already registered as a player.", ephemeral=True
             )
-        else:
-            await interaction.response.send_message("You are already registered as a player.", ephemeral=True)
-
-    @app_commands.command(name="where_am_i", description="Get your location info")
-    async def where_am_i(self, interaction: discord.Interaction):
-        '''Returns the location of the player'''
-        if await check_player_exists(interaction) is False:
             return
 
-        player = data.players[interaction.user]
-        player_location = player.ship.location
-        location_name = player_location.is_planet()
-        await interaction.response.send_message(f"You are currently at {player_location}, also known as {location_name}.", ephemeral=True)
+        print("interaction.user.id:", interaction.user.id)
+
+        try:
+            Player.register(
+                interaction.user.id,
+                interaction.user.global_name,
+                player_class,
+                guild_name,
+            )
+        except IntegrityError:
+            await interaction.response.send_message(
+                f"Duplicate values.",
+                ephemeral=True,
+            )
+            return
+
+        Player.get(interaction.user.id)
+
+        await interaction.response.send_message(
+            f"Welcome to Ethereal Hyperspace Battleships {interaction.user.name}!",
+            ephemeral=True,
+        )
+
+    @app_commands.command(name="where_am_i", description="Get your location info")
+    @app_commands.check(check_registered)
+    async def where_am_i(self, interaction: discord.Interaction):
+        """Returns the location of the player"""
+        player = Player.get(interaction.user.id)
+        coordinates = (player.x_pos, player.y_pos)
+        location_name = player.location_name()
+        await interaction.response.send_message(
+            f"You are currently at {coordinates}, also known as {location_name}.",
+            ephemeral=True,
+        )
+
 
 async def setup(client: commands.Bot) -> None:
     await client.add_cog(GeneralCommands(client))

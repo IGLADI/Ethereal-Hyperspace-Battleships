@@ -83,7 +83,9 @@ async def on_guild_join(guild):
     for channel in guild.text_channels:
         if channel.permissions_for(guild.me).send_messages:
             # TODO should have a complete intro message
-            await channel.send("Hello! Welcome to Ethereal Hyperspace Battleships type /help for more info.")
+            await channel.send(
+                "Hello! Welcome to Ethereal Hyperspace Battleships type /help for more info."
+            )
         break
     await create_roles(guild)
     await create_channels(guild)
