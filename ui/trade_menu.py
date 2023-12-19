@@ -21,14 +21,17 @@ class TradeModal(ModalPaginator):
         author_id: int,
         **kwargs: Any,
     ) -> None:
-        super().__init__(author_id=author_id, **kwargs)
+        # TODO can reopen MODAL once completed
+        buttons = {
+            "FINISH": CustomButton(label="Send Offer"),
+        }
+        super().__init__(buttons=buttons, author_id=author_id, **kwargs)
         self.inputs = inputs
         self.amount = amount
         self.recipiant = recipiant
 
         for data_input in self.inputs:
             title: str = data_input["title"]
-            # TODO set default value to 0
             required: bool = data_input["required"]
             questions: List[str] = data_input["questions"]
             modal = PaginatorModal(title=title, required=required)
@@ -63,22 +66,18 @@ class TradeModal(ModalPaginator):
         total_resources = 0
         try:
             for modal in self.modals:
-                if modal == self.modals[0]:
-                    for field in modal.children:
-                        total_resources += int(field.value)
-                        if int(field.value) < 0:
-                            await interaction.response.send_message(
-                                "You can't ask for negative resources.", ephemeral=True
-                            )
-                            return
-                else:
-                    for field in modal.children:
-                        total_resources += int(field.value)
-                        if int(field.value) < 0:
-                            await interaction.response.send_message(
-                                "You can't offer negative resources.", ephemeral=True
-                            )
-                            return
+                for field in modal.children:
+                    value = int(field.value)
+                    if value < 0:
+                        error_message = (
+                            "You can't ask for negative resources."
+                            if modal == self.modals[0]
+                            else "You can't offer negative resources."
+                        )
+                        await interaction.response.send_message(error_message, ephemeral=True)
+                        return
+                    total_resources += value
+
         except ValueError:
             await interaction.response.send_message("Invalid input", ephemeral=True)
             return
@@ -196,16 +195,22 @@ class OfferPaginator(discord.ui.View):
 async def check_enough_resources(player, recipiant_player, modals, interaction: discord.Interaction) -> bool:
     for modal in modals:
         if modal == modals[0]:
-            for field in modal.children:
-                if recipiant_player.ship.modules[5].get_resource_amount(field.label) < int(field.value):
-                    await interaction.response.send_message(
-                        "The recipiant doesn't have enough resources to send.", ephemeral=True
-                    )
-                    return False
+            if not await check_enough_resources_per_player(recipiant_player, modals, interaction):
+                return False
         else:
+            if not await check_enough_resources_per_player(player, modals, interaction):
+                return False
+    return True
+
+
+async def check_enough_resources_per_player(player, modals, interaction: discord.Interaction) -> bool:
+    for modal in modals:
+        if modal == modals[0]:
             for field in modal.children:
                 if player.ship.modules[5].get_resource_amount(field.label) < int(field.value):
-                    await interaction.response.send_message("You don't have enough resources to send.", ephemeral=True)
+                    await interaction.response.send_message(
+                        f"{player.id} doesn't have enough {field.label}", ephemeral=True
+                    )
                     return False
     return True
 

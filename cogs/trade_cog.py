@@ -98,15 +98,12 @@ class TradeCog(commands.Cog):
             await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
 
-        if send_or_receive_money == "receive":
-            amount = -amount
-
         if amount < 0:
             banner = ErrorBanner(text="Please provide a positive amount of money.", user=interaction.user)
             await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
 
-        if send_or_receive_money == "receive":
+        if send_or_receive_money == "send":
             amount = -amount
 
         if amount < 0:
@@ -123,7 +120,7 @@ class TradeCog(commands.Cog):
         resources = ["Copper", "Silver", "Gold", "Uranium", "Black Matter"]
         # TODO set required to false with default values of 0
         ask_resources = {
-            "title": "Resources You Ask",
+            "title": "Resources You Ask:",
             "required": False,
             "questions": resources,
         }
@@ -139,7 +136,6 @@ class TradeCog(commands.Cog):
         paginator = TradeModal(inputs, amount, recipient, author_id=interaction.user.id)
 
         await paginator.send(interaction)
-        # await interaction.response.send_message(ephemeral=True, view=paginator, content=paginator.inputs[0]["title"])
 
 
 async def setup(client: commands.Bot) -> None:
