@@ -62,7 +62,7 @@ class Database:
             JOIN players p ON
                 p.x_pos = l.location_x_pos AND
                 p.y_pos = l.location_y_pos
-            WHERE p.discord_id = ?;
+            WHERE p.discord_id = ?
             """,
             (discord_id,),
         )
@@ -72,7 +72,7 @@ class Database:
         results = self.get_results(
             """
             SELECT p.x_pos, p.y_pos FROM players p
-            WHERE p.discord_id = ?;
+            WHERE p.discord_id = ?
             """,
             (discord_id,),
         )
@@ -83,7 +83,7 @@ class Database:
         return self.get_only_result(
             """
             SELECT p.money FROM players p
-            WHERE p.discord_id = ?;
+            WHERE p.discord_id = ?
             """,
             (discord_id,),
         )
@@ -232,14 +232,14 @@ class Database:
         self._cursor.execute(
             """
             DELETE FROM contributions
-            WHERE item_id = ?;
+            WHERE item_id = ?
             """,
             (item_id,),
         )
         self._cursor.execute(
             """
             DELETE FROM items
-            WHERE item_id = ?;
+            WHERE item_id = ?
             """,
             (item_id,),
         )
@@ -286,7 +286,7 @@ class Database:
             SELECT ?, ?, ?, g.guild_id, p.location_x_pos, p.location_y_pos
             FROM guilds g
             JOIN planets p ON g.planet_id = p.planet_id
-            WHERE g.name = ?;
+            WHERE g.name = ?
             RETURNING player_id
             """,
             (discord_id, discord_name, player_class, guild_name),
@@ -309,6 +309,7 @@ class Database:
             INSERT INTO ships (player_id)
             SELECT player_id FROM players
             WHERE discord_id = ?
+            RETURNING ship_id
             """,
             (discord_id,),
         )
