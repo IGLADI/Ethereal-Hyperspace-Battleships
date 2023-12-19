@@ -1,6 +1,7 @@
 import mariadb
 import json
 import data
+import sys
 
 
 def get_connection():
@@ -22,7 +23,7 @@ def get_connection():
         return connection
     except mariadb.Error as e:
         print("Error connecting to MariaDB:", e)
-        return None
+        sys.exit(1)
 
 
 class Database:
