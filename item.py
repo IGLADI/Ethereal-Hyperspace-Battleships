@@ -9,12 +9,13 @@ class Item:
         global _db
         amount = _db.item_amount(item_id)
         name = _db.item_name(item_id)
-        print("name:", name)
-        print("amount:", amount)
+        item_type = _db.item_type(item_id)
 
         self._id = item_id
         self._name = name
+        self._type = item_type
         self._amount = amount
+        # should be set by cargo
         self._max_amount = 100
 
     @property
@@ -24,6 +25,10 @@ class Item:
     @property
     def name(self) -> str:
         return self._name
+
+    @property
+    def type(self):
+        return self._type
 
     @property
     def amount(self) -> int:
@@ -48,44 +53,53 @@ class Item:
     def max_amount(self, max_amount):
         self._max_amount = max_amount
 
-    @classmethod
-    def store(cls, name, item_type, amount, cargo_module_id):
-        global _db
-        _db.store_item(
-            name=name,
-            item_type=item_type,
-            amount=amount,
-            cargo_module_id=cargo_module_id,
-        )
-
     def __str__(self):
-        return f"{self.name}: {self.amount}/{self.max_amount}"
+        return f"{self.name} ({self.type}): {self.amount}/{self.max_amount}"
 
 
 class Resource(Item):
     def __init__(self, item_id):
         super().__init__(item_id)
 
-        resource_type = _db.item_type(item_id)
-        self._type = resource_type
-
     @property
     def type(self) -> str:
         return self._type
 
+    def contribute(self, building_id: int, contribution: int):
+        """Contribute resource to a building."""
+        global _db
+        # 1. check if enough of resource
+        # 2. add in contributions,
+        #    - if already a resource with this name, alter its amount
+        #    - else create a new item in database
+        # 3. alter amount of resource
+        if contribution > self.amount:
+            raise ValueError(
+                f"Be more modest. {contribution} is much more than what you have {amount}"
+            )
+        contributed_item_id = _db.contribution_exists(
+            building_id=building_id, item_name=self.name
+        )
+        if contributed_item_id:
+            contributed_item = Item(contributed_item_id)
+            contributed_item.amount += contribution
+        else:
+            item_contributed_id = _db.store_item(
+                name=self.name, item_type=self.type, amount=contribution
+            )
+            _db.store_contribution(item_contributed_id, building_id)
+
+        self.amount -= contribution
+
+    def __str__(self):
+        return f"{self.name}: {self.amount}/{self.max_amount}"
+
     @classmethod
     def store(cls, name, amount, cargo_module_id):
-        super().store(
+        global _db
+        item_id = _db.store_item(
             name=name,
             item_type="resource",
             amount=amount,
             cargo_module_id=cargo_module_id,
         )
-
-    def contribute_resource(cls, building_id):
-        global _db
-        # TODO implementation
-        # 1. check if enough of resource
-        # 2. add in contributions
-        # 3. remove from cargo
-        _db.contribute_resource(item_id, building_id)

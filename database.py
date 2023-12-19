@@ -182,9 +182,9 @@ class Database:
     def module_set_level(self, module_id, module_level):
         self._cursor.execute(
             """
-        UPDATE modules SET level = ?
-        WHERE module_id = ?
-        """,
+            UPDATE modules SET level = ?
+            WHERE module_id = ?
+            """,
             (module_level, module_id),
         )
 
@@ -244,6 +244,17 @@ class Database:
             (item_id,),
         )
 
+    def contribution_exists(self, building_id, item_name: str) -> int:
+        """Check if an item is in contributions."""
+        return self.get_only_result(
+            """
+            SELECT c.item_id FROM contributions c
+            JOIN items i ON i.item_id = c.item_id
+            WHERE c.building_id = ? AND i.name = ?
+            """,
+            (building_id, item_name),
+        )
+
     def cargo_resource_ids(self, cargo_module_id) -> list:
         """Returns a list of item ids."""
         statement = """
@@ -256,7 +267,7 @@ class Database:
 
     # Storing commands ########################################################
 
-    def store_item(self, name, item_type, cargo_module_id, amount=1) -> int:
+    def store_item(self, name, item_type, cargo_module_id=None, amount=1) -> int:
         """Store an item to a cargo_module_id."""
         return self.get_only_result(
             """
