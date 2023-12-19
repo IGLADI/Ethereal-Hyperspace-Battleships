@@ -145,6 +145,16 @@ CREATE TABLE `contributions` (
     CONSTRAINT `UN__contributions` UNIQUE (building_id, item_id)
 );
 
+CREATE TABLE `bug_reports` (
+    `bug_report_id` INT(11) NOT NULL AUTO_INCREMENT,
+    CONSTRAINT `PK__bug_reports` PRIMARY KEY (`bug_report_id`),
+    `content` TEXT NOT NULL,
+    `creation_time` TIMESTAMP DEFAULT CURRENT_TIME,
+    `player_id` INT(11) NOT NULL,
+    CONSTRAINT `FK__players__bug_reports` FOREIGN KEY (`player_id`)
+        REFERENCES `players` (`player_id`)
+);
+
 -- Setup default values -------------------------------------------------------
 -- planets
 INSERT INTO `locations` (`location_x_pos`, `location_y_pos`, `name`) VALUES

@@ -6,6 +6,9 @@ from discord.ext import commands
 from typing import Literal
 from player import Player
 
+import asyncio
+from utils import check_player_exists
+from player import Player
 import data
 
 
@@ -26,6 +29,7 @@ class ShipCommands(commands.Cog):
     @app_commands.command(name="ship_info", description="Get info on your ship")
     @app_commands.check(check_registered)
     async def ship_info(self, interaction: discord.Interaction):
+
         player = Player.get(interaction.user.id)
         ship = player.ship
         ship_message = f"**{player.name}'s ship**\n"
@@ -41,6 +45,7 @@ class ShipCommands(commands.Cog):
     )
     @app_commands.check(check_registered)
     async def cargo_info(self, interaction: discord.Interaction):
+
         player = Player.get(interaction.user.id)
         ship = player.ship
         ship_message = f"**{player.name}'s ship**\n"
@@ -77,7 +82,6 @@ class ShipCommands(commands.Cog):
                 f"Couldn't find module {module_name}.", ephemeral=True
             )
             return
-
         try:
             module.upgrade(player.ship.modules["Cargo"])
         except Exception as e:
@@ -120,39 +124,39 @@ class ShipCommands(commands.Cog):
             await interaction.response.send_message(
                 "The generator is still booting.", ephemeral=True
             )
+
+    @app_commands.command(name="travel", description="Travel to a new location")
+    async def travel(self, interaction: discord.Interaction, x_coordinate: int, y_coordinate: int):
+        if await check_player_exists(interaction) is False:
             return
-        if on is generator_status:
-            status_message = "Generator is already " + (
-                "on" if generator_status else "off"
-            )
-            await interaction.response.send_message(status_message, ephemeral=True)
+          
+        player = Player.get(interaction.user.id)
+        ship = player.ship
+        if ship.is_traveling:
+            await interaction.response.send_message("Wait untill you arrive before you start a new journey!", ephemeral=True)
+            return
+        
+        try:
+            sleep = ship.travel(x_coordinate, y_coordinate)
+            await interaction.response.send_message(f"{player.id} traveling to ({x_coordinate}, {y_coordinate}). Estimated duration = {sleep}.")
+        except Exception as e:
+            await interaction.response.send_message(f"Couldn't travel: {e}", ephemeral=True)
+            return
+        else:
+            await asyncio.sleep(sleep)
+            await interaction.followup.send(f"{player.id} arrived at ({x_coordinate}, {y_coordinate}).")
+
+    # TODO: implement ship.scan()
+    @app_commands.command(name="scan", description="Use your radar to scan the area")
+    async def scan(self, interaction: discord.Interaction):
+        if await check_player_exists(interaction) is False:
             return
 
-        if on and not generator_status:
-            player.ship.modules["EnergyGenerator"].booting = True
-            await interaction.response.send_message("Booting up the generator...")
-            message = await interaction.followup.send("░░░░░░░░░░ 0%")
-            for percent in range(0, 100, 10):
-                bar = "█" * (percent // 10) + "░" * ((100 - percent) // 10)
-                await message.edit(content=f"{bar} {percent}%")
-                await asyncio.sleep(0.5)
-            await message.delete()
+        player = Player.get(interaction.user.id)
+        ship = player.ship
 
-            await interaction.followup.send("Generator is now online!")
-            player.ship.modules["EnergyGenerator"].turn_on()
-            player.ship.modules["EnergyGenerator"].booting = False
-        elif not on and generator_status:
-            player.ship.modules["EnergyGenerator"].booting = True
-            await interaction.response.send_message("Shutting down the generator...")
-            message = await interaction.followup.send("██████████ 100%")
-            for percent in range(100, 0, -10):
-                bar = "█" * (percent // 10) + "░" * ((100 - percent) // 10)
-                await message.edit(content=f"{bar} {percent}%")
-                # await asyncio.sleep(0.5)
-            await message.delete()
-            player.ship.modules["EnergyGenerator"].turn_off()
-            await interaction.followup.send("Generator has been shut down.")
-            player.ship.modules["EnergyGenerator"].booting = False
+        found = ship.scan()
+        await interaction.response.send_message(f"Scanned the area. Found {found} .", ephemeral=True)
 
 
 async def setup(client: commands.Bot) -> None:
