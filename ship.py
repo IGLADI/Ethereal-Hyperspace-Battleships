@@ -1,4 +1,3 @@
-from location import Location
 from database import Database
 
 from module import (
@@ -15,19 +14,6 @@ from module import (
     DEFAULT_MODULES,
 )
 
-_MODULE_MAPS = {
-    "Module": Module,
-    "SolarPanel": SolarPanel,
-    "TravelModule": TravelModule,
-    "MiningModule": MiningModule,
-    "Canon": Canon,
-    "Shield": Shield,
-    "Fuel": Fuel,
-    "Cargo": Cargo,
-    "Radar": Radar,
-    "EnergyGenerator": EnergyGenerator,
-}
-
 _db = Database()
 
 
@@ -39,7 +25,7 @@ class Ship:
         modules = {}
         for module_id in module_ids:
             type = _db.module_type(module_id)
-            module = _MODULE_MAPS.get(type)
+            module = DEFAULT_MODULES.get(type)
             modules[type] = module(module_id)
 
         self.id = ship_id
@@ -77,10 +63,10 @@ class Ship:
 
     @classmethod
     def store(cls, discord_id):
-        """Registers a new ship with default modules."""
+        """Stores a new ship with default modules."""
         global _db
         _db.store_ship(discord_id)
 
         ship_id = _db.player_ship_id(discord_id)
-        for module in DEFAULT_MODULES:
+        for module in DEFAULT_MODULES.values():
             module.store(ship_id)
