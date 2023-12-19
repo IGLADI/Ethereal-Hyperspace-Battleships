@@ -128,7 +128,7 @@ CREATE TABLE `items` (
     `name` varchar(255) NOT NULL,
     `type` ENUM('resource') NOT NULL,
     `amount` INT(11) NOT NULL DEFAULT 1,
-    `cargo_module_id` int(11) NOT NULL,
+    `cargo_module_id` int(11) NULL,
     CONSTRAINT `FK__cargo_modules__items` FOREIGN KEY (`cargo_module_id`)
 	    REFERENCES `cargo_modules` (`cargo_module_id`),
     CONSTRAINT `UN__items` UNIQUE (`name`, `cargo_module_id`)
@@ -141,7 +141,8 @@ CREATE TABLE `contributions` (
 	    REFERENCES `buildings` (`building_id`),
     `item_id` INT(11) NOT NULL,
     CONSTRAINT `FK__items__contributions` FOREIGN KEY (`item_id`)
-	    REFERENCES `items` (`item_id`)
+	    REFERENCES `items` (`item_id`),
+    CONSTRAINT `UN__contributions` UNIQUE (building_id, item_id)
 );
 
 -- Setup default values -------------------------------------------------------
