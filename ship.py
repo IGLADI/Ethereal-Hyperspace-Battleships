@@ -1,54 +1,61 @@
-from location import Location
-from module import SolarPanel, TravelModule, MiningModule, Canon, Shield, Fuel, Cargo, Radar, EnergyGenerator
+from database import Database
+
+from module import (
+    Module,
+    SolarPanel,
+    TravelModule,
+    MiningModule,
+    Canon,
+    Shield,
+    Fuel,
+    Cargo,
+    Radar,
+    EnergyGenerator,
+    DEFAULT_MODULES,
+)
+
+_db = Database()
 
 
 class Ship:
-    def __init__(self):
-        self._modules = []
-        self._location = Location(0, 0)
-        self._modules.append(TravelModule())
-        self._modules.append(MiningModule())
-        self._modules.append(Canon())
-        self._modules.append(Shield())
-        self._modules.append(Fuel())
-        self._modules.append(Cargo())
-        self._modules.append(Radar())
-        self._modules.append(EnergyGenerator())
-        self._modules.append(SolarPanel())
+    def __init__(self, ship_id):
+        global _db
+        module_ids = _db.ship_module_ids(ship_id)
+
+        modules = {}
+        for module_id in module_ids:
+            type = _db.module_type(module_id)
+            module = DEFAULT_MODULES.get(type)
+            modules[type] = module(module_id)
+
+        self.id = ship_id
+        self._modules = modules
         # TODO make this in apart battery module
         self._energy = 100
         self._energy_capacity = 100
 
     @property
-    def energy_capacity(self):
+    def energy_capacity(self) -> int:
         return self._energy_capacity
 
     @property
-    def energy(self):
+    def energy(self) -> int:
         return self._energy
 
     @property
-    def modules(self):
+    def modules(self) -> dict:
         return self._modules
 
-    @property
-    def location(self):
-        return self._location
+    @energy.setter
+    def energy(self, energy):
+        self._energy = energy
 
-    def add_energy(self, amount):
-        self._energy += amount
+    @classmethod
+    def store(cls, discord_id):
+        """Stores a new ship with default modules."""
+        global _db
+        _db.store_ship(discord_id)
 
-    def remove_energy(self, amount):
-        self._energy -= amount
-
-    def remove_resource(self, resource_name, amount):
-        for resource in self.modules[5]._capacity:
-            if resource.name == resource_name:
-                resource.amount -= amount
-                break
-
-    def add_resource(self, resource_name, amount):
-        for resource in self.modules[5]._capacity:
-            if resource.name == resource_name:
-                resource.amount += amount
-                break
+        ship_id = _db.player_ship_id(discord_id)
+        for module in DEFAULT_MODULES.values():
+            module.store(ship_id)
