@@ -265,6 +265,16 @@ class Database:
         ids = [result[0] for result in results]
         return ids
 
+    def cargo_module_id(self, module_id):
+        """Return cargo id by module id."""
+        return self.get_only_result(
+            """
+            SELECT cargo_module_id FROM cargo_modules
+            WHERE module_id = ?
+            """,
+            (module_id,),
+        )
+
     # Storing commands ########################################################
 
     def store_item(self, name, item_type, cargo_module_id=None, amount=1) -> int:
