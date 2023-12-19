@@ -46,20 +46,9 @@ class Ship:
     def modules(self) -> dict:
         return self._modules
 
-    def change_energy(self, amount):
-        self._energy += amount
-
-    def remove_resource(self, resource_name, amount):
-        for resource in self.modules["Cargo"]._capacity:
-            if resource.name == resource_name:
-                resource.amount -= amount
-                break
-
-    def add_resource(self, resource_name, amount):
-        for resource in self.modules["Cargo"]._capacity:
-            if resource.name == resource_name:
-                resource.amount += amount
-                break
+    @energy.setter
+    def energy(self, energy):
+        self._energy = energy
 
     @classmethod
     def store(cls, discord_id):

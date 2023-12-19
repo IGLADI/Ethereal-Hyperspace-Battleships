@@ -47,8 +47,8 @@ class Database:
         """Checks if a player exists in the database."""
         self._cursor.execute(
             """
-            SELECT 1 FROM players p
-            WHERE p.discord_id = ?
+            SELECT 1 FROM players
+            WHERE discord_id = ?
             """,
             (discord_id,),
         )
@@ -71,8 +71,8 @@ class Database:
         """Returns the coordinates of the players as a tuple."""
         results = self.get_results(
             """
-            SELECT p.x_pos, p.y_pos FROM players p
-            WHERE p.discord_id = ?
+            SELECT x_pos, y_pos FROM players
+            WHERE discord_id = ?
             """,
             (discord_id,),
         )
@@ -82,8 +82,8 @@ class Database:
         """Returns the money of the player as an int."""
         return self.get_only_result(
             """
-            SELECT p.money FROM players p
-            WHERE p.discord_id = ?
+            SELECT money FROM players
+            WHERE discord_id = ?
             """,
             (discord_id,),
         )
@@ -96,6 +96,16 @@ class Database:
             WHERE discord_id = ?
             """,
             (amount, discord_id),
+        )
+
+    def player_name(self, discord_id) -> int:
+        """Return ship_id for player_id"""
+        return self.get_only_result(
+            """
+            SELECT discord_name FROM players
+            WHERE discord_id = ?
+            """,
+            (discord_id,),
         )
 
     def player_ship_id(self, discord_id) -> int:
