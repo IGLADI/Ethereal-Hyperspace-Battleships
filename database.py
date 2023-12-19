@@ -139,6 +139,16 @@ class Database:
             (module_id,),
         )
 
+    def fuel_module_set_fuel(self, module_id: int, fuel: int):
+        """Set fuel in fuel_module."""
+        self._cursor.execute(
+            """
+            UPDATE fuel_modules SET fuel = ?
+            WHERE module_id = ?
+            """,
+            (fuel, module_id),
+        )
+
     def ship_module_ids(self, ship_id) -> list:
         """Returns a list of module_ids."""
         statement = """

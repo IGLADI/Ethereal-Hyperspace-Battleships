@@ -403,6 +403,12 @@ class Fuel(Module):
     def fuel(self):
         return self._fuel
 
+    @fuel.setter
+    def fuel(self, fuel):
+        global _db
+        _db.fuel_module_set_fuel(module_id=self.id, fuel=fuel)
+        self._fuel = fuel
+
     def upgrade(self, cargo_player):
         super().upgrade(cargo_player)
 
