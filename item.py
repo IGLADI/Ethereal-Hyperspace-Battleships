@@ -15,8 +15,6 @@ class Item:
         self._name = name
         self._type = item_type
         self._amount = amount
-        # should be set by cargo
-        self._max_amount = 900
 
     @property
     def id(self) -> int:
@@ -34,24 +32,14 @@ class Item:
     def amount(self) -> int:
         return self._amount
 
-    @property
-    def max_amount(self) -> int:
-        return self._max_amount
-
     @amount.setter
     def amount(self, amount):
-        if amount > self.max_amount:
-            raise ValueError(f"Can not assign more than max_amount: {self.max_amount}")
         global _db
-        self._amount = amount
         if amount == 0:
             _db.item_delete(self.id)
         else:
             _db.item_set_amount(self.id, amount)
-
-    @max_amount.setter
-    def max_amount(self, max_amount):
-        self._max_amount = max_amount
+        self._amount = amount
 
     def __str__(self):
         return f"{self.name} ({self.type}): {self.amount}"
