@@ -21,7 +21,7 @@ general_channels = [
     {"type": "voice", "name": "general", "position": 3},
 ]
 
-RESOURCE_NAMES = ["Copper", "Silver", "Gold", "Uranium", "Black Matter"]
+RESOURCE_NAMES = ["rock", "copper", "silver", "gold", "uranium", "black matter"]
 BUILDING_TYPES = [
     "repair station",
     "shop",

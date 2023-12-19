@@ -12,11 +12,13 @@ _db = Database()
 class Player:
     def __init__(self, discord_id):
         global _db
-        ship_id = _db.player_ship_id(id)
-        money = _db.player_money(id)
-        x_pos, y_pos = _db.player_coordinates(id)
+        ship_id = _db.player_ship_id(discord_id)
+        money = _db.player_money(discord_id)
+        x_pos, y_pos = _db.player_coordinates(discord_id)
+        name = _db.player_name(discord_id)
 
         self._id = discord_id
+        self._name = name
         self._ship = Ship(ship_id)
         self._money = money
         self._x_pos = x_pos
@@ -28,6 +30,10 @@ class Player:
     @property
     def id(self):
         return self._id
+
+    @property
+    def name(self):
+        return self._name
 
     @property
     def money(self):
@@ -68,19 +74,16 @@ class Player:
         while True:
             if self.ship.energy < 100:
                 # generate solar energy
-                self.ship.add_energy(self.ship.modules["EnergyGenerator"].generation)
+                self.ship.energy += self.ship.modules["EnergyGenerator"].generation
                 # generate with energy generator
                 if self.ship.modules["EnergyGenerator"].is_on:
                     # always use 1 uranium for now, will probably add a different rendement per level later on
-                    for resource in self.ship.modules["Cargo"]._capacity:
-                        if resource.name == "Uranium":
-                            uranium_amount = resource.amount
-                            break
-                    if uranium_amount >= 1:
+                    uranium = self.ship.modules["Cargo"].resources.get("Uranium")
+                    if uranium and uranium.amount >= 1:
                         self.ship.add_energy(
                             self.ship.modules["EnergyGenerator"].generation
                         )
-                        self._ship.remove_resource("Uranium", 1)
+                        uranium.amount -= 1
                 time.sleep(60)
 
     def location_name(self) -> str:
