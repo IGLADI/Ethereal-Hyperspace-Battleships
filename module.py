@@ -54,18 +54,41 @@ class Module:
         """Uses resources in cargo of player to upgrade module."""
         if self._level == self._max_level:
             raise Exception("Module is already at max level.")
-        if not self.has_enough_resources(cargo):
-            raise Exception("Not enough resources to upgrade.")
-        self._level += 1
-        cargo.consume_resource()
 
-    def has_enough_resources(self, cargo_player):
+        if not self.can_upgrade(cargo):
+            raise Exception("Not enough resources to upgrade.")
+
+        for cost in self._cost:
+            resource_name = cost["resource"]
+            required_amount = cost["amount"]
+
+            if required_amount == 0:
+                continue
+
+            resource = cargo.resources.get(resource_name)
+            if not resource:
+                continue
+
+            resource.amount -= required_amount
+            if resource.amount == 0:
+                cargo.resources.pop(resource_name)
+
+        print("hehe")
+        self.level += 1
+
+    def can_upgrade(self, cargo) -> bool:
         """Utility function to check if a player has enough resources to upgrade a module."""
         for cost in self._cost:
             resource_name = cost["resource"]
             required_amount = cost["amount"]
 
-            if cargo_player.get_resource_amount(resource_name) < required_amount:
+            if required_amount == 0:
+                continue
+
+            resource = cargo.resources.get(resource_name)
+            if not resource:
+                return False
+            if resource.amount < required_amount:
                 return False
 
         return True
@@ -197,7 +220,7 @@ class Cargo(Module):
         cargo_module_id = _db.cargo_module_id(module_id)
         item_ids = _db.cargo_resource_ids(cargo_module_id)
 
-        self._id = cargo_module_id
+        self.cargo_id = cargo_module_id
         self._capacity = 0
         self._max_capacity = 600
         self._resources = {}
@@ -224,16 +247,6 @@ class Cargo(Module):
         if self._capacity + capacity > self.max_capacity:
             raise ValueError("Storage exceeded")
         self._capacity = capacity
-
-    def consume_resource(self, resource_name, amount):
-        resource = self._resources.get(resource_name)
-        if not resource:
-            raise DataError(f"404 {resource_name} not found.")
-
-        resource.amount -= amount
-
-        if resource.amount == 0:
-            self.resources.pop(resource_name)
 
     # max_capacity levels:  300,    400,    500,    600,      800,      1000
     # rock cost levels:    100,    300,    900,    2700,     8100,     24300
@@ -262,7 +275,7 @@ class Cargo(Module):
             return
 
         resource_id = Resource.store(
-            name=resource_name, amount=amount, cargo_module_id=self.id
+            name=resource_name, amount=amount, cargo_module_id=self.cargo_id
         )
         resource = Resource(resource_id)
         self._resources[resource_name] = resource
@@ -270,7 +283,9 @@ class Cargo(Module):
 
     def __str__(self):
         resources_str = "".join(
-            f"\n   - {resource}" for resource in self.resources.values()
+            f"\n   - {resource}"
+            for resource in self.resources.values()
+            if resource.amount > 0
         )
         return f"{super().__str__()} - Capacity: {resources_str} \n - Storage: {self.capacity}/{self._max_capacity} tons\n"
 

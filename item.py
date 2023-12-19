@@ -16,7 +16,7 @@ class Item:
         self._type = item_type
         self._amount = amount
         # should be set by cargo
-        self._max_amount = 100
+        self._max_amount = 900
 
     @property
     def id(self) -> int:
@@ -27,7 +27,7 @@ class Item:
         return self._name
 
     @property
-    def type(self):
+    def type(self) -> str:
         return self._type
 
     @property
@@ -54,16 +54,12 @@ class Item:
         self._max_amount = max_amount
 
     def __str__(self):
-        return f"{self.name} ({self.type}): {self.amount}/{self.max_amount}"
+        return f"{self.name} ({self.type}): {self.amount}"
 
 
 class Resource(Item):
     def __init__(self, item_id):
         super().__init__(item_id)
-
-    @property
-    def type(self) -> str:
-        return self._type
 
     def contribute(self, building_id: int, contribution: int):
         """Contribute resource to a building."""
@@ -91,11 +87,8 @@ class Resource(Item):
 
         self.amount -= contribution
 
-    def __str__(self):
-        return f"{self.name}: {self.amount}/{self.max_amount}"
-
     @classmethod
-    def store(cls, name, amount, cargo_module_id):
+    def store(cls, name, amount, cargo_module_id) -> int:
         global _db
         item_id = _db.store_item(
             name=name,
@@ -103,3 +96,4 @@ class Resource(Item):
             amount=amount,
             cargo_module_id=cargo_module_id,
         )
+        return item_id
