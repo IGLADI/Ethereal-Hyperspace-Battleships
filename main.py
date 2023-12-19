@@ -41,6 +41,7 @@ class Client(commands.Bot):
             "cogs.casino_games.race_game_cog",
             "cogs.ship_cog",
             "cogs.mine_cog",
+            "cogs.travel_cog",
         ]
 
     # this overwrites the default sync setup (used by self.tree.sync in on_ready)

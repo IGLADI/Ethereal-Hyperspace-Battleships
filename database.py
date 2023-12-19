@@ -139,6 +139,25 @@ class Database:
             (y_pos, discord_id),
         )
 
+    def player_from_scan(self, x_pos, y_pos, distance, excluded_player_discord_id) -> int:
+        """Returns the player in a certain distance."""
+        statement = """
+        SELECT discord_name, x_pos, y_pos FROM players
+        WHERE x_pos BETWEEN ? AND ? AND y_pos BETWEEN ? AND ?
+        AND discord_id <> ?
+        """
+        results = self.get_results(statement, (x_pos - distance, x_pos + distance, y_pos - distance, y_pos + distance, excluded_player_discord_id))
+        return results if results else []
+    
+    def location_from_scan(self, x_pos, y_pos, distance) -> str:
+        """Returns the location name from coordinates in a certain distance."""
+        statement = """
+        SELECT name, location_x_pos, location_y_pos FROM locations
+        WHERE location_x_pos BETWEEN ? AND ? AND location_y_pos BETWEEN ? AND ?
+        """
+        results = self.get_results(statement, (x_pos - distance, x_pos + distance, y_pos - distance, y_pos + distance))
+        return results if results else []
+
     def fuel_module_fuel(self, module_id) -> int:
         """Return fuel in a fuel module by module_id"""
         return self.get_only_result(
