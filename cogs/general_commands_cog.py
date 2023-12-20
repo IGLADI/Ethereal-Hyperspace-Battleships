@@ -34,8 +34,8 @@ class GeneralCommands(commands.Cog):
         help_message += "/pay - Give money to a player\n"
         await interaction.response.send_message(help_message, ephemeral=True)
 
-    @app_commands.check(check_registered)
     @app_commands.command(name="balance", description="Check your balance")
+    @app_commands.check(check_registered)
     async def balance(self, interaction: discord.Interaction):
         player = Player.get(interaction.user.id)
         await interaction.response.send_message(f"Your current balance is ${player.money}.", ephemeral=True)

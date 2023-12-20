@@ -1,5 +1,6 @@
 import mariadb
 import json
+import sys
 
 
 def get_connection():
@@ -14,14 +15,12 @@ def get_connection():
     database = db_data["database"]
 
     try:
-        connection = mariadb.connect(
-            host=host, user=user, password=password, port=3306, database=database
-        )
+        connection = mariadb.connect(host=host, user=user, password=password, port=3306, database=database)
         connection.autocommit = True
         return connection
     except mariadb.Error as e:
         print("Error connecting to MariaDB:", e)
-        return None
+        sys.exit(1)
 
 
 class Database:
