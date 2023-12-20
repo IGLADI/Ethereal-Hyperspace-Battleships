@@ -1,13 +1,17 @@
+import discord
+
 import data
+from database import Database
 
 import database
 _db = database.Database()
 
+async def check_registered(interaction: discord.Interaction) -> bool:
+    """Check if a player is registered, if not sends an error message. Else run the function."""
 
 async def check_player_exists(interaction):
     if _db.player_exists(interaction.user.id):
         return True
-
     await interaction.response.send_message(
         "You are not registered as a player.", ephemeral=True
     )
