@@ -110,8 +110,6 @@ class GeneralCommands(commands.Cog):
             )
             return
 
-        print("interaction.user.id:", interaction.user.id)
-
         try:
             Player.register(
                 interaction.user.id,
@@ -127,11 +125,13 @@ class GeneralCommands(commands.Cog):
             return
 
         Player.get(interaction.user.id)
-
+        role = discord.utils.get(interaction.guild.roles, name=guild_name)
+        if role:
+            await interaction.user.add_roles(role)
         await interaction.response.send_message(
-            f"Welcome to Ethereal Hyperspace Battleships {interaction.user.name}!",
+            f"Welcome to Ethereal Hyperspace Battleships {interaction.user.name}!\n You are now registered as a {player_class} in {guild_name}.",
             ephemeral=True,
-        )
+        )    
 
     @app_commands.command(name="where_am_i", description="Get your location info")
     @app_commands.check(check_registered)
