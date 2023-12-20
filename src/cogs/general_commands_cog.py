@@ -5,8 +5,10 @@ from discord.ext import commands
 from typing import Literal
 from mariadb import IntegrityError
 from player import Player
-from ui.simple_banner import NormalBanner, ErrorBanner, SuccessBanner
-from utils import send_bug_report, get_betted_amount, check_registered
+from ui.help_banner import HelpBanner
+from utils import send_bug_report
+from utils import check_registered
+
 
 class GeneralCommands(commands.Cog):
     def __init__(self, client: commands.Bot):
@@ -14,30 +16,20 @@ class GeneralCommands(commands.Cog):
 
     @app_commands.command(name="help", description="Provides a list of bot commands")
     async def help(self, interaction: discord.Interaction):
-        # Welcome message and tutorial
-        help_message = "Welcome to Ethereal Hyperspace Battleships!\n"
-        help_message += "To start out, please type /register followed by /tutorial.\n"
-        # Command list
-
-        help_message += "Here is a list of commands:\n"
-        help_message += "/help - Get help\n"
-        help_message += "/guild - Get guild info\n"
-        help_message += "/resources - Get info on resources and mining\n"
-        help_message += "/balance - Check your money\n"
-        help_message += "/pay - Give money to a player\n"
-        banner = NormalBanner(text=help_message, user=interaction.user)
+        commands = {
+            "balance": "Check your balance",
+            "bug_report": "Report a bug",
+            "register": "Register as a player",
+            "where_am_i": "Get your location info",
+        }
+        banner = HelpBanner(commands, interaction.user)
         await interaction.response.send_message(embed=banner.embed, ephemeral=True)
 
     @app_commands.command(name="balance", description="Check your balance")
     @app_commands.check(check_registered)
     async def balance(self, interaction: discord.Interaction):
-
         player = Player.get(interaction.user.id)
-        betted_amount = get_betted_amount(interaction)
-        balance = player.money
-        balance -= betted_amount
-        banner = NormalBanner(text=f"Your current balance is ${balance}.", user=interaction.user)
-        await interaction.response.send_message(embed=banner.embed, ephemeral=True)
+        await interaction.response.send_message(f"Your current balance is ${player.money}.", ephemeral=True)
 
     # TODO maybe add displayname
     # ! (still keep id and add a check so that only one user can create an account with a name)
@@ -49,9 +41,10 @@ class GeneralCommands(commands.Cog):
         guild_name: Literal["The Federation", "The Empire", "The Alliance", "The Independents"],
     ):
         if Player.exists(interaction.user.id):
-            banner = ErrorBanner(text="You are already registered as a player.", user=interaction.user)
-            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
+            await interaction.response.send_message("You are already registered as a player.", ephemeral=True)
             return
+
+        print("interaction.user.id:", interaction.user.id)
 
         try:
             Player.register(
@@ -69,8 +62,10 @@ class GeneralCommands(commands.Cog):
 
         Player.get(interaction.user.id)
 
-        banner = SuccessBanner(text="Welcome to Ethereal Hyperspace Battleships!", user=interaction.user)
-        await interaction.response.send_message(embed=banner.embed, ephemeral=True)
+        await interaction.response.send_message(
+            f"Welcome to Ethereal Hyperspace Battleships {interaction.user.name}!",
+            ephemeral=True,
+        )
 
     @app_commands.command(name="where_am_i", description="Get your location info")
     @app_commands.check(check_registered)
@@ -79,10 +74,10 @@ class GeneralCommands(commands.Cog):
         player = Player.get(interaction.user.id)
         coordinates = (player.x_pos, player.y_pos)
         location_name = player.location_name()
-        banner = NormalBanner(
-            text=f"You are currently at {coordinates}, also known as {location_name}.", user=interaction.user
+        await interaction.response.send_message(
+            f"You are currently at {coordinates}, also known as {location_name}.",
+            ephemeral=True,
         )
-        await interaction.response.send_message(embed=banner.embed, ephemeral=True)
 
     @app_commands.command(name="bug_report", description="Report a bug")
     async def bug_report(
