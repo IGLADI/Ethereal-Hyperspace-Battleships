@@ -439,3 +439,13 @@ class Database:
             """,
             (ship_id,),
         )
+    
+    def store_bug_report(self, discord_id, bug_report):
+        """Store a bug report."""
+        self._cursor.execute(
+            """
+            INSERT INTO reports (discord_id, content)
+            VALUES (?, ?)
+            """,
+            (discord_id, bug_report),
+        )

@@ -10,21 +10,12 @@ import asyncio
 from utils import check_player_exists
 from player import Player
 
-async def check_registered(interaction: discord.Interaction) -> bool:
-    """Check if a player is registered, if not sends an error message. Else run the function."""
-    if not Player.exists(interaction.user.id):
-        await interaction.response.send_message(
-            "You are not registered as a player.", ephemeral=True
-        )
-        return False
-    return True
-
 class TravelCommands(commands.Cog):
     def __init__(self, client: commands.Bot):
         self.client = client
 
     @app_commands.command(name="travel", description="Travel to a new location")
-    @app_commands.check(check_registered)
+    @app_commands.check(check_player_exists)
     async def travel(self, interaction: discord.Interaction, x_coordinate: int, y_coordinate: int):          
         player = Player.get(interaction.user.id)
   
@@ -44,7 +35,7 @@ class TravelCommands(commands.Cog):
             await interaction.followup.send(f"{player.id} arrived at {image_name}: ({x_coordinate}, {y_coordinate}).\n", file=discord.File(image))
             
     @app_commands.command(name="scan", description="Use your radar to scan the area")
-    @app_commands.check(check_registered)
+    @app_commands.check(check_player_exists)
     async def scan(self, interaction: discord.Interaction):
 
         player = Player.get(interaction.user.id)
