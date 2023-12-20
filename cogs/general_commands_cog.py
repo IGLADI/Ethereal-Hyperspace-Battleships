@@ -10,9 +10,7 @@ from player import Player
 async def check_registered(interaction: discord.Interaction) -> bool:
     """Check if a player is registered, if not sends an error message. Else run the function."""
     if not Player.exists(interaction.user.id):
-        await interaction.response.send_message(
-            "You are not registered as a player.", ephemeral=True
-        )
+        await interaction.response.send_message("You are not registered as a player.", ephemeral=True)
         return False
     return True
 
@@ -40,9 +38,7 @@ class GeneralCommands(commands.Cog):
     @app_commands.command(name="balance", description="Check your balance")
     async def balance(self, interaction: discord.Interaction):
         player = Player.get(interaction.user.id)
-        await interaction.response.send_message(
-            f"Your current balance is ${player.money}.", ephemeral=True
-        )
+        await interaction.response.send_message(f"Your current balance is ${player.money}.", ephemeral=True)
 
     # TODO maybe add displayname
     # ! (still keep id and add a check so that only one user can create an account with a name)
@@ -51,14 +47,10 @@ class GeneralCommands(commands.Cog):
         self,
         interaction: discord.Interaction,
         player_class: Literal["martian", "dwarf", "droid"],
-        guild_name: Literal[
-            "The Federation", "The Empire", "The Alliance", "The Independents"
-        ],
+        guild_name: Literal["The Federation", "The Empire", "The Alliance", "The Independents"],
     ):
         if Player.exists(interaction.user.id):
-            await interaction.response.send_message(
-                "You are already registered as a player.", ephemeral=True
-            )
+            await interaction.response.send_message("You are already registered as a player.", ephemeral=True)
             return
 
         print("interaction.user.id:", interaction.user.id)
@@ -72,7 +64,7 @@ class GeneralCommands(commands.Cog):
             )
         except IntegrityError:
             await interaction.response.send_message(
-                f"Duplicate values.",
+                "Duplicate values.",
                 ephemeral=True,
             )
             return

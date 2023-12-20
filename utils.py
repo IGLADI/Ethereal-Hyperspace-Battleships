@@ -8,9 +8,7 @@ async def check_player_exists(interaction):
     if db.player_exists(interaction.user.id):
         return True
 
-    await interaction.response.send_message(
-        "You are not registered as a player.", ephemeral=True
-    )
+    await interaction.response.send_message("You are not registered as a player.", ephemeral=True)
     return False
 
 
@@ -27,3 +25,9 @@ def get_betted_amount(discord_id):
                     total_bet_amount += -bet["bet_amount"] * (amount_of_racers - 1)
 
     return total_bet_amount
+
+
+def get_resource_amount(cargo, resource_name: str) -> int:
+    resource_name = resource_name.lower()
+    resource = cargo.resources.get(resource_name)
+    return resource.amount if resource else 0

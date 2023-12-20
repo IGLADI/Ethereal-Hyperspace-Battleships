@@ -6,15 +6,11 @@ from discord.ext import commands
 from typing import Literal
 from player import Player
 
-import data
-
 
 async def check_registered(interaction: discord.Interaction) -> bool:
     """Check if a player is registered, if not sends an error message. Else run the function."""
     if not Player.exists(interaction.user.id):
-        await interaction.response.send_message(
-            "You are not registered as a player.", ephemeral=True
-        )
+        await interaction.response.send_message("You are not registered as a player.", ephemeral=True)
         return False
     return True
 
@@ -36,9 +32,7 @@ class ShipCommands(commands.Cog):
         ship_message += f"\nEnergy: {ship.energy}"
         await interaction.response.send_message(ship_message, ephemeral=True)
 
-    @app_commands.command(
-        name="inventory", description="Get info on your cargo and it's contents"
-    )
+    @app_commands.command(name="inventory", description="Get info on your cargo and it's contents")
     @app_commands.check(check_registered)
     async def cargo_info(self, interaction: discord.Interaction):
         player = Player.get(interaction.user.id)
@@ -46,9 +40,7 @@ class ShipCommands(commands.Cog):
         ship_message = f"**{player.name}'s ship**\n"
         ship_message += "**Cargo:**"
         ship_message += "".join(
-            f"\n- {resource}"
-            for resource in ship.modules["Cargo"].resources.values()
-            if resource.amount > 0
+            f"\n- {resource}" for resource in ship.modules["Cargo"].resources.values() if resource.amount > 0
         )
         await interaction.response.send_message(ship_message, ephemeral=True)
 
@@ -73,22 +65,16 @@ class ShipCommands(commands.Cog):
         module = ship.modules.get(module_name)
 
         if not module:
-            await interaction.response.send_message(
-                f"Couldn't find module {module_name}.", ephemeral=True
-            )
+            await interaction.response.send_message(f"Couldn't find module {module_name}.", ephemeral=True)
             return
 
         try:
             module.upgrade(player.ship.modules["Cargo"])
         except Exception as e:
-            await interaction.response.send_message(
-                f"Couldn't upgrade {module_name}: {e}", ephemeral=True
-            )
+            await interaction.response.send_message(f"Couldn't upgrade {module_name}: {e}", ephemeral=True)
             return
 
-        await interaction.response.send_message(
-            f"Upgraded {module_name} to level {module.level}.", ephemeral=True
-        )
+        await interaction.response.send_message(f"Upgraded {module_name} to level {module.level}.", ephemeral=True)
 
     # ! For debugging purposes
     @app_commands.command(name="add_cargo", description="For debugging purposes")
@@ -96,9 +82,7 @@ class ShipCommands(commands.Cog):
     async def add_cargo(
         self,
         interaction: discord.Interaction,
-        resource: Literal[
-            "Rock", "Copper", "Silver", "Gold", "Uranium", "Black Matter"
-        ],
+        resource: Literal["Rock", "Copper", "Silver", "Gold", "Uranium", "Black Matter"],
         amount: int,
     ):
         player = Player.get(interaction.user.id)
@@ -109,22 +93,16 @@ class ShipCommands(commands.Cog):
             ephemeral=True,
         )
 
-    @app_commands.command(
-        name="toggle_energy_generator", description="Toggle on of the energy generator"
-    )
+    @app_commands.command(name="toggle_energy_generator", description="Toggle on of the energy generator")
     @app_commands.check(check_registered)
     async def toggle_energy_generator(self, interaction: discord.Interaction, on: bool):
         player = Player.get(interaction.user.id)
         generator_status = player.ship.modules["EnergyGenerator"].is_on
         if player.ship.modules["EnergyGenerator"].booting:
-            await interaction.response.send_message(
-                "The generator is still booting.", ephemeral=True
-            )
+            await interaction.response.send_message("The generator is still booting.", ephemeral=True)
             return
         if on is generator_status:
-            status_message = "Generator is already " + (
-                "on" if generator_status else "off"
-            )
+            status_message = "Generator is already " + ("on" if generator_status else "off")
             await interaction.response.send_message(status_message, ephemeral=True)
             return
 

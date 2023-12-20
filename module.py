@@ -94,9 +94,7 @@ class Module:
         return True
 
     def __str__(self):
-        cost_str = "".join(
-            f"\n   - {cost['resource']}: {cost['amount']}" for cost in self._cost
-        )
+        cost_str = "".join(f"\n   - {cost['resource']}: {cost['amount']}" for cost in self._cost)
         if self._level == self._max_level:
             return (
                 f" - **Name: {self._name}**\n"
@@ -268,25 +266,20 @@ class Cargo(Module):
 
     def add_resource(self, resource_name, amount):
         """Adds a resource to the module, creates a new one or stack with existing resource."""
+        resource_name = resource_name.lower()
         resource = self.resources.get(resource_name)
         if resource:
             resource.amount += amount
             self._capacity += amount
             return
 
-        resource_id = Resource.store(
-            name=resource_name, amount=amount, cargo_module_id=self.cargo_id
-        )
+        resource_id = Resource.store(name=resource_name, amount=amount, cargo_module_id=self.cargo_id)
         resource = Resource(resource_id)
         self._resources[resource_name] = resource
         self._capacity += resource.amount
 
     def __str__(self):
-        resources_str = "".join(
-            f"\n   - {resource}"
-            for resource in self.resources.values()
-            if resource.amount > 0
-        )
+        resources_str = "".join(f"\n   - {resource}" for resource in self.resources.values() if resource.amount > 0)
         return f"{super().__str__()} - Capacity: {resources_str} \n - Storage: {self.capacity}/{self._max_capacity} tons\n"
 
     @classmethod

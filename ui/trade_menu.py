@@ -4,6 +4,7 @@ import discord
 from typing import Any, Dict, List
 
 from player import Player
+from utils import get_resource_amount
 
 
 # TODO add default values for the inputs (0)
@@ -89,7 +90,7 @@ class TradeModal(ModalPaginator):
         resume_table = "Offer sent"
         await interaction.response.send_message(resume_table)
 
-        offer_paginator = OfferPaginator(player, self.recipient, self.modals, self.amount)
+        offer_paginator = OfferPaginator(player, recipient_player, self.modals, self.amount)
 
         # TODO UI dev add a little resume of the transaction and who proposed you the offers (same as aboveg ig)
         await self.recipient.send("You received a trade offer", view=offer_paginator)
@@ -126,9 +127,8 @@ class OfferPaginator(discord.ui.View):
         await interaction.response.send_message("Offer accepted", ephemeral=True)
 
     def distribute_resources(self) -> None:
-        recipient_player = Player.get(self.recipient.id)
         player_cargo = self.player.ship.modules["Cargo"]
-        recipient_cargo = recipient_player.ship.modules["Cargo"]
+        recipient_cargo = self.recipient_player.ship.modules["Cargo"]
 
         for modal in self.uppermodals:
             if modal == self.uppermodals[0]:
@@ -142,15 +142,10 @@ class OfferPaginator(discord.ui.View):
 
         if self.amount < 0:
             self.player.money += abs(self.amount)
-            recipient_player.money -= abs(self.amount)
+            self.recipient_player.money -= abs(self.amount)
         else:
             self.player.money -= abs(self.amount)
-            recipient_player.money += abs(self.amount)
-
-
-def get_resource_amount(cargo, resource_name: str) -> int:
-    resource = cargo.resources.get(resource_name)
-    return resource.amount if resource else 0
+            self.recipient_player.money += abs(self.amount)
 
 
 async def check_enough_resources(
