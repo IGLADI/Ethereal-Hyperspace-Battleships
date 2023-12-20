@@ -84,7 +84,7 @@ async def on_guild_join(guild):
         await create_roles(guild)
         await create_channels(guild)
     except Exception as e:
-        await channel.send("This bot can only run on community servers. Not on private servers! Bye!")
+        await channel.send("This bot can only run on community servers. Not on private servers! Bye!\n https://support.discord.com/hc/en-us/articles/360047132851-Enabling-Your-Community-Server")
         await guild.leave()
 
 # start the bot with the token in the config file
