@@ -109,9 +109,7 @@ class TradeModal(ModalPaginator):
         banner = SuccessBanner(text="Offer sent", user=interaction.user)
         await interaction.response.send_message(embed=banner.embed, ephemeral=True)
 
-        offer_paginator = OfferPaginator(
-            self.player, self.recipient_player, self.modals, self.amount, self
-        )
+        offer_paginator = OfferPaginator(self.player, self.recipient_player, self.modals, self.amount, self)
 
         resume_table = self.get_offer_table()
         banner = NormalBanner(text=f"You received a trade offer:\n\n{resume_table}", user=self.recipient)
@@ -160,7 +158,7 @@ class OfferPaginator(discord.ui.View):
 
     @discord.ui.button(label="Deny", style=discord.ButtonStyle.red)
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
-        banner = ErrorBanner(text="Offer denied", user= interaction.user)
+        banner = ErrorBanner(text="Offer denied", user=interaction.user)
         await interaction.response.send_message(embed=banner.embed, ephemeral=True)
         self.stop()
 
@@ -216,7 +214,9 @@ async def check_enough_resources_per_player(player, modals, interaction: discord
             for field in modal.children:
                 player_cargo = player.ship.modules["Cargo"]
                 if get_resource_amount(player_cargo, field.label) < int(field.value):
-                    banner = ErrorBanner(text=f"{player.id} doesn't have enough {field.label}", user=interaction.user)
+                    banner = ErrorBanner(
+                        text=f"{player.name} doesn't have enough {field.label}", user=interaction.user
+                    )
                     await interaction.response.send_message(embed=banner.embed, ephemeral=True)
                     return False
     return True
