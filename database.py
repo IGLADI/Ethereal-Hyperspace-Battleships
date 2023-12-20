@@ -1,6 +1,5 @@
 import mariadb
 import json
-import data
 
 
 def get_connection():

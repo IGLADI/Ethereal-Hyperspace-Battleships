@@ -3,7 +3,6 @@ import discord
 
 from typing import Any, Dict, List
 
-import data
 from player import Player
 
 
@@ -83,21 +82,14 @@ class TradeModal(ModalPaginator):
         player = Player.get(self.author_id)
         recipient_player = Player.get(self.recipient.id)
 
-        if (
-            await check_enough_resources(
-                player, recipient_player, self.modals, interaction
-            )
-            is False
-        ):
+        if await check_enough_resources(player, recipient_player, self.modals, interaction) is False:
             return
 
         # TODO print "ASK/OFFER", "RESOURCE_TYPE", "AMOUNT" (don't forget money) by UI dev
         resume_table = "Offer sent"
         await interaction.response.send_message(resume_table)
 
-        offer_paginator = OfferPaginator(
-            player, self.recipient, self.modals, self.amount
-        )
+        offer_paginator = OfferPaginator(player, self.recipient, self.modals, self.amount)
 
         # TODO UI dev add a little resume of the transaction and who proposed you the offers (same as aboveg ig)
         await self.recipient.send("You received a trade offer", view=offer_paginator)
@@ -113,9 +105,7 @@ class OfferPaginator(discord.ui.View):
         self.amount = amount
 
     @discord.ui.button(label="Accept", style=discord.ButtonStyle.green)
-    async def confirm(
-        self, interaction: discord.Interaction, button: discord.ui.Button
-    ):
+    async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
         # TODO for UI dev
         await self.accept_offer(interaction)
         self.stop()
@@ -127,19 +117,9 @@ class OfferPaginator(discord.ui.View):
         self.stop()
 
     async def accept_offer(self, interaction: discord.Interaction) -> None:
-        if (
-            await check_enough_resources(
-                self.player, self.recipient_player, self.uppermodals, interaction
-            )
-            is False
-        ):
+        if await check_enough_resources(self.player, self.recipient_player, self.uppermodals, interaction) is False:
             return
-        if (
-            await check_enough_money(
-                self.player, self.recipient_player, self.amount, interaction
-            )
-            is False
-        ):
+        if await check_enough_money(self.player, self.recipient_player, self.amount, interaction) is False:
             return
         self.distribute_resources()
         # TODO UI dev?
@@ -190,26 +170,18 @@ async def check_enough_resources(
         else:
             for field in modal.children:
                 if get_resource_amount(player_cargo, field.label) < int(field.value):
-                    await interaction.response.send_message(
-                        "You don't have enough resources to send.", ephemeral=True
-                    )
+                    await interaction.response.send_message("You don't have enough resources to send.", ephemeral=True)
                     return False
     return True
 
 
-async def check_enough_money(
-    player, recipient_player, amount, interaction: discord.Interaction
-) -> bool:
+async def check_enough_money(player, recipient_player, amount, interaction: discord.Interaction) -> bool:
     if amount < 0:
         if recipient_player.money < abs(amount):
-            await interaction.response.send_message(
-                "The recipient doesn't have enough money to send.", ephemeral=True
-            )
+            await interaction.response.send_message("The recipient doesn't have enough money to send.", ephemeral=True)
             return False
     else:
         if player.money < abs(amount):
-            await interaction.response.send_message(
-                "The sender doesn't have enough money to send.", ephemeral=True
-            )
+            await interaction.response.send_message("The sender doesn't have enough money to send.", ephemeral=True)
             return False
     return True

@@ -1,5 +1,5 @@
 from database import Database
-from item import Item, Resource
+from item import Resource
 
 
 _db = Database()
