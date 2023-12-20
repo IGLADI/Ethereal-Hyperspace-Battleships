@@ -63,7 +63,7 @@ class TradeCog(commands.Cog):
         sender.money = sender.money - amount_to_pay
         recipient.money = recipient.money + amount_to_pay
 
-        banner = SuccessBanner(text=f"You gave ${amount_to_pay} to {member_recipient.name}.", user=interaction.user)
+        banner = SuccessBanner(text=f"You gave ${amount_to_pay} to {recipient.name}.", user=interaction.user)
         await interaction.response.send_message(embed=banner.embed)
 
         message = f"{interaction.user.mention} gave you ${amount_to_pay}."

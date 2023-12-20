@@ -60,10 +60,10 @@ class GeneralCommands(commands.Cog):
             )
             return
 
-        Player.get(interaction.user.id)
+        player = Player.get(interaction.user.id)
 
         await interaction.response.send_message(
-            f"Welcome to Ethereal Hyperspace Battleships {interaction.user.name}!",
+            f"Welcome to Ethereal Hyperspace Battleships {player.name}!",
             ephemeral=True,
         )
 
