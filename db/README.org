@@ -23,3 +23,9 @@ A docker container is provided to run a database up and ready for use.
 #+begin_src shell
 ./install.sh remote
 #+end_src
+
+** Tables
+You can also only recreate the database with:
+#+begin_src shell
+  ./install.sh tables
+#+end_src

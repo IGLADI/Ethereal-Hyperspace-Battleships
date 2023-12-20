@@ -34,7 +34,7 @@ elif [ "$1" = "tables" ]
 then
     eval "$mariadb_command" < sql/tables.sql
 else
-    die 'usage: ./install.sh <docker|remote|table>'
+    die 'usage: ./install.sh <docker|remote|tables>'
 fi
 printf 'Succeeded.\n'
 
