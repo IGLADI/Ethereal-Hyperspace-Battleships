@@ -29,10 +29,10 @@ class Location:
         image_info = _db.location_image(self.x, self.y)
         if image_info == []:
             int_image = randrange(0, 4)
-            return f"assets/space/space{int_image}.jpg", "space"
+            return f"../assets/space/space{int_image}.jpg", "space"
         if image_info[0][0] == None:
             int_image = randrange(0, 9)
-            image = f"assets/planet/planet{int_image}.jpg"
+            image = f"../assets/planet/planet{int_image}.jpg"
             _db.set_location_image(self.x, self.y, image)
             return image, image_info[0][1]
         if image_info:
