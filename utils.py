@@ -5,12 +5,14 @@ from ui.simple_banner import ErrorBanner
 
 from database import Database
 
+import database
+_db = database.Database()
 
 async def check_registered(interaction: discord.Interaction) -> bool:
     """Check if a player is registered, if not sends an error message. Else run the function."""
-    db = Database()
 
-    if db.player_exists(interaction.user.id):
+async def check_player_exists(interaction):
+    if _db.player_exists(interaction.user.id):
         return True
 
     banner = ErrorBanner("You are not registered as a player.", interaction.user)
@@ -37,3 +39,6 @@ def get_resource_amount(cargo, resource_name: str) -> int:
     resource_name = resource_name.lower()
     resource = cargo.resources.get(resource_name)
     return resource.amount if resource else 0
+
+def send_bug_report(discord_id, bug_report):
+    _db.store_bug_report(discord_id, bug_report)

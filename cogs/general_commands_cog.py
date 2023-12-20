@@ -5,6 +5,7 @@ from discord.ext import commands
 from typing import Literal
 from mariadb import IntegrityError
 from player import Player
+from utils import send_bug_report
 from utils import check_registered
 
 class GeneralCommands(commands.Cog):
@@ -86,6 +87,22 @@ class GeneralCommands(commands.Cog):
             text=f"You are currently at {coordinates}, also known as {location_name}.", user=interaction.user
         )
         await interaction.response.send_message(embed=banner.embed, ephemeral=True)
+
+    @app_commands.command(name="bug_report", description="Report a bug")
+    async def bug_report(
+        self,
+        interaction: discord.Interaction,
+        bug_description: str,
+    ):
+        """Report a bug"""
+        await interaction.response.send_message("Sending Report", ephemeral=True)
+        await interaction.delete_original_response()
+
+        send_bug_report(interaction.user.id, bug_description)
+
+        await interaction.user.send(
+            f"Thank you for your bug report: {bug_description}. The team will take a look and fix this issue as soon as possible."
+        )
 
 
 async def setup(client: commands.Bot) -> None:
