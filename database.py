@@ -157,6 +157,15 @@ class Database:
         """
         results = self.get_results(statement, (x_pos - distance, x_pos + distance, y_pos - distance, y_pos + distance))
         return results if results else []
+    
+    def location_from_coordinates(self, x_pos, y_pos) -> str:
+        """Returns the location name from coordinates."""
+        statement = """
+        SELECT name FROM locations
+        WHERE location_x_pos = ? AND location_y_pos = ?
+        """
+        results = self.get_results(statement, (x_pos, y_pos))
+        return results[0][0] if results else None
 
     def fuel_module_fuel(self, module_id) -> int:
         """Return fuel in a fuel module by module_id"""

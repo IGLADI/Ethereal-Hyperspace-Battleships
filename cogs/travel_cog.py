@@ -41,8 +41,7 @@ class TravelCommands(commands.Cog):
         else:
             await asyncio.sleep(sleep)
             await interaction.followup.send(f"{player.id} arrived at ({x_coordinate}, {y_coordinate}).")
-
-    # TODO: implement ship.scan()
+            
     @app_commands.command(name="scan", description="Use your radar to scan the area")
     @app_commands.check(check_registered)
     async def scan(self, interaction: discord.Interaction):
@@ -50,8 +49,7 @@ class TravelCommands(commands.Cog):
         player = Player.get(interaction.user.id)
 
         found = player.scan(interaction.user.id)
-        await interaction.response.send_message(f"Scanned the area. Found {found} .", ephemeral=True)
-
+        await interaction.response.send_message(f"Scanned the area. Found {found} .", ephemeral=True)        
 
 async def setup(client: commands.Bot) -> None:
     await client.add_cog(TravelCommands(client))
