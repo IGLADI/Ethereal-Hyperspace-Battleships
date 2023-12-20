@@ -129,7 +129,7 @@ class TradeCog(commands.Cog):
         self,
         interaction: discord.Interaction,
         recipient: discord.Member,
-        send_or_receive_money: Literal["send", "receive"] = "send",
+        transaction_action: Literal["send", "receive"] = "send",
         amount: int = 0,
     ):
         sender_id = interaction.user.id
@@ -154,7 +154,7 @@ class TradeCog(commands.Cog):
             await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
 
-        if send_or_receive_money == "send":
+        if transaction_action == "send":
             amount = -amount
 
         if amount < 0:

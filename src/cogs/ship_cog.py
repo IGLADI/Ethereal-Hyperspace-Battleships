@@ -48,9 +48,9 @@ class ShipCommands(commands.Cog):
         )
         await interaction.response.send_message(embed=banner.embed, ephemeral=True)
 
-    @app_commands.command(name="upgrade_ship", description="Upgrade a module")
+    @app_commands.command(name="upgrade_module", description="Upgrade a module")
     @app_commands.check(check_registered)
-    async def upgrade_ship(
+    async def upgrade_module(
         self,
         interaction: discord.Interaction,
         module_name: Literal[
@@ -138,7 +138,7 @@ class ShipCommands(commands.Cog):
 
         if on and not generator_status:
             player.ship.modules["EnergyGenerator"].booting = True
-            banner = LoadingBanner(text="Booting up the generator...\n\n░░░░░░░░░░ 0%", user=interaction.user)
+            banner = LoadingBanner(text="", user=interaction.user)
             await interaction.response.send_message(embed=banner.embed)
             for percent in range(0, 101, 10):
                 bar = "█" * (percent // 10) + "░" * ((100 - percent) // 10)
@@ -156,7 +156,7 @@ class ShipCommands(commands.Cog):
         elif not on and generator_status:
             player.ship.modules["EnergyGenerator"].booting = True
             banner = LoadingBanner(
-                text="Shutting down the generator...\n\n██████████ 100%",
+                text="",
                 user=interaction.user,
             )
             await interaction.response.send_message(embed=banner.embed)
