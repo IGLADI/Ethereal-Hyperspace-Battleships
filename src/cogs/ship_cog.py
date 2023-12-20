@@ -5,7 +5,7 @@ from discord.ext import commands
 
 from typing import Literal
 from player import Player
-from utils import check_registered
+from utils import check_player_exists
 
 import data
 
@@ -15,7 +15,7 @@ class ShipCommands(commands.Cog):
         self.client = client
 
     @app_commands.command(name="ship_info", description="Get info on your ship")
-    @app_commands.check(check_registered)
+    @app_commands.check(check_player_exists)
     async def ship_info(self, interaction: discord.Interaction):
         player = Player.get(interaction.user.id)
         ship = player.ship
@@ -30,7 +30,7 @@ class ShipCommands(commands.Cog):
     @app_commands.command(
         name="inventory", description="Get info on your cargo and it's contents"
     )
-    @app_commands.check(check_registered)
+    @app_commands.check(check_player_exists)
     async def cargo_info(self, interaction: discord.Interaction):
         player = Player.get(interaction.user.id)
         ship = player.ship
@@ -44,7 +44,7 @@ class ShipCommands(commands.Cog):
         await interaction.response.send_message(ship_message, ephemeral=True)
 
     @app_commands.command(name="upgrade_ship", description="Upgrade a module")
-    @app_commands.check(check_registered)
+    @app_commands.check(check_player_exists)
     async def upgrade_ship(
         self,
         interaction: discord.Interaction,
@@ -83,7 +83,7 @@ class ShipCommands(commands.Cog):
 
     # ! For debugging purposes
     @app_commands.command(name="add_cargo", description="For debugging purposes")
-    @app_commands.check(check_registered)
+    @app_commands.check(check_player_exists)
     async def add_cargo(
         self,
         interaction: discord.Interaction,
@@ -103,7 +103,7 @@ class ShipCommands(commands.Cog):
     @app_commands.command(
         name="toggle_energy_generator", description="Toggle on of the energy generator"
     )
-    @app_commands.check(check_registered)
+    @app_commands.check(check_player_exists)
     async def toggle_energy_generator(self, interaction: discord.Interaction, on: bool):
         player = Player.get(interaction.user.id)
         generator_status = player.ship.modules["EnergyGenerator"].is_on

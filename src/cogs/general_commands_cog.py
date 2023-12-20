@@ -6,7 +6,7 @@ from typing import Literal
 from mariadb import IntegrityError
 from player import Player
 from utils import send_bug_report
-from utils import check_registered
+from utils import check_player_exists
 
 
 class GeneralCommands(commands.Cog):
@@ -82,7 +82,7 @@ class GeneralCommands(commands.Cog):
     # Checked for race condition (spamming the command to multiply money because that money can't go under 0)
     # but discord seems to already block it and only start the new command once the first one has been processed
     @app_commands.command(name="pay", description="Gift money to a player")
-    @app_commands.check(check_registered)
+    @app_commands.check(check_player_exists)
     async def pay(
         self,
         interaction: discord.Interaction,
@@ -127,7 +127,7 @@ class GeneralCommands(commands.Cog):
         )
 
     @app_commands.command(name="balance", description="Check your balance")
-    @app_commands.check(check_registered)
+    @app_commands.check(check_player_exists)
     async def balance(self, interaction: discord.Interaction):
         player = Player.get(interaction.user.id)
         balance = player.money
@@ -176,7 +176,7 @@ class GeneralCommands(commands.Cog):
         )
 
     @app_commands.command(name="where_am_i", description="Get your location info")
-    @app_commands.check(check_registered)
+    @app_commands.check(check_player_exists)
     async def where_am_i(self, interaction: discord.Interaction):
         """Returns the location of the player"""
         player = Player.get(interaction.user.id)

@@ -7,7 +7,8 @@ import random
 
 from data import RESOURCE_NAMES
 from player import Player
-from utils import check_registered
+from utils import check_player_exists
+from location import Location
 
 
 class MineCommands(commands.Cog):
@@ -18,20 +19,24 @@ class MineCommands(commands.Cog):
     # Copper: 35% | Silver: 30% |Gold: 25% | Uranium: 7% | Black Matter: 3%
     # TODO mine X times (avoid spamming /mine)
     @app_commands.command(name="mine", description="Mine a random resource")
-    @app_commands.check(check_registered)
+    @app_commands.check(check_player_exists)
     async def mine(self, interaction: discord.Interaction, mining_sessions: int = 1):
         player = Player.get(interaction.user.id)
-        
+
         if player.ship.energy < 10 * mining_sessions:
             await interaction.response.send_message(
                 "You don't have enough energy.", ephemeral=True
             )
             return
-        
-        await interaction.response.send_message(
-                f"You started mining.", ephemeral=True
+
+        if Location(player.x_pos, player.y_pos).is_planet() == None:
+            await interaction.response.send_message(
+                "You can only mine on a planet.", ephemeral=True
             )
-        for _ in range(mining_sessions):
+            return
+
+        await interaction.response.send_message("Mining...", ephemeral=True)
+        for i in range(mining_sessions):
             # TODO mining module changes energy efficiency
             player.ship.energy -= 10
             mining_bonus = player.ship.modules["MiningModule"].mining_bonus
