@@ -161,3 +161,4 @@ cython_debug/
 
 config.json
 .vscode/
+assets/
