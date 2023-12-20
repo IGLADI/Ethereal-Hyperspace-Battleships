@@ -91,9 +91,9 @@ class GeneralCommands(commands.Cog):
     async def register(
         self,
         interaction: discord.Interaction,
-        player_class: Literal["martian", "dwarf", "droid"],
+        player_class: Literal["martian", "dwarf", "droid"], # gives player the option to choose between three classes
         guild_name: Literal[
-            "The Federation", "The Empire", "The Alliance", "The Independents"
+            "The Federation", "The Empire", "The Alliance", "The Independents" # gives player the option to choose between four guilds
         ],
     ):
         if Player.exists(interaction.user.id):
@@ -119,7 +119,10 @@ class GeneralCommands(commands.Cog):
         Player.get(interaction.user.id)
         role = discord.utils.get(interaction.guild.roles, name=guild_name)
         if role:
-            await interaction.user.add_roles(role)
+            await interaction.user.add_roles(role) 
+        else:
+            raise NotImplementedError
+
         await interaction.response.send_message(
             f"Welcome to Ethereal Hyperspace Battleships {interaction.user.name}!\n You are now registered as a {player_class} in {guild_name}.",
             ephemeral=True,
@@ -129,7 +132,7 @@ class GeneralCommands(commands.Cog):
     @app_commands.check(check_registered)
     async def where_am_i(self, interaction: discord.Interaction):
         """Returns the location of the player"""
-        player = Player.get(interaction.user.id)
+        player = Player.get(interaction.user.id) 
         coordinates = (player.x_pos, player.y_pos)
         location_name = player.location_name()
         await interaction.response.send_message(
