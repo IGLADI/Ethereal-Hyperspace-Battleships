@@ -108,8 +108,6 @@ class TradeCog(commands.Cog):
     ):
         sender_id = interaction.user.id
         recipient_id = recipient.id
-        print("recipient_id:", recipient_id)
-        print("Player.exists(recipient_id):", Player.exists(recipient_id))
 
         if sender_id == recipient_id:
             await interaction.response.send_message("You can't trade with yourself.", ephemeral=True)

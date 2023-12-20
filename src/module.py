@@ -73,7 +73,6 @@ class Module:
             if resource.amount == 0:
                 cargo.resources.pop(resource_name)
 
-        print("hehe")
         self.level += 1
 
     def can_upgrade(self, cargo) -> bool:
