@@ -115,12 +115,12 @@ class ShipCommands(commands.Cog):
 
     @app_commands.command(name="toggle_energy_generator", description="Toggle on of the energy generator")
     @app_commands.check(check_registered)
-    async def toggle_energy_generator(self, interaction: discord.Interaction, on: Literal["on", "off"]):
+    async def toggle_energy_generator(self, interaction: discord.Interaction, toggle: Literal["on", "off"]):
 
-        if on == "on":
-            on = True
-        elif on == "off":
-            on = False
+        if toggle == "on":
+            toggle = True
+        elif toggle == "off":
+            toggle = False
 
         player = Player.get(interaction.user.id)
         if  player.ship.modules["EnergyGenerator"].booting:
@@ -129,14 +129,14 @@ class ShipCommands(commands.Cog):
             return
         
         generator_status = player.ship.modules["EnergyGenerator"].is_on
-        if on is generator_status:
+        if toggle is generator_status:
             banner = ErrorBanner(
                 text="Generator is already " + ("on" if generator_status else "off"), user=interaction.user
             )
             await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
 
-        if on and not generator_status:
+        if toggle and not generator_status:
             player.ship.modules["EnergyGenerator"].booting = True
             banner = LoadingBanner(text="", user=interaction.user)
             await interaction.response.send_message(embed=banner.embed)
@@ -153,7 +153,7 @@ class ShipCommands(commands.Cog):
             await interaction.edit_original_response(embed=banner.embed)
             player.ship.modules["EnergyGenerator"].turn_on()
             player.ship.modules["EnergyGenerator"].booting = False
-        elif not on and generator_status:
+        elif not toggle and generator_status:
             player.ship.modules["EnergyGenerator"].booting = True
             banner = LoadingBanner(
                 text="",
