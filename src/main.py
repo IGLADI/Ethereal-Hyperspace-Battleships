@@ -61,11 +61,6 @@ class Client(commands.Bot):
             print(e)
         print("--------------------------------------------")
 
-        #! temporary data storage untill we have a database
-        planets["C4MPU5 K441"] = Planet("C4MPU5 K441", 0, 0)
-        planets["Earth"] = Planet("Earth", 50, 0)
-
-
 # load the bot token from config.json KEEP THIS TOKEN PRIVATE (gitignore)
 with open("config.json", "r") as f:
     data = json.load(f)
@@ -85,9 +80,12 @@ async def on_guild_join(guild):
             # TODO should have a complete intro message
             await channel.send("Hello! Welcome to Ethereal Hyperspace Battleships type /help for more info.")
         break
-    await create_roles(guild)
-    await create_channels(guild)
-
+    try:
+        await create_roles(guild)
+        await create_channels(guild)
+    except Exception as e:
+        await channel.send("This bot can only run on community servers. Not on private servers! Bye!")
+        await guild.leave()
 
 # start the bot with the token in the config file
 client.run(TOKEN)
