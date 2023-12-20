@@ -44,8 +44,6 @@ class GeneralCommands(commands.Cog):
             await interaction.response.send_message("You are already registered as a player.", ephemeral=True)
             return
 
-        print("interaction.user.id:", interaction.user.id)
-
         try:
             Player.register(
                 interaction.user.id,
