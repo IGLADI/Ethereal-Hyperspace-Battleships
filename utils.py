@@ -1,11 +1,15 @@
+import discord
+
 import data
 from ui.simple_banner import ErrorBanner
 
-import database
+from database import Database
 
 
-async def check_player_exists(interaction):
-    db = database.Database()
+async def check_registered(interaction: discord.Interaction) -> bool:
+    """Check if a player is registered, if not sends an error message. Else run the function."""
+    db = Database()
+
     if db.player_exists(interaction.user.id):
         return True
 

@@ -9,14 +9,7 @@ from typing import Literal
 from player import Player
 
 from tabulate import tabulate
-
-async def check_registered(interaction: discord.Interaction) -> bool:
-    """Check if a player is registered, if not sends an error message. Else run the function."""
-    if not Player.exists(interaction.user.id):
-        banner = ErrorBanner(text="You are not registered as a player.", user=interaction.user)
-        await interaction.response.send_message(embed=banner.embed, ephemeral=True)
-        return False
-    return True
+from utils import check_registered
 
 
 class ShipCommands(commands.Cog):

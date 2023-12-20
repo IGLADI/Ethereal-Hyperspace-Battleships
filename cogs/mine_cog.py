@@ -9,16 +9,7 @@ from ui.simple_banner import ErrorBanner, SuccessBanner
 from utils import check_player_exists
 from data import RESOURCE_NAMES
 from player import Player
-
-
-async def check_registered(interaction: discord.Interaction) -> bool:
-    """Check if a player is registered, if not sends an error message. Else run the function."""
-    if not Player.exists(interaction.user.id):
-        await interaction.response.send_message(
-            "You are not registered as a player.", ephemeral=True
-        )
-        return False
-    return True
+from utils import check_registered
 
 
 class MineCommands(commands.Cog):
