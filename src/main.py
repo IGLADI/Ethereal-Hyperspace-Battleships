@@ -8,6 +8,7 @@ from data import planets
 from planet import Planet
 
 from create_roles import create_roles
+from ui.simple_banner import SimpleBanner
 
 # check discord.py docs AND discord developer portal docs, please use cogs and slash commands (discord.py 2.0)
 # https://discordpy.readthedocs.io/en/stable/interactions/api.html
@@ -15,15 +16,8 @@ from create_roles import create_roles
 
 # TODO add some eastereggs (42)
 
-# TODO implement nice messages (temporary messages have been made for dev but need to be cleaned up for final version)
-# TODO add asci emojis/tabulate/figlet/... to the msgs (also colors?)
-
 # ! check for racing condition (buying something while betting ect) => use get_betted_amount(interaction) & ...
 # discord seems to already block it and only process one command at a time per user
-
-# TODO save all the data every minute in a json file and when the bot is started again load the data from the json
-# ? OR directly save the data in a json file and load it for each action (might be slow)
-# ? or use a (local) database
 
 
 class Client(commands.Bot):
@@ -41,6 +35,7 @@ class Client(commands.Bot):
             "cogs.casino_games.race_game_cog",
             "cogs.ship_cog",
             "cogs.mine_cog",
+            "cogs.trade_cog",
         ]
 
     # this overwrites the default sync setup (used by self.tree.sync in on_ready)
@@ -60,7 +55,7 @@ class Client(commands.Bot):
             print(e)
         print("--------------------------------------------")
 
-        #! temporary data storage untill we have a database
+        # ! temporary data storage untill we have a database
         planets["C4MPU5 K441"] = Planet("C4MPU5 K441", 0, 0)
         planets["Earth"] = Planet("Earth", 50, 0)
 
@@ -82,7 +77,8 @@ async def on_guild_join(guild):
     for channel in guild.text_channels:
         if channel.permissions_for(guild.me).send_messages:
             # TODO should have a complete intro message
-            await channel.send("Hello! Welcome to Ethereal Hyperspace Battleships type /help for more info.")
+            banner = SimpleBanner(text="Hello! Welcome to Ethereal Hyperspace Battleships type /help for more info.")
+            await channel.send(embed=banner.embed)
         break
     await create_roles(guild)
     await create_channels(guild)
