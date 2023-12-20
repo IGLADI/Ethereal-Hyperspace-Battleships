@@ -48,7 +48,7 @@ class TradeCog(commands.Cog):
             return
 
         if not Player.exists(recipient_id):
-            banner = ErrorBanner(text="You can't give money to yourself.", user=interaction.user)
+            banner = ErrorBanner(text="The recipient doesn't have an account.", user=interaction.user)
             await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
 
