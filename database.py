@@ -167,6 +167,25 @@ class Database:
         """
         results = self.get_results(statement, (x_pos, y_pos))
         return results[0][0] if results else None
+    
+    def location_image(self, x_pos, y_pos) -> str:
+        """Returns the location image from coordinates."""
+        statement = """
+        SELECT image, name FROM locations
+        WHERE location_x_pos = ? AND location_y_pos = ?
+        """
+        results = self.get_results(statement, (x_pos, y_pos))
+        return results if results else []
+    
+    def set_location_image(self, x_pos, y_pos, image):
+        """Set the location image from coordinates."""
+        self._cursor.execute(
+            """
+            UPDATE locations SET image = ?
+            WHERE location_x_pos = ? AND location_y_pos = ?
+            """,
+            (image, x_pos, y_pos),
+        )
 
     def fuel_module_fuel(self, module_id) -> int:
         """Return fuel in a fuel module by module_id"""

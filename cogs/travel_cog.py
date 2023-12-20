@@ -5,7 +5,7 @@ from discord.ext import commands
 
 from typing import Literal
 from player import Player
-
+from location import Location
 import asyncio
 from utils import check_player_exists
 from player import Player
@@ -40,7 +40,8 @@ class TravelCommands(commands.Cog):
             return
         else:
             await asyncio.sleep(sleep)
-            await interaction.followup.send(f"{player.id} arrived at ({x_coordinate}, {y_coordinate}).")
+            image, image_name = Location(x_coordinate, y_coordinate).get_image()
+            await interaction.followup.send(f"{player.id} arrived at {image_name}: ({x_coordinate}, {y_coordinate}).\n", file=discord.File(image))
             
     @app_commands.command(name="scan", description="Use your radar to scan the area")
     @app_commands.check(check_registered)

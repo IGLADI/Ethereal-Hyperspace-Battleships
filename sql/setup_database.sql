@@ -10,7 +10,8 @@ CREATE TABLE `locations` (
     `location_x_pos` INT(11) NOT NULL,
     `location_y_pos` INT(11) NOT NULL,
     CONSTRAINT `PK_locations` PRIMARY KEY (`location_x_pos`, `location_y_pos`),
-    `name` VARCHAR(255) NOT NULL UNIQUE
+    `name` VARCHAR(255) NOT NULL UNIQUE,
+    `image` VARCHAR(255) NULL DEFAULT NULL
 );
 
 CREATE TABLE `planets` (
@@ -147,12 +148,13 @@ CREATE TABLE `contributions` (
 
 -- Setup default values -------------------------------------------------------
 -- planets
-INSERT INTO `locations` (`location_x_pos`, `location_y_pos`, `name`) VALUES
-(0, 0, 'Earth'),
-(0, 5, 'Mars'),
-(-5, 5, 'Venus'),
-(-5, 0, 'Jupiter'),
-(-5, -5, 'Mercury');
+INSERT INTO `locations` (`location_x_pos`, `location_y_pos`, `name`, `image`) VALUES
+(0, 0, 'C4MPU5 K441', 'assets/planet/c4mpu5_k441.jpg'),
+(0, 5, 'Mars', 'assets/planet/mars.jpg'),
+(-5, 5, 'Venus', 'assets/planet/venus.jpg'),
+(-5, 0, 'Jupiter', 'assets/planet/jupiter.jpg'),
+(-5, -5, 'Mercury', 'assets/planet/mercury.jpg');
+
 -- inserting planet ids manually
 INSERT INTO `planets` VALUES
 (1, 0, 0, 0),
