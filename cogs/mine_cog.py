@@ -6,7 +6,6 @@ import math
 import random
 
 from ui.simple_banner import ErrorBanner, SuccessBanner
-from utils import check_player_exists
 from data import RESOURCE_NAMES
 from player import Player
 from utils import check_registered

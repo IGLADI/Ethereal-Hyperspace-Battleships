@@ -4,7 +4,6 @@ import discord
 from discord.ext import commands
 
 from ui.simple_banner import ErrorBanner, LoadingBanner, NormalBanner, SuccessBanner
-from utils import check_player_exists
 from typing import Literal
 from player import Player
 
@@ -93,8 +92,6 @@ class ShipCommands(commands.Cog):
         resource: Literal["Rock", "Copper", "Silver", "Gold", "Uranium", "Black Matter"],
         amount: int,
     ):
-        if await check_player_exists(interaction) is False:
-            return
 
         player = Player.get(interaction.user.id)
         resource_name = resource.lower()
@@ -117,9 +114,8 @@ class ShipCommands(commands.Cog):
             )
 
     @app_commands.command(name="toggle_energy_generator", description="Toggle on of the energy generator")
+    @app_commands.check(check_registered)
     async def toggle_energy_generator(self, interaction: discord.Interaction, on: Literal["on", "off"]):
-        if await check_player_exists(interaction) is False:
-            return
 
         if on == "on":
             on = True

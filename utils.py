@@ -8,17 +8,14 @@ from database import Database
 import database
 _db = database.Database()
 
-async def check_registered(interaction: discord.Interaction) -> bool:
-    """Check if a player is registered, if not sends an error message. Else run the function."""
 
-async def check_player_exists(interaction):
+async def check_registered(interaction: discord.Interaction) -> bool:
     if _db.player_exists(interaction.user.id):
         return True
 
     banner = ErrorBanner("You are not registered as a player.", interaction.user)
     await interaction.response.send_message(embed=banner.embed, ephemeral=True)
     return False
-
 
 # TODO make this work with negative betts (with the multiplier)
 def get_betted_amount(discord_id):

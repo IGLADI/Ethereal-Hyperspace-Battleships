@@ -5,8 +5,8 @@ from discord.ext import commands
 from typing import Literal
 from mariadb import IntegrityError
 from player import Player
-from utils import send_bug_report
-from utils import check_registered
+from ui.simple_banner import NormalBanner, ErrorBanner, SuccessBanner
+from utils import send_bug_report, get_betted_amount, check_registered
 
 class GeneralCommands(commands.Cog):
     def __init__(self, client: commands.Bot):
@@ -31,8 +31,6 @@ class GeneralCommands(commands.Cog):
     @app_commands.command(name="balance", description="Check your balance")
     @app_commands.check(check_registered)
     async def balance(self, interaction: discord.Interaction):
-        if await check_player_exists(interaction) is False:
-            return
 
         player = Player.get(interaction.user.id)
         betted_amount = get_betted_amount(interaction)

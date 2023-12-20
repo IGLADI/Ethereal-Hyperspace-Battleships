@@ -5,7 +5,6 @@ from discord.ext import commands
 from typing import Literal
 
 from ui.trade_menu import TradeModal
-from utils import check_player_exists
 from ui.simple_banner import ErrorBanner, SuccessBanner
 from player import Player
 from utils import get_resource_amount
