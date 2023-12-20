@@ -1,7 +1,6 @@
--- Create user
-DROP USER IF EXISTS 'ethb'@'localhost';
-CREATE USER 'ethb'@'localhost' IDENTIFIED BY 'space123';
-GRANT ALL PRIVILEGES ON `ethbdb`.* TO 'ethb'@'localhost' WITH GRANT OPTION;
+DROP USER IF EXISTS 'ethb'@'%';
+CREATE USER 'ethb'@'%' IDENTIFIED BY 'space123';
+GRANT ALL PRIVILEGES ON `ethbdb`.* TO 'ethb'@'%' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
 
 -- From sql secure installation -----------------------------------------------

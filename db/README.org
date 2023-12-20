@@ -1,0 +1,31 @@
+* Database
+** Preamble
+*** Defaults
+These scripts will assume default configuration.  Edit the secrets!!!
+
+*** Client
+If you want to interact with the console, you can use `mariadb` from
+the cli.
+
+*** Linux
+The local installation only works on linux.
+
+** Installation
+*** Local
+To run the database on a local running mariadb
+#+begin_src shell
+./install.sh local
+#+end_src
+NOTE: you need mariadb-server version >= 10.5.0
+
+*** Docker
+A docker container is provided to run a database up and ready for use.
+#+begin_src shell
+./install.sh remote
+#+end_src
+
+** Tables
+You can also only recreate the database with:
+#+begin_src shell
+  ./install.sh tables
+#+end_src

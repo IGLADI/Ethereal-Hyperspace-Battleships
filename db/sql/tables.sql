@@ -62,9 +62,7 @@ CREATE TABLE `reports` (
     CONSTRAINT `PK__reports` PRIMARY KEY (`report_id`),
     `content` TEXT NOT NULL,
     `creation_time` TIMESTAMP DEFAULT CURRENT_TIME,
-    `player_id` INT(11) NOT NULL,
-    CONSTRAINT `FK__players__reports` FOREIGN KEY (`player_id`)
-	    REFERENCES `players` (`player_id`)
+    `discord_id` DECIMAL(32) NOT NULL
 );
 
 CREATE TABLE `polls` (
