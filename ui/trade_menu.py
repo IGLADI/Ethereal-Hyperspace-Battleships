@@ -4,10 +4,11 @@ from discord.ext.modal_paginator import CustomButton
 import discord_colorize
 
 from typing import Any, Dict, List
-
 from tabulate import tabulate
 
-import data
+from player import Player
+from ui.simple_banner import ErrorBanner, NormalBanner, SuccessBanner
+from utils import get_resource_amount
 
 
 # TODO add default values for the inputs (0)
@@ -16,7 +17,7 @@ class TradeModal(ModalPaginator):
         self,
         inputs: List[Dict[str, Any]],
         amount,
-        recipiant: discord.Member,
+        recipient: discord.Member,
         *,
         author_id: int,
         **kwargs: Any,
@@ -28,7 +29,7 @@ class TradeModal(ModalPaginator):
         super().__init__(buttons=buttons, author_id=author_id, **kwargs)
         self.inputs = inputs
         self.amount = amount
-        self.recipiant = recipiant
+        self.recipient = recipient
 
         for data_input in self.inputs:
             title: str = data_input["title"]
@@ -78,12 +79,14 @@ class TradeModal(ModalPaginator):
                     total_resources += value
 
         except ValueError:
-            await interaction.response.send_message("Invalid input", ephemeral=True)
+            banner = ErrorBanner(text="Invalid input", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
         else:
             if total_resources == 0:
                 await interaction.response.send_message(
-                    "You can't send an empty offer, if you want to send money use /pay.", ephemeral=True
+                    "You can't send an empty offer, if you want to send money use /pay.",
+                    ephemeral=True,
                 )
                 return
 
@@ -97,23 +100,25 @@ class TradeModal(ModalPaginator):
                     )
                     return
 
-        self.player = data.players[interaction.user]
-        self.recipiant_player = data.players[self.recipiant]
+        self.player = Player.get(self.author_id)
+        self.recipient_player = Player.get(self.recipient.id)
 
-        if await check_enough_resources(self.player, self.recipiant_player, self.modals, interaction) is False:
+        if await check_enough_resources(self.player, self.recipient_player, self.modals, interaction) is False:
             return
 
-        await interaction.response.send_message("Offer sent")
+        banner = SuccessBanner(text="Offer sent", user=interaction.user)
+        await interaction.response.send_message(embed=banner.embed, ephemeral=True)
 
         offer_paginator = OfferPaginator(
-            self.player, self.recipiant_player, self.modals, self.amount, interaction, self
+            self.player, self.recipient_player, self.modals, self.amount, self
         )
 
         resume_table = self.get_offer_table()
-        await self.recipiant.send(f"You received a trade offer:\n\n{resume_table}", view=offer_paginator)
+        banner = NormalBanner(text=f"You received a trade offer:\n\n{resume_table}", user=self.recipient)
+        await self.recipient.send(embed=banner.embed, view=offer_paginator)
 
     def get_offer_table(self) -> str:
-        message = f"Trade between {self.interaction.user.mention} and {self.recipiant.mention}:\n"
+        message = f"Trade between {self.interaction.user.mention} and {self.recipient.mention}\n"
         headers = ["RESOURCE", "ASK", "OFFER"]
         values = []
         try:
@@ -139,14 +144,13 @@ class TradeModal(ModalPaginator):
 
 
 class OfferPaginator(discord.ui.View):
-    def __init__(self, player, recipiant_player, uppermodals, amount, og_interaction, upper_self, *args, **kwargs):
+    def __init__(self, player, recipiant_player, uppermodals, amount, upper_self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.value = None
         self.player = player
-        self.recipiant_player = recipiant_player
+        self.recipient_player = recipiant_player
         self.uppermodals = uppermodals
         self.amount = amount
-        self.og_interaction = og_interaction
         self.upper_self = upper_self
 
     @discord.ui.button(label="Accept", style=discord.ButtonStyle.green)
@@ -156,42 +160,49 @@ class OfferPaginator(discord.ui.View):
 
     @discord.ui.button(label="Deny", style=discord.ButtonStyle.red)
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.send_message("Offer denied", ephemeral=True)
+        banner = ErrorBanner(text="Offer denied", user= interaction.user)
+        await interaction.response.send_message(embed=banner.embed, ephemeral=True)
         self.stop()
 
     async def accept_offer(self, interaction: discord.Interaction) -> None:
-        if await check_enough_resources(self.player, self.recipiant_player, self.uppermodals, interaction) is False:
+        if await check_enough_resources(self.player, self.recipient_player, self.uppermodals, interaction) is False:
             return
-        if await check_enough_money(self.player, self.recipiant_player, self.amount, interaction) is False:
+        if await check_enough_money(self.player, self.recipient_player, self.amount, interaction) is False:
             return
         self.distribute_resources()
-        await interaction.response.send_message("Offer accepted", ephemeral=True)
-        await self.og_interaction.user.send(
-            f"{interaction.user.mention} accepted your offer:\n\n{self.upper_self.get_offer_table()}"
-        )
+        banner = SuccessBanner(text="Offer accepted", user=interaction.user)
+        await interaction.response.send_message(embed=banner.embed, ephemeral=True)
+        banner = SuccessBanner(text="Offer accepted", user=interaction.user)
+        await self.recipient_player.user.send(embed=banner.embed)
 
     def distribute_resources(self) -> None:
+        player_cargo = self.player.ship.modules["Cargo"]
+        recipient_cargo = self.recipient_player.ship.modules["Cargo"]
+
         for modal in self.uppermodals:
             if modal == self.uppermodals[0]:
                 for field in modal.children:
-                    self.recipiant_player.ship.modules[5].remove_resource(field.label, int(field.value))
-                    self.player.ship.modules[5].add_resource(field.label, int(field.value))
+                    recipient_cargo.add_resource(field.label, -1 * int(field.value))
+                    player_cargo.add_resource(field.label, int(field.value))
             else:
                 for field in modal.children:
-                    self.player.ship.modules[5].remove_resource(field.label, int(field.value))
-                    self.recipiant_player.ship.modules[5].add_resource(field.label, int(field.value))
+                    player_cargo.add_resource(field.label, -1 * int(field.value))
+                    recipient_cargo.add_resource(field.label, int(field.value))
+
         if self.amount < 0:
             self.player.money += abs(self.amount)
-            self.recipiant_player.money -= abs(self.amount)
+            self.recipient_player.money -= abs(self.amount)
         else:
             self.player.money -= abs(self.amount)
-            self.recipiant_player.money += abs(self.amount)
+            self.recipient_player.money += abs(self.amount)
 
 
-async def check_enough_resources(player, recipiant_player, modals, interaction: discord.Interaction) -> bool:
+async def check_enough_resources(
+    player: Player, recipient_player: Player, modals, interaction: discord.Interaction
+) -> bool:
     for modal in modals:
         if modal == modals[0]:
-            if not await check_enough_resources_per_player(recipiant_player, modals, interaction):
+            if not await check_enough_resources_per_player(recipient_player, modals, interaction):
                 return False
         else:
             if not await check_enough_resources_per_player(player, modals, interaction):
@@ -203,21 +214,23 @@ async def check_enough_resources_per_player(player, modals, interaction: discord
     for modal in modals:
         if modal == modals[0]:
             for field in modal.children:
-                if player.ship.modules[5].get_resource_amount(field.label) < int(field.value):
-                    await interaction.response.send_message(
-                        f"{player.id} doesn't have enough {field.label}", ephemeral=True
-                    )
+                player_cargo = player.ship.modules["Cargo"]
+                if get_resource_amount(player_cargo, field.label) < int(field.value):
+                    banner = ErrorBanner(text=f"{player.id} doesn't have enough {field.label}", user=interaction.user)
+                    await interaction.response.send_message(embed=banner.embed, ephemeral=True)
                     return False
     return True
 
 
-async def check_enough_money(player, recipiant_player, amount, interaction: discord.Interaction) -> bool:
+async def check_enough_money(player, recipient_player, amount, interaction: discord.Interaction) -> bool:
     if amount < 0:
-        if recipiant_player.money < abs(amount):
-            await interaction.response.send_message("The recipiant doesn't have enough money to send.", ephemeral=True)
+        if recipient_player.money < abs(amount):
+            banner = ErrorBanner(text="The recipient doesn't have enough money to send.", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return False
     else:
         if player.money < abs(amount):
-            await interaction.response.send_message("The sender doesn't have enough money to send.", ephemeral=True)
+            banner = ErrorBanner(text="You don't have enough money to send.", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return False
     return True

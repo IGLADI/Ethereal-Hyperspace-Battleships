@@ -4,10 +4,20 @@ from discord.ext import commands
 
 from typing import Literal
 
-import data
 from ui.trade_menu import TradeModal
 from utils import check_player_exists
 from ui.simple_banner import ErrorBanner, SuccessBanner
+from player import Player
+from utils import get_resource_amount
+
+
+async def check_registered(interaction: discord.Interaction) -> bool:
+    """Check if a player is registered, if not sends an error message. Else run the function."""
+    if not Player.exists(interaction.user.id):
+        banner = ErrorBanner(text="You are not registered as a player.", user=interaction.user)
+        await interaction.response.send_message(embed=banner.embed, ephemeral=True)
+        return False
+    return True
 
 
 class TradeCog(commands.Cog):
@@ -18,75 +28,104 @@ class TradeCog(commands.Cog):
     # Checked for race condition (spamming the command to multiply money because that money can't go under 0)
     # but discord seems to already block it and only start the new command once the first one has been processed
     @app_commands.command(name="pay", description="Gift money to a player")
-    async def pay(self, interaction: discord.Interaction, amount_to_pay: int, member_recipient: discord.Member):
-        if await check_player_exists(interaction) is False:
+    @app_commands.check(check_registered)
+    async def pay(
+        self,
+        interaction: discord.Interaction,
+        amount_to_pay: int,
+        member_recipient: discord.Member,
+    ):
+        sender_id = interaction.user.id
+        recipient_id = member_recipient.id
+
+        if sender_id == recipient_id:
+            banner = ErrorBanner(text="You can't give money to yourself.", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
+
         if amount_to_pay <= 0:
             banner = ErrorBanner(text="Please provide a positive amount of money.", user=interaction.user)
             await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
-        if not await check_recipiant_has_an_account(member_recipient, interaction):
-            return
-        sender = data.players[interaction.user]
-        recipient = data.players[member_recipient]
-        if sender == recipient:
+
+        if not Player.exists(recipient_id):
             banner = ErrorBanner(text="You can't give money to yourself.", user=interaction.user)
             await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
+
+        sender = Player.get(sender_id)
+        recipient = Player.get(recipient_id)
+
         if sender.money < amount_to_pay:
             banner = ErrorBanner(text="You don't have enough money.", user=interaction.user)
             await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
 
-        sender.money -= amount_to_pay
-        recipient.money += amount_to_pay
+        sender.money = sender.money - amount_to_pay
+        recipient.money = recipient.money + amount_to_pay
+
         banner = SuccessBanner(text=f"You gave ${amount_to_pay} to {member_recipient.name}.", user=interaction.user)
         await interaction.response.send_message(embed=banner.embed)
 
         message = f"{interaction.user.mention} gave you ${amount_to_pay}."
-        banner = SuccessBanner(text=message, user=member_recipient)
+        banner = SuccessBanner(text=message, user=interaction.user)
         await member_recipient.send(embed=banner.embed)
 
     @app_commands.command(name="give_resources", description="Give resources to another player")
+    @app_commands.check(check_registered)
     async def give_resources(
         self,
         interaction: discord.Interaction,
         amount_to_give: int,
-        resource: Literal["Copper", "Silver", "Gold", "Uranium", "Black Matter"],
+        resource: Literal["Copper", "Silver", "Gold"],
         recipient: discord.Member,
     ):
-        if await check_player_exists(interaction) is False:
+        sender_id = interaction.user.id
+        recipient_discord_account = recipient
+        recipient_id = recipient.id
+
+        if sender_id == recipient_id:
+            banner = ErrorBanner(text="You can't give resources to yourself.", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
+
         if amount_to_give <= 0:
             banner = ErrorBanner(text="Please provide a positive amount of resources.", user=interaction.user)
             await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
-        if not await check_recipiant_has_an_account(recipient, interaction):
+
+        if not Player.exists(recipient_id):
+            banner = ErrorBanner(text="The recipient doesn't have an account.", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
-        sender = data.players[interaction.user]
-        recipient_player = data.players[recipient]
-        if sender == recipient_player:
+
+        sender = Player.get(sender_id)
+        recipient = Player.get(recipient_id)
+        
+        if sender == recipient:
             banner = ErrorBanner(text="You can't give resources to yourself.", user=interaction.user)
             await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
-        if sender.ship.modules[5].get_resource_amount(resource) < amount_to_give:
+
+        if get_resource_amount(sender.ship.modules["Cargo"], resource) < amount_to_give:
             banner = ErrorBanner(text="You don't have enough resources.", user=interaction.user)
             await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
 
-        sender.ship.modules[5].remove_resource(resource, amount_to_give)
-        recipient_player.ship.modules[5].add_resource(resource, amount_to_give)
+        sender.ship.modules["Cargo"].add_resource(resource, -1 * amount_to_give)
+        recipient.ship.modules["Cargo"].add_resource(resource, amount_to_give)
 
-        message = f"You gave {amount_to_give} {resource} to {recipient_player.id}."
+        message = f"You gave {amount_to_give} {resource} to {recipient.name}."
         banner = SuccessBanner(text=message, user=interaction.user)
         await interaction.response.send_message(embed=banner.embed)
-
+        
         message = f"{interaction.user.mention} gave you {amount_to_give} {resource}."
-        banner = SuccessBanner(text=message, user=recipient)
-        await recipient.send(embed=banner.embed)
+        banner = SuccessBanner(text=message, user=interaction.user)
+        await recipient_discord_account.send(embed=banner.embed)
 
     # TODO should implement better texts
     @app_commands.command(name="trade", description="Trade resources with another player")
+    @app_commands.check(check_registered)
     async def trade(
         self,
         interaction: discord.Interaction,
@@ -94,14 +133,21 @@ class TradeCog(commands.Cog):
         send_or_receive_money: Literal["send", "receive"] = "send",
         amount: int = 0,
     ):
-        if await check_player_exists(interaction) is False:
-            return
-        if not await check_recipiant_has_an_account(recipient, interaction):
+        sender_id = interaction.user.id
+        recipient_id = recipient.id
+        print("recipient_id:", recipient_id)
+        print("Player.exists(recipient_id):", Player.exists(recipient_id))
+
+
+        if not Player.exists(recipient_id):
+            banner = ErrorBanner(text="The recipient doesn't have an account.", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
 
-        sender = data.players[interaction.user]
-        recipiant_player = data.players[recipient]
-        if sender == recipiant_player:
+        sender = Player.get(sender_id)
+        recipient_player = Player.get(recipient_id)
+        
+        if sender == recipient_player:
             banner = ErrorBanner(text="You can't trade with yourself.", user=interaction.user)
             await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
@@ -115,27 +161,26 @@ class TradeCog(commands.Cog):
             amount = -amount
 
         if amount < 0:
-            if data.players[recipiant_player.id].money < abs(amount):
+            if recipient_player.money < abs(amount):
                 banner = ErrorBanner(text="The recipiant doesn't have enough money to send.", user=interaction.user)
                 await interaction.response.send_message(embed=banner.embed, ephemeral=True)
                 return
         else:
-            if data.players[interaction.user].money < abs(amount):
+            if sender.money < abs(amount):
                 banner = ErrorBanner(text="You don't have enough money to send.", user=interaction.user)
                 await interaction.response.send_message(embed=banner.embed, ephemeral=True)
                 return
 
-        resources = ["Copper", "Silver", "Gold", "Uranium", "Black Matter"]
         # TODO set required to false with default values of 0
         ask_resources = {
             "title": "Resources You Ask:",
             "required": False,
-            "questions": resources,
+            "questions": ["copper", "silver", "gold"],
         }
         give_resources = {
             "title": "Resources You Offer:",
             "required": False,
-            "questions": resources,
+            "questions": ["copper", "silver", "gold"],
         }
         inputs = [
             ask_resources,
@@ -151,7 +196,7 @@ async def setup(client: commands.Bot) -> None:
 
 
 async def check_recipiant_has_an_account(recipient: discord.Member, interaction: discord.Interaction) -> bool:
-    if recipient not in data.players:
+    if recipient not in Player.players:
         banner = ErrorBanner(text="The recipient doesn't have an account.", user=interaction.user)
         await interaction.response.send_message(embed=banner.embed, ephemeral=True)
         return False

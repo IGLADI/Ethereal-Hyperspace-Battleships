@@ -1,0 +1,7 @@
+To run the database run
+#+begin_src shell
+./setup.sh
+#+end_src
+
+NOTE:
+Only works superior OSes.
