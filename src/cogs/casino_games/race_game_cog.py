@@ -10,7 +10,7 @@ from tabulate import tabulate
 
 import data
 from races import Racer
-from utils import check_player_exists
+from utils import check_registered
 
 
 # TODO add imgs (AI/start w hardcoded)
@@ -27,6 +27,7 @@ class RaceGame(commands.Cog):
         # TODO rename variables and store them simply in the class to then use them and write them back
 
     @app_commands.command(name="race_info", description="Get info on the different races types to bet on")
+    @app_commands.check(check_registered)
     async def race_info(self, interaction: discord.Interaction):
         race_info_text = "Race Details:\n"
         for race, details in self.race_details.items():
@@ -42,6 +43,7 @@ class RaceGame(commands.Cog):
         name="create_race",
         description="creates a racing game if you provide the right arguments such as type and racers amount",
     )
+    @app_commands.check(check_registered)
     async def create_race(
         self,
         interaction: discord.Interaction,
@@ -53,8 +55,6 @@ class RaceGame(commands.Cog):
         min_speed = race_info["min_speed"]
         max_speed = race_info["max_speed"]
 
-        if await check_player_exists(interaction) is False:
-            return
         if amount_of_racers < 2:
             await interaction.response.send_message("You need at least 2 racers.", ephemeral=True)
             return
@@ -95,9 +95,8 @@ class RaceGame(commands.Cog):
     @app_commands.command(
         name="bet_on_race", description="Bet on a racer! To bet on his loss, bet with a negative amount"
     )
+    @app_commands.check(check_registered)
     async def bet_on_race(self, interaction: discord.Interaction, betamount: int, racer_to_bet_on: str):
-        if await check_player_exists(interaction) is False:
-            return
         if interaction.channel_id not in data.race_games:
             await interaction.response.send_message(
                 "No race game is currently in progress in this channel.", ephemeral=True

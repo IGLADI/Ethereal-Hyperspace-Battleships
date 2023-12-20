@@ -1,13 +1,17 @@
+import discord
+
 import data
+from database import Database
 
 import database
+_db = database.Database()
 
+async def check_registered(interaction: discord.Interaction) -> bool:
+    """Check if a player is registered, if not sends an error message. Else run the function."""
 
 async def check_player_exists(interaction):
-    db = database.Database()
-    if db.player_exists(interaction.user.id):
+    if _db.player_exists(interaction.user.id):
         return True
-
     await interaction.response.send_message(
         "You are not registered as a player.", ephemeral=True
     )
@@ -27,3 +31,6 @@ def get_betted_amount(discord_id):
                     total_bet_amount += -bet["bet_amount"] * (amount_of_racers - 1)
 
     return total_bet_amount
+
+def send_bug_report(discord_id, bug_report):
+    _db.store_bug_report(discord_id, bug_report)
