@@ -130,16 +130,14 @@ class TradeCog(commands.Cog):
         if send_or_receive_money == "receive":
             amount = -amount
 
-        if amount < 0:
-            if recipient_player.money < abs(amount):
+        if amount < 0 and recipient_player.money < abs(amount):
                 await interaction.response.send_message(
                     "The recipient doesn't have enough money to send.", ephemeral=True
                 )
                 return
-        else:
-            if sender.money < abs(amount):
-                await interaction.response.send_message("You don't have enough money to send.", ephemeral=True)
-                return
+        if sender.money < abs(amount):
+            await interaction.response.send_message("You don't have enough money to send.", ephemeral=True)
+            return
 
         # TODO set required to false with default values of 0
         ask_resources = {

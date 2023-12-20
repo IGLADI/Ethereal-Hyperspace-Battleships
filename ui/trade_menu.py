@@ -171,12 +171,10 @@ async def check_enough_resources(
 
 
 async def check_enough_money(player, recipient_player, amount, interaction: discord.Interaction) -> bool:
-    if amount < 0:
-        if recipient_player.money < abs(amount):
+    if amount < 0 and recipient_player.money < abs(amount):
             await interaction.response.send_message("The recipient doesn't have enough money to send.", ephemeral=True)
             return False
-    else:
-        if player.money < abs(amount):
-            await interaction.response.send_message("The sender doesn't have enough money to send.", ephemeral=True)
-            return False
+    if player.money < abs(amount):
+        await interaction.response.send_message("The sender doesn't have enough money to send.", ephemeral=True)
+        return False
     return True
