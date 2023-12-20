@@ -5,16 +5,7 @@ from discord.ext import commands
 from typing import Literal
 from mariadb import IntegrityError
 from player import Player
-
-
-async def check_registered(interaction: discord.Interaction) -> bool:
-    """Check if a player is registered, if not sends an error message. Else run the function."""
-    if not Player.exists(interaction.user.id):
-        await interaction.response.send_message(
-            "You are not registered as a player.", ephemeral=True
-        )
-        return False
-    return True
+from utils import check_registered
 
 
 class GeneralCommands(commands.Cog):
