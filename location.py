@@ -1,4 +1,6 @@
-from data import planets
+from database import Database
+_db = Database()
+
 
 class Location:
     def __init__(self, x, y):
@@ -16,10 +18,7 @@ class Location:
 
     def is_planet(self):
         '''Returns the planet name if the location is a planet, otherwise returns space'''
-        for planet in planets.values():
-            if self.x == planet.location.x and self.y == planet.location.y:
-                return f"at {planet.name}"
-        return "floating in space"
+        return _db.location_from_coordinates(self.x, self.y)
     
     def distance_to(self, location):
         '''Returns the distance between two locations'''

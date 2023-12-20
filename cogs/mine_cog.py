@@ -7,7 +7,7 @@ import random
 
 from data import RESOURCE_NAMES
 from player import Player
-
+from location import Location
 
 async def check_registered(interaction: discord.Interaction) -> bool:
     """Check if a player is registered, if not sends an error message. Else run the function."""
@@ -29,9 +29,16 @@ class MineCommands(commands.Cog):
     @app_commands.check(check_registered)
     async def mine(self, interaction: discord.Interaction, mining_sessions: int = 1):
         player = Player.get(interaction.user.id)
+
         if player.ship.energy < 10 * mining_sessions:
             await interaction.response.send_message(
                 "You don't have enough energy.", ephemeral=True
+            )
+            return
+        
+        if Location(player.x_pos, player.y_pos).is_planet() == None:
+            await interaction.response.send_message(
+                "You can only mine on a planet.", ephemeral=True
             )
             return
 
