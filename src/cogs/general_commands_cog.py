@@ -53,8 +53,6 @@ class GeneralCommands(commands.Cog):
             await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
 
-        print("interaction.user.id:", interaction.user.id)
-
         try:
             Player.register(
                 interaction.user.id,

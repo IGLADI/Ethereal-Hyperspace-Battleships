@@ -134,8 +134,6 @@ class TradeCog(commands.Cog):
     ):
         sender_id = interaction.user.id
         recipient_id = recipient.id
-        print("recipient_id:", recipient_id)
-        print("Player.exists(recipient_id):", Player.exists(recipient_id))
 
 
         if not Player.exists(recipient_id):
