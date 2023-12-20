@@ -160,12 +160,7 @@ class TradeCog(commands.Cog):
         ]
         paginator = TradeModal(inputs, amount, recipient, author_id=interaction.user.id)
 
-        # TODO fix this, should use paginator.start() instead
-        await interaction.response.send_message(
-            view=paginator,
-            ephemeral=True,
-            content=(paginator.modals[0].title + f"\n\n1/{len(paginator.modals)}"),
-        )
+        await paginator.send(interaction)
 
 
 async def setup(client: commands.Bot) -> None:
