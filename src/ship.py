@@ -1,18 +1,6 @@
 from database import Database
 
-from module import (
-    Module,
-    SolarPanel,
-    TravelModule,
-    MiningModule,
-    Canon,
-    Shield,
-    Fuel,
-    Cargo,
-    Radar,
-    EnergyGenerator,
-    DEFAULT_MODULES,
-)
+from module import DEFAULT_MODULES
 
 _db = Database()
 

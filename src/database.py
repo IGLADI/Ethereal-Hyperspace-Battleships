@@ -1,6 +1,5 @@
 import mariadb
 import json
-import data
 import sys
 
 
@@ -16,9 +15,7 @@ def get_connection():
     database = db_data["database"]
 
     try:
-        connection = mariadb.connect(
-            host=host, user=user, password=password, port=3306, database=database
-        )
+        connection = mariadb.connect(host=host, user=user, password=password, port=3306, database=database)
         connection.autocommit = True
         return connection
     except mariadb.Error as e:
