@@ -16,69 +16,10 @@ class GeneralCommands(commands.Cog):
 
     # TODO add any additional commands here
     @app_commands.command(name="help", description="Provides a list of bot commands")
-    async def help(
-        self, 
-        interaction: discord.Interaction, 
-        page: Literal[
-            'main', 'guild', 'resources', 'travel', 'economic'
-        ] = 'main'
-        ):
-
-        # Main page command list
-        def help_main():
-            return {
-                "help {page name}": "Show commands from that page"
-            }
-        
-        # Guild page command list
-        def help_guild():
-            return {
-                "guild": "Get guild info",
-                "guild_members": "Get guild members",
-                "guild_leave": "Leave your guild",
-                "guild_join {guild name}": "Join a guild",
-                "guild_create {guild name}": "Create a guild",
-            }
-
-        # Resources page command list
-        def help_resources():
-            return {
-                "resources": "Get info on resources and mining",
-                "mine": "Mine a random resource",
-                "inventory": "Check your cargo",
-                "sell {resource} {amount}": "Sell resources",
-                "buy {resource} {amount}": "Buy resources",
-            }
-
-        # Travel page command list
-        def help_travel():
-            return {
-                "where_am_i": "Get your location info",
-                "travel {x} {y}": "Travel to a location",
-                "scan": "Scan the area for players and locations",
-            }
-
-        # Economic page command list
-        def help_economic():
-            return {
-                "balance": "Check your money",
-                "pay {amount} {player}": "Give money to a player",
-                "trade": "idk, i didn't write this...",
-            }
-
-        switch_dict = {
-            'main': help_main,
-            'guild': help_guild,
-            'resources': help_resources,
-            'travel': help_travel,
-            'economic': help_economic        
-        }
-
-        help_function = switch_dict.get(page)
-        commands = help_function()
-        
-        banner = HelpBanner(commands, interaction.user)
-        await interaction.response.send_message(embed=banner.embed, ephemeral=True)
+    @app_commands.check(check_registered)
+    async def help_command(self, interaction: discord.Interaction):
+        banner = HelpBanner(interaction.user)
+        await interaction.response.send_message(embed=banner.embed, view=banner, ephemeral=True)
 
     @app_commands.command(name="balance", description="Check your balance")
     @app_commands.check(check_registered)
