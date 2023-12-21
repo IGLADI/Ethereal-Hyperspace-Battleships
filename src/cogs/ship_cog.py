@@ -84,7 +84,7 @@ class ShipCommands(commands.Cog):
 
     # ! For debugging purposes
     @app_commands.command(name="add_cargo", description="For debugging purposes")
-    @app_commands.check(check_player_exists)
+    @app_commands.check(check_registered)
     async def add_cargo(
         self,
         interaction: discord.Interaction,

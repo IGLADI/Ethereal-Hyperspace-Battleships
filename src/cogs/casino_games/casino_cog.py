@@ -11,7 +11,7 @@ class CasinoGame(commands.Cog):
         self.client = client
 
     @app_commands.command(name="casino_info", description="Get info on the casino commands")
-    @app_commands.check(check_player_exists)
+    @app_commands.check(check_registered)
     async def casino_info(self, interaction: discord.Interaction):
         casino_info = "Here is a list of casino commands:\n"
         casino_info += "/casino_info - Get info on the casino commands\n"

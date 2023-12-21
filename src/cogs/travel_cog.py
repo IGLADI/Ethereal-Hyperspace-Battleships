@@ -7,7 +7,7 @@ from typing import Literal
 from player import Player
 from location import Location
 import asyncio
-from utils import check_player_exists
+from utils import check_registered
 from player import Player
 
 class TravelCommands(commands.Cog):
@@ -15,7 +15,7 @@ class TravelCommands(commands.Cog):
         self.client = client
 
     @app_commands.command(name="travel", description="Travel to a new location")
-    @app_commands.check(check_player_exists)
+    @app_commands.check(check_registered)
     async def travel(self, interaction: discord.Interaction, x_coordinate: int, y_coordinate: int):          
         player = Player.get(interaction.user.id)
   
@@ -35,7 +35,7 @@ class TravelCommands(commands.Cog):
             await interaction.followup.send(f"{player.id} arrived at {image_name}: ({x_coordinate}, {y_coordinate}).\n", file=discord.File(image))
             
     @app_commands.command(name="scan", description="Use your radar to scan the area")
-    @app_commands.check(check_player_exists)
+    @app_commands.check(check_registered)
     async def scan(self, interaction: discord.Interaction):
 
         player = Player.get(interaction.user.id)

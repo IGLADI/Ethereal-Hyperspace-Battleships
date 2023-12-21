@@ -29,7 +29,7 @@ class RaceGame(commands.Cog):
         # TODO rename variables and store them simply in the class to then use them and write them back
 
     @app_commands.command(name="race_info", description="Get info on the different races types to bet on")
-    @app_commands.check(check_player_exists)
+    @app_commands.check(check_registered)
     async def race_info(self, interaction: discord.Interaction):
         race_info_text = "Race Details:\n"
         for race, details in self.race_details.items():
@@ -45,7 +45,7 @@ class RaceGame(commands.Cog):
         name="create_race",
         description="creates a racing game if you provide the right arguments such as type and racers amount",
     )
-    @app_commands.check(check_player_exists)
+    @app_commands.check(check_registered)
     async def create_race(
         self,
         interaction: discord.Interaction,
@@ -103,7 +103,7 @@ class RaceGame(commands.Cog):
     @app_commands.command(
         name="bet_on_race", description="Bet on a racer! To bet on his loss, bet with a negative amount"
     )
-    @app_commands.check(check_player_exists)
+    @app_commands.check(check_registered)
     async def bet_on_race(self, interaction: discord.Interaction, betamount: int, racer_to_bet_on: str):
         if interaction.channel_id not in data.race_games:
             banner = ErrorBanner(text="No race game is currently in progress in this channel.", user=interaction.user)

@@ -8,7 +8,7 @@ import random
 from ui.simple_banner import ErrorBanner, SuccessBanner
 from data import RESOURCE_NAMES
 from player import Player
-from utils import check_player_exists
+from utils import check_registered
 from location import Location
 
 
@@ -20,7 +20,7 @@ class MineCommands(commands.Cog):
     # Copper: 35% | Silver: 30% |Gold: 25% | Uranium: 7% | Black Matter: 3%
     # TODO mine X times (avoid spamming /mine)
     @app_commands.command(name="mine", description="Mine a random resource")
-    @app_commands.check(check_player_exists)
+    @app_commands.check(check_registered)
     async def mine(self, interaction: discord.Interaction, mining_sessions: int = 1):
         player = Player.get(interaction.user.id)
 
