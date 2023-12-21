@@ -80,54 +80,6 @@ class GeneralCommands(commands.Cog):
         banner = HelpBanner(commands, interaction.user)
         await interaction.response.send_message(embed=banner.embed, ephemeral=True)
 
-    # ? TODO maybe add a min lvl to give money (avoid spamming discord acounts)
-    # Checked for race condition (spamming the command to multiply money because that money can't go under 0)
-    # but discord seems to already block it and only start the new command once the first one has been processed
-    @app_commands.command(name="pay", description="Gift money to a player")
-    @app_commands.check(check_registered)
-    async def pay(
-        self,
-        interaction: discord.Interaction,
-        amount_to_pay: int,
-        member_recipient: discord.Member,
-    ):
-        sender_id = interaction.user.id
-        recipient_id = member_recipient.id
-
-        if sender_id == recipient_id:
-            await interaction.response.send_message(
-                "You can't give money to yourself.", ephemeral=True
-            )
-            return
-
-        if amount_to_pay <= 0:
-            await interaction.response.send_message(
-                "Please provide a positive amount of money.", ephemeral=True
-            )
-            return
-
-        if not Player.exists(recipient_id):
-            await interaction.response.send_message(
-                "The recipient doesn't have an account.", ephemeral=True
-            )
-            return
-
-        sender = Player.get(sender_id)
-        recipient = Player.get(recipient_id)
-
-        if sender.money < amount_to_pay:
-            await interaction.response.send_message(
-                "You don't have enough money.", ephemeral=True
-            )
-            return
-
-        sender.money = sender.money - amount_to_pay
-        recipient.money = recipient.money + amount_to_pay
-
-        await interaction.response.send_message(
-            f"You gave ${amount_to_pay} to {member_recipient.name}."
-        )
-
     @app_commands.command(name="balance", description="Check your balance")
     @app_commands.check(check_registered)
     async def balance(self, interaction: discord.Interaction):
