@@ -2,6 +2,7 @@ import discord
 import data
 
 
+# TODO delete them first to prevent problems
 def create_category_if_not_exists(func):
     async def wrapper(guild: discord.Guild, name: str):
         category = discord.utils.get(guild.categories, name=name)

@@ -3,18 +3,19 @@ import discord
 import data
 from ui.simple_banner import ErrorBanner
 
-from database import Database
-
 import database
+
 _db = database.Database()
+
 
 async def check_registered(interaction: discord.Interaction) -> bool:
     if _db.player_exists(interaction.user.id):
         return True
 
-    banner = ErrorBanner("You are not registered as a player.", interaction.user)
+    banner = ErrorBanner(interaction.user, "You are not registered as a player.")
     await interaction.response.send_message(embed=banner.embed, ephemeral=True)
     return False
+
 
 # TODO make this work with negative betts (with the multiplier)
 def get_betted_amount(discord_id):
@@ -35,6 +36,7 @@ def get_resource_amount(cargo, resource_name: str) -> int:
     resource_name = resource_name.lower()
     resource = cargo.resources.get(resource_name)
     return resource.amount if resource else 0
+
 
 def send_bug_report(discord_id, bug_report):
     _db.store_bug_report(discord_id, bug_report)
