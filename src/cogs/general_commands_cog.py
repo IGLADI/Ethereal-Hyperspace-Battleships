@@ -15,16 +15,12 @@ class GeneralCommands(commands.Cog):
     def __init__(self, client: commands.Bot):
         self.client = client
 
+    # TODO add any additional commands here
     @app_commands.command(name="help", description="Provides a list of bot commands")
-    async def help(self, interaction: discord.Interaction):
-        commands = {
-            "balance": "Check your balance",
-            "bug_report": "Report a bug",
-            "register": "Register as a player",
-            "where_am_i": "Get your location info",
-        }
-        banner = HelpBanner(commands, interaction.user)
-        await interaction.response.send_message(embed=banner.embed, ephemeral=True)
+    @app_commands.check(check_registered)
+    async def help_command(self, interaction: discord.Interaction):
+        banner = HelpBanner(interaction.user)
+        await interaction.response.send_message(embed=banner.embed, view=banner, ephemeral=True)
 
     @app_commands.command(name="balance", description="Check your balance")
     @app_commands.check(check_registered)
@@ -74,18 +70,6 @@ class GeneralCommands(commands.Cog):
             f"Welcome to Ethereal Hyperspace Battleships {interaction.user.name}!\n You are now registered as a {player_class} in {guild_name}.",
             ephemeral=True,
         )    
-
-    @app_commands.command(name="where_am_i", description="Get your location info")
-    @app_commands.check(check_registered)
-    async def where_am_i(self, interaction: discord.Interaction):
-        """Returns the location of the player"""
-        player = Player.get(interaction.user.id) 
-        coordinates = (player.x_pos, player.y_pos)
-        location_name = player.location_name()
-        await interaction.response.send_message(
-            f"You are currently at {coordinates}, also known as {location_name}.",
-            ephemeral=True,
-        )
 
     @app_commands.command(name="bug_report", description="Report a bug")
     async def bug_report(

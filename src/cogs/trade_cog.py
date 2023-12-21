@@ -7,8 +7,7 @@ from typing import Literal
 from ui.trade_menu import TradeModal
 from ui.simple_banner import ErrorBanner, SuccessBanner
 from player import Player
-from utils import check_registered
-
+from utils import get_resource_amount, check_registered
 
 class TradeCog(commands.Cog):
     def __init__(self, bot):
