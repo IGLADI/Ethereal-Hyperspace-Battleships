@@ -60,15 +60,15 @@ class MineCommands(commands.Cog):
             mining_bonus = player.ship.modules["MiningModule"].mining_bonus
             resource_name = random.choices(RESOURCE_NAMES, weights=[45, 30, 20, 3, 2, 1])[0]
             amount = math.floor((random.random() * mining_bonus) / 2)
-            player.ship.modules["Cargo"].add_resource(player, resource_name, amount)
+            added = player.ship.modules["Cargo"].add_resource(player, resource_name, amount)
             if amount == added:
-                banner = SuccessBanner(text=f"You mined {amount} tons of {resource_name}.", user=interaction.user)
+                banner = SuccessBanner(text=f"You mined {amount} tons of {resource_name}.", user=interaction.user, extra_header="'s mining session")
             elif added > 0:
-                banner = LoadingBanner( text=f"You mined {amount} tons of {resource_name}. You only had space for {added} tons.", user=interaction.user)
+                banner = LoadingBanner( text=f"You mined {amount} tons of {resource_name}. You only had space for {added} tons.", user=interaction.user, extra_header="'s mining session")
             else:
-                banner = ErrorBanner(text=f"You mined {amount} tons of {resource_name}. But you have no space left in your Cargo Module... Try upgrading it!", user=interaction.user)
+                banner = ErrorBanner(text=f"You mined {amount} tons of {resource_name}. But you have no space left in your Cargo Module... Try upgrading it!", user=interaction.user, extra_header="'s mining session")
             await interaction.followup.send(embed=banner.embed, ephemeral=True)
-         player._is_mining = False
+        player._is_mining = False
 
 async def setup(client: commands.Bot) -> None:
     await client.add_cog(MineCommands(client))
