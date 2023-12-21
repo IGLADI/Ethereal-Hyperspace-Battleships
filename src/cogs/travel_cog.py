@@ -37,6 +37,9 @@ class TravelCommands(commands.Cog):
         if player._is_traveling:
             await interaction.response.send_message("Wait untill you arrive before you start a new journey!", ephemeral=True)
             return
+        if player._is_mining:
+            await interaction.response.send_message("Wait untill you are done mining before you start travelling!", ephemeral=True)
+            return
         
         try:
             sleep = player.travel(x_coordinate, y_coordinate)

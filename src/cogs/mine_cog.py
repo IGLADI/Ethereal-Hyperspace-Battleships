@@ -10,6 +10,7 @@ from data import RESOURCE_NAMES
 from player import Player
 from utils import check_registered
 from location import Location
+import asyncio
 
 
 class MineCommands(commands.Cog):
@@ -37,7 +38,9 @@ class MineCommands(commands.Cog):
             return
 
         await interaction.response.send_message("Mining...", ephemeral=True)
+        player._is_mining = True
         for i in range(mining_sessions):
+            await asyncio.sleep(5)
             # TODO mining module changes energy efficiency
             player.ship.energy -= 10
             mining_bonus = player.ship.modules["MiningModule"].mining_bonus
@@ -47,6 +50,7 @@ class MineCommands(commands.Cog):
             await interaction.followup.send(
                 f"You mined {amount} tons of {resource_name}.", ephemeral=True
             )
+        player._is_mining = False
 
 
 async def setup(client: commands.Bot) -> None:
