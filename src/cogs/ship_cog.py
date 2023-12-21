@@ -74,7 +74,6 @@ class ShipCommands(commands.Cog):
             banner = ErrorBanner(text=f"Couldn't find module {module_name}.", user=interaction.user)
             await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
-
         try:
             module.upgrade(player.ship.modules["Cargo"])
         except Exception as e:
