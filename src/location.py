@@ -1,4 +1,6 @@
-from data import planets
+from random import randrange
+from database import Database
+_db = Database()
 
 
 class Location:
@@ -16,8 +18,23 @@ class Location:
         return f"({self.x}, {self.y})"
 
     def is_planet(self):
-        """Returns the planet name if the location is a planet, otherwise returns space"""
-        for planet in planets.values():
-            if self.x == planet.location.x and self.y == planet.location.y:
-                return f"at {planet.name}"
-        return "floating in space"
+        '''Returns the planet name if the location is a planet, otherwise returns None'''
+        return _db.location_from_coordinates(self.x, self.y)
+    
+    def distance_to(self, location):
+        '''Returns the distance between two locations'''
+        return ((self.x - location.x) ** 2 + (self.y - location.y) ** 2) ** 0.5
+    
+    def get_image(self):
+        '''Returns the image of the location'''
+        image_info = _db.location_image(self.x, self.y)
+        if image_info == []:
+            int_image = randrange(0, 4)
+            return f"../assets/space/space{int_image}.jpg", "space"
+        if image_info[0][0] == None:
+            int_image = randrange(0, 9)
+            image = f"../assets/planet/planet{int_image}.jpg"
+            _db.set_location_image(self.x, self.y, image)
+            return image, image_info[0][1]
+        if image_info:
+            return image_info[0][0], image_info[0][1]

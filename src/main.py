@@ -39,6 +39,7 @@ class Client(commands.Bot):
             "cogs.casino_games.race_game_cog",
             "cogs.ship_cog",
             "cogs.mine_cog",
+            "cogs.travel_cog",
             "cogs.trade_cog",
         ]
 
@@ -58,11 +59,6 @@ class Client(commands.Bot):
         except Exception as e:
             print(e)
         print("--------------------------------------------")
-
-        # ! temporary data storage untill we have a database
-        data.planets["C4MPU5 K441"] = Planet("C4MPU5 K441", 0, 0)
-        data.planets["Earth"] = Planet("Earth", 50, 0)
-
 
 # load the bot token from config.json KEEP THIS TOKEN PRIVATE (gitignore)
 with open("config.json", "r") as f:
@@ -84,9 +80,12 @@ async def on_guild_join(guild):
             banner = SimpleBanner(text="Hello! Welcome to Ethereal Hyperspace Battleships type /help for more info.")
             await channel.send(embed=banner.embed)
         break
-    await create_roles(guild)
-    await create_channels(guild)
-
+    try:
+        await create_roles(guild)
+        await create_channels(guild)
+    except Exception as e:
+        await channel.send("This bot can only run on community servers. Not on private servers! Bye!\n https://support.discord.com/hc/en-us/articles/360047132851-Enabling-Your-Community-Server")
+        await guild.leave()
 
 @client.event
 async def on_message(message):
