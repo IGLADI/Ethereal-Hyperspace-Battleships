@@ -65,10 +65,11 @@ class GeneralCommands(commands.Cog):
         else:
             raise NotImplementedError
 
-        await interaction.response.send_message(
-            f"Welcome to Ethereal Hyperspace Battleships {interaction.user.name}!\n You are now registered as a {player_class} in {guild_name}.",
-            ephemeral=True,
+        banner = NormalBanner(
+            text=f"Welcome to Ethereal Hyperspace Battleships {interaction.user.name}!\n You are now registered as a {player_class} in {guild_name}.",
+            user=interaction.user,
         )
+        await interaction.response.send_message(embed=banner.embed, ephemeral=True)
 
     @app_commands.command(name="bug_report", description="Report a bug")
     async def bug_report(
