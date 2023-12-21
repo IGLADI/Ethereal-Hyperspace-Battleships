@@ -109,7 +109,9 @@ class TradeModal(ModalPaginator):
         banner = SuccessBanner(text="Offer sent", user=interaction.user)
         await interaction.response.send_message(embed=banner.embed, ephemeral=True)
 
-        offer_paginator = OfferPaginator(self.player, self.recipient_player, self.modals, self.amount, self)
+        offer_paginator = OfferPaginator(
+            self.player, interaction.user, self.recipient_player, self.modals, self.amount, self, timeout=60.0
+        )
 
         resume_table = self.get_offer_table()
         banner = NormalBanner(text=f"You received a trade offer:\n\n{resume_table}", user=self.recipient)
@@ -142,10 +144,11 @@ class TradeModal(ModalPaginator):
 
 
 class OfferPaginator(discord.ui.View):
-    def __init__(self, player, recipiant_player, uppermodals, amount, upper_self, *args, **kwargs):
+    def __init__(self, player, player_discord, recipiant_player, uppermodals, amount, upper_self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.value = None
         self.player = player
+        self.player_discord = player_discord
         self.recipient_player = recipiant_player
         self.uppermodals = uppermodals
         self.amount = amount
@@ -171,7 +174,7 @@ class OfferPaginator(discord.ui.View):
         banner = SuccessBanner(text="Offer accepted", user=interaction.user)
         await interaction.response.send_message(embed=banner.embed, ephemeral=True)
         banner = SuccessBanner(text="Offer accepted", user=interaction.user)
-        await self.recipient_player.user.send(embed=banner.embed)
+        await self.player_discord.send(embed=banner.embed)
 
     def distribute_resources(self) -> None:
         player_cargo = self.player.ship.modules["Cargo"]

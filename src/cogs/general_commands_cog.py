@@ -6,6 +6,7 @@ from typing import Literal
 from mariadb import IntegrityError
 from player import Player
 from ui.help_banner import HelpBanner
+from ui.simple_banner import NormalBanner
 from utils import send_bug_report
 from utils import check_registered
 
@@ -84,7 +85,8 @@ class GeneralCommands(commands.Cog):
     @app_commands.check(check_registered)
     async def balance(self, interaction: discord.Interaction):
         player = Player.get(interaction.user.id)
-        await interaction.response.send_message(f"Your current balance is ${player.money}.", ephemeral=True)
+        banner = NormalBanner(text=f"Your current balance is ${player.money}.", user=interaction.user)
+        await interaction.response.send_message(embed=banner.embed, ephemeral=True)
 
     # TODO maybe add displayname
     # ! (still keep id and add a check so that only one user can create an account with a name)

@@ -90,7 +90,7 @@ class TradeCog(commands.Cog):
 
         sender = Player.get(sender_id)
         recipient = Player.get(recipient_id)
-        
+
         if sender == recipient:
             banner = ErrorBanner(text="You can't give resources to yourself.", user=interaction.user)
             await interaction.response.send_message(embed=banner.embed, ephemeral=True)
@@ -107,7 +107,7 @@ class TradeCog(commands.Cog):
         message = f"You gave {amount_to_give} {resource} to {recipient.name}."
         banner = SuccessBanner(text=message, user=interaction.user)
         await interaction.response.send_message(embed=banner.embed)
-        
+
         message = f"{interaction.user.mention} gave you {amount_to_give} {resource}."
         banner = SuccessBanner(text=message, user=interaction.user)
         await recipient_discord_account.send(embed=banner.embed)
@@ -125,7 +125,6 @@ class TradeCog(commands.Cog):
         sender_id = interaction.user.id
         recipient_id = recipient.id
 
-
         if not Player.exists(recipient_id):
             banner = ErrorBanner(text="The recipient doesn't have an account.", user=interaction.user)
             await interaction.response.send_message(embed=banner.embed, ephemeral=True)
@@ -133,7 +132,7 @@ class TradeCog(commands.Cog):
 
         sender = Player.get(sender_id)
         recipient_player = Player.get(recipient_id)
-        
+
         if sender == recipient_player:
             banner = ErrorBanner(text="You can't trade with yourself.", user=interaction.user)
             await interaction.response.send_message(embed=banner.embed, ephemeral=True)
