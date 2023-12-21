@@ -41,8 +41,7 @@ class Module:
     @property
     def cost(self):
         return [
-            {"resource": resource, "amount": self._cost[resource][self._level - 1]}
-            for resource in self._cost_values
+            {"resource": resource, "amount": self._cost[resource][self.level - 1]} for resource in self._cost_values
         ]
 
     @level.setter
@@ -55,15 +54,15 @@ class Module:
 
     def upgrade(self, cargo):
         """Uses resources in cargo of player to upgrade module."""
-        if self._level == self._max_level:
+        if self.level == self.max_level:
             raise Exception("Module is already at max level.")
 
-        if not self.can_upgrade(cargo, self._level):
+        if not self.can_upgrade(cargo):
             raise Exception("Not enough resources to upgrade.")
 
         for cost in self._cost:
             resource_name = cost["resource"]
-            required_amount = cost["amount"][self._level-1]
+            required_amount = cost["amount"][self.level - 1]
 
             if required_amount == 0:
                 continue
@@ -78,11 +77,11 @@ class Module:
 
         self.level += 1
 
-    def can_upgrade(self, cargo, level) -> bool:
+    def can_upgrade(self, cargo) -> bool:
         """Utility function to check if a player has enough resources to upgrade a module."""
         for cost in self._cost:
             resource_name = cost["resource"]
-            required_amount = cost["amount"][level-1]
+            required_amount = cost["amount"][self.level - 1]
 
             if required_amount == 0:
                 continue
@@ -98,17 +97,17 @@ class Module:
     def __str__(self):
         # TODO upgrade cost should be printed in a separate command, else /ship_info will be wayyyyy too long
         # cost_str = "".join(f"\n   - {cost['resource']}: {cost['amount']}" for cost in self._cost)
-        if self._level == self._max_level:
+        if self.level == self.max_level:
             return (
                 f" - Name: {self._name}\n"
                 f" - Description: {self._description}\n"
-                f" - Level: {self._level}/{self._max_level}\n"
+                f" - Level: {self.level}/{self.max_level}\n"
                 # f" - Upgrade Cost: MAX LEVEL\n"
             )
         return (
             f" - Name: {self._name}\n"
             f" - Description: {self._description}\n"
-            f" - Level: {self._level}/{self._max_level}\n"
+            f" - Level: {self.level}/{self.max_level}\n"
             # f" - Upgrade Cost: {cost_str}\n"
         )
 
@@ -135,7 +134,7 @@ class TravelModule(Module):
 
     @property
     def max_distance(self):
-        return self._max_distance[self._level - 1]
+        return self._max_distance[self.level - 1]
 
     def __str__(self):
         return f"{super().__str__()} - Max Distance: {self._max_distance} lightyears\n"
@@ -158,7 +157,7 @@ class MiningModule(Module):
 
     @property
     def mining_bonus(self):
-        return self._mining_bonus[self._level - 1]
+        return self._mining_bonus[self.level - 1]
 
     def upgrade(self, cargo_player):
         super().upgrade(cargo_player)
@@ -213,7 +212,7 @@ class Cargo(Module):
 
     @property
     def max_capacity(self):
-        return self._max_capacity[self._level - 1]
+        return self._max_capacity[self.level - 1]
 
     @property
     def resources(self):
@@ -228,14 +227,15 @@ class Cargo(Module):
     def upgrade(self, cargo_player):
         super().upgrade(cargo_player)
 
-
-    
-
     def add_resource(self, player, resource_name, amount):
         """Adds a resource to the module, creates a new one or stack with existing resource."""
         cargo_module_id = _db.player_id(player._id)
 
-        max_amount = player.ship.modules["Cargo"].max_capacity - (_db.item_amount_by_player_and_name(cargo_module_id, resource_name) if _db.item_amount_by_player_and_name(cargo_module_id, resource_name) else 0)
+        max_amount = player.ship.modules["Cargo"].max_capacity - (
+            _db.item_amount_by_player_and_name(cargo_module_id, resource_name)
+            if _db.item_amount_by_player_and_name(cargo_module_id, resource_name)
+            else 0
+        )
         if amount >= max_amount:
             a = max_amount
         else:
@@ -282,7 +282,7 @@ class Canon(Module):
 
     @property
     def strength(self):
-        return self._strength[self._level - 1]
+        return self._strength[self.level - 1]
 
     def upgrade(self, cargo_player):
         super().upgrade(cargo_player)
@@ -318,7 +318,7 @@ class Shield(Module):
 
     @property
     def defense(self):
-        return self._defense[self._level - 1]
+        return self._defense[self.level - 1]
 
     def upgrade(self, cargo_player):
         super().upgrade(cargo_player)
@@ -394,7 +394,7 @@ class Radar(Module):
 
     @property
     def radar_range(self):
-        return self._radar_range[self._level - 1]
+        return self._radar_range[self.level - 1]
 
     def upgrade(self, cargo_player):
         super().upgrade(cargo_player)
@@ -429,7 +429,7 @@ class EnergyGenerator(Module):
 
     @property
     def generation(self):
-        return self._generation[self._level - 1]
+        return self._generation[self.level - 1]
 
     @property
     def is_on(self):
@@ -473,7 +473,7 @@ class SolarPanel(Module):
 
     @property
     def generation(self):
-        return self._generation[self._level - 1]
+        return self._generation[self.level - 1]
 
     def upgrade(self, cargo_player):
         super().upgrade(cargo_player)
