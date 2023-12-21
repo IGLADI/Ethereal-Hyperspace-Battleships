@@ -9,6 +9,7 @@ from location import Location
 import asyncio
 from utils import check_registered
 from player import Player
+from ui.simple_banner import ErrorBanner, LoadingBanner, NormalBanner, SuccessBanner
 
 class TravelCommands(commands.Cog):
     def __init__(self, client: commands.Bot):
@@ -37,17 +38,26 @@ class TravelCommands(commands.Cog):
         if player._is_traveling:
             await interaction.response.send_message("Wait untill you arrive before you start a new journey!", ephemeral=True)
             return
+        if player._is_mining:
+            await interaction.response.send_message("Wait untill you are done mining before you start travelling!", ephemeral=True)
+            return
         
         try:
             sleep = player.travel(x_coordinate, y_coordinate)
-            await interaction.response.send_message(f"{player.name} traveling to ({x_coordinate}, {y_coordinate}). Estimated duration = {sleep}.")
+            banner = LoadingBanner(
+                text=f"{player.name} traveling to ({x_coordinate}, {y_coordinate}). Estimated duration = {sleep}.", user=interaction.user, extra_header=" is travelling to a new location"
+            )
+            await interaction.response.send_message(embed=banner.embed)
         except Exception as e:
             await interaction.response.send_message(f"Couldn't travel: {e}", ephemeral=True)
             return
         else:
             await asyncio.sleep(sleep)
             image, image_name = Location(x_coordinate, y_coordinate).get_image()
-            await interaction.followup.send(f"{player.id} arrived at {image_name}: ({x_coordinate}, {y_coordinate}).\n", file=discord.File(image))
+            banner = SuccessBanner(
+                text=f"{player.name} arrived at {image_name}: ({x_coordinate}, {y_coordinate}).", user=interaction.user, extra_header=" arrived at a new location"
+            )
+            await interaction.followup.send(embed=banner.embed, file=discord.File(image))
             
     @app_commands.command(name="scan", description="Use your radar to scan the area")
     @app_commands.check(check_registered)

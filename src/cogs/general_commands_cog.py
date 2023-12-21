@@ -6,6 +6,7 @@ from typing import Literal
 from mariadb import IntegrityError
 from player import Player
 from ui.help_banner import HelpBanner
+from ui.simple_banner import NormalBanner
 from utils import send_bug_report
 from utils import check_registered
 
@@ -25,7 +26,8 @@ class GeneralCommands(commands.Cog):
     @app_commands.check(check_registered)
     async def balance(self, interaction: discord.Interaction):
         player = Player.get(interaction.user.id)
-        await interaction.response.send_message(f"Your current balance is ${player.money}.", ephemeral=True)
+        banner = NormalBanner(text=f"Your current balance is ${player.money}.", user=interaction.user)
+        await interaction.response.send_message(embed=banner.embed, ephemeral=True)
 
     # TODO maybe add displayname
     # ! (still keep id and add a check so that only one user can create an account with a name)
@@ -34,7 +36,10 @@ class GeneralCommands(commands.Cog):
         self,
         interaction: discord.Interaction,
         player_class: Literal["martian", "dwarf", "droid"],
-        guild_name: Literal["The Federation", "The Empire", "The Alliance", "The Independents"],
+        guild_name: Literal[
+            "The Federation", "The Empire", "The Alliance", "The Independents"
+        ],
+
     ):
         if Player.exists(interaction.user.id):
             await interaction.response.send_message("You are already registered as a player.", ephemeral=True)
@@ -54,12 +59,17 @@ class GeneralCommands(commands.Cog):
             )
             return
 
-        player = Player.get(interaction.user.id)
+        Player.get(interaction.user.id)
+        role = discord.utils.get(interaction.guild.roles, name=guild_name)
+        if role:
+            await interaction.user.add_roles(role) 
+        else:
+            raise NotImplementedError
 
         await interaction.response.send_message(
-            f"Welcome to Ethereal Hyperspace Battleships {player.name}!",
+            f"Welcome to Ethereal Hyperspace Battleships {interaction.user.name}!\n You are now registered as a {player_class} in {guild_name}.",
             ephemeral=True,
-        )
+        )    
 
     @app_commands.command(name="bug_report", description="Report a bug")
     async def bug_report(

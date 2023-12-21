@@ -30,6 +30,7 @@ class Player:
         self._energy_thread.daemon = True
         self._energy_thread.start()
         self._is_traveling = False
+        self._is_mining = False
 
     @property
     def id(self):
