@@ -1,3 +1,4 @@
+from uu import Error
 from discord import app_commands
 import discord
 from discord.ext import commands
@@ -6,7 +7,7 @@ from typing import Literal
 from mariadb import IntegrityError
 from player import Player
 from ui.help_banner import HelpBanner
-from ui.simple_banner import NormalBanner
+from ui.simple_banner import ErrorBanner, NormalBanner
 from utils import send_bug_report
 from utils import check_registered
 
@@ -36,13 +37,11 @@ class GeneralCommands(commands.Cog):
         self,
         interaction: discord.Interaction,
         player_class: Literal["martian", "dwarf", "droid"],
-        guild_name: Literal[
-            "The Federation", "The Empire", "The Alliance", "The Independents"
-        ],
-
+        guild_name: Literal["The Federation", "The Empire", "The Alliance", "The Independents"],
     ):
         if Player.exists(interaction.user.id):
-            await interaction.response.send_message("You are already registered as a player.", ephemeral=True)
+            banner = ErrorBanner(interaction.user, "You are already registered as a player.")
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
 
         try:
@@ -62,14 +61,14 @@ class GeneralCommands(commands.Cog):
         Player.get(interaction.user.id)
         role = discord.utils.get(interaction.guild.roles, name=guild_name)
         if role:
-            await interaction.user.add_roles(role) 
+            await interaction.user.add_roles(role)
         else:
             raise NotImplementedError
 
         await interaction.response.send_message(
             f"Welcome to Ethereal Hyperspace Battleships {interaction.user.name}!\n You are now registered as a {player_class} in {guild_name}.",
             ephemeral=True,
-        )    
+        )
 
     @app_commands.command(name="bug_report", description="Report a bug")
     async def bug_report(
