@@ -23,6 +23,7 @@ class Player:
         self._money = money
         self._x_pos = x_pos
         self._y_pos = y_pos
+        self._on_message_reward_cooldown = False
         self._energy_thread = Thread(target=self.update_energy)
         self._energy_thread.daemon = True
         self._energy_thread.start()
@@ -68,6 +69,14 @@ class Player:
         global _db
         self._money = amount if self._money >= 0 else 0
         _db.player_set_money(self.id, self._money)
+
+    @property
+    def on_message_reward_cooldown(self) -> bool:
+        return self._on_message_reward_cooldown
+
+    @on_message_reward_cooldown.setter
+    def on_message_reward_cooldown(self, on_message_reward_cooldown: bool):
+        self._on_message_reward_cooldown = on_message_reward_cooldown
 
     # TODO make a secondary module like solar panels (slow but doesn't consume uranium=>players don't get stuck)
     def update_energy(self):
