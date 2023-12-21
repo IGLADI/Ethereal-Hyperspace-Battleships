@@ -36,6 +36,12 @@ class MineCommands(commands.Cog):
                 "You can only mine on a planet.", ephemeral=True
             )
             return
+        
+        if player._is_mining:
+            await interaction.response.send_message(
+                "You are already mining!", ephemeral=True
+            )
+            return
 
         await interaction.response.send_message("Mining...", ephemeral=True)
         player._is_mining = True
