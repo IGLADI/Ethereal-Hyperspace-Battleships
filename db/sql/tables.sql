@@ -95,7 +95,7 @@ CREATE TABLE `ships` (
 CREATE TABLE `modules` (
     `module_id` INT(11) NOT NULL AUTO_INCREMENT,
     CONSTRAINT `PK__modules` PRIMARY KEY (`module_id`),
-    `level` INT(11) NOT NULL DEFAULT 0,
+    `level` INT(11) NOT NULL DEFAULT 1,
     `state` ENUM('active', 'inactive') NULL,
     `type` ENUM('SolarPanel', 'TravelModule', 'MiningModule', 'Canon', 'Shield', 'Fuel', 'Cargo', 'Radar', 'EnergyGenerator') NOT NULL,
     `ship_id` INT(11) NOT NULL,

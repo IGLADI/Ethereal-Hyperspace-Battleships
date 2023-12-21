@@ -4,8 +4,12 @@ from discord.ext import commands
 from create_channels import create_channels
 
 import json
-from data import planets
+import random
+import asyncio
+
+import data
 from planet import Planet
+from player import Player
 
 from create_roles import create_roles
 from ui.simple_banner import SimpleBanner
@@ -58,8 +62,8 @@ class Client(commands.Bot):
 
 # load the bot token from config.json KEEP THIS TOKEN PRIVATE (gitignore)
 with open("config.json", "r") as f:
-    data = json.load(f)
-    TOKEN = data["bot_token"]
+    config_data = json.load(f)
+    TOKEN = config_data["bot_token"]
 
 # create the bot
 client = Client()
@@ -82,6 +86,35 @@ async def on_guild_join(guild):
     except Exception as e:
         await channel.send("This bot can only run on community servers. Not on private servers! Bye!\n https://support.discord.com/hc/en-us/articles/360047132851-Enabling-Your-Community-Server")
         await guild.leave()
+
+@client.event
+async def on_message(message):
+    if client.user == message.author:
+        return
+    channel = message.channel
+
+    if not isinstance(channel, discord.TextChannel):
+        return
+    if not isinstance(channel.category, discord.CategoryChannel):
+        return
+    if channel.category.name not in data.guild_names:
+        return
+
+    player = Player.get(message.author.id)
+    if player.on_message_reward_cooldown:
+        return
+
+    if random.randint(1, data.REWARD_ON_MESSAGE_CHANCE) != 1:
+        return
+
+    player.money += 1000
+    await channel.send(message.author.mention + " got himself 1000 money!!!")
+
+    # 4. if he got a reward start the cooldown
+    player.on_message_reward_cooldown = True
+    await asyncio.sleep(data.REWARD_ON_MESSAGE_COOLDOWN)
+    player.on_message_reward_cooldown = False
+
 
 # start the bot with the token in the config file
 client.run(TOKEN)
