@@ -14,6 +14,21 @@ class TravelCommands(commands.Cog):
     def __init__(self, client: commands.Bot):
         self.client = client
 
+    @app_commands.command(name="where_am_i", description="Get your location info")
+    @app_commands.check(check_registered)
+    async def where_am_i(self, interaction: discord.Interaction):
+        """Returns the location of the player"""
+        player = Player.get(interaction.user.id)
+        coordinates = (player.x_pos, player.y_pos)
+        if player._is_traveling:
+            await interaction.response.send_message(f"You are currently traveling. But you are at {coordinates} right now!", ephemeral=True)
+        else:                                        
+            location_name = Location(player.x_pos, player.y_pos).is_planet() if Location(player.x_pos, player.y_pos).is_planet() else "floating in space"
+            await interaction.response.send_message(
+                f"You are currently at {coordinates}, also known as {location_name}.",
+                ephemeral=True,
+            )
+
     @app_commands.command(name="travel", description="Travel to a new location")
     @app_commands.check(check_registered)
     async def travel(self, interaction: discord.Interaction, x_coordinate: int, y_coordinate: int):          
@@ -25,7 +40,7 @@ class TravelCommands(commands.Cog):
         
         try:
             sleep = player.travel(x_coordinate, y_coordinate)
-            await interaction.response.send_message(f"{player.id} traveling to ({x_coordinate}, {y_coordinate}). Estimated duration = {sleep}.")
+            await interaction.response.send_message(f"{player.name} traveling to ({x_coordinate}, {y_coordinate}). Estimated duration = {sleep}.")
         except Exception as e:
             await interaction.response.send_message(f"Couldn't travel: {e}", ephemeral=True)
             return

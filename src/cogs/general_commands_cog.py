@@ -120,18 +120,6 @@ class GeneralCommands(commands.Cog):
             ephemeral=True,
         )
 
-    @app_commands.command(name="where_am_i", description="Get your location info")
-    @app_commands.check(check_registered)
-    async def where_am_i(self, interaction: discord.Interaction):
-        """Returns the location of the player"""
-        player = Player.get(interaction.user.id)
-        coordinates = (player.x_pos, player.y_pos)
-        location_name = player.location_name()
-        await interaction.response.send_message(
-            f"You are currently at {coordinates}, also known as {location_name}.",
-            ephemeral=True,
-        )
-
     @app_commands.command(name="bug_report", description="Report a bug")
     async def bug_report(
         self,

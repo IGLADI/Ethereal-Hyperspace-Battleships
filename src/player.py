@@ -90,10 +90,6 @@ class Player:
                         uranium.amount -= 1
                 time.sleep(60)
 
-    def location_name(self) -> str:
-        global _db
-        return _db.player_location_name(self.id)
-
     @classmethod
     def register(cls, discord_id, discord_name, player_class, guild_name):
         """Registers a new player in the database."""
