@@ -117,6 +117,8 @@ class Player:
     def get(cls, discord_id):
         """Gets a player from the players cache, if player is not found add it to the cache.
         Note: This assumes player with discord_id exists in the database."""
+        if data.CACHE_DISABLED:
+            return cls(discord_id)
         p = data.players.get(discord_id)
         if p is None:
             p = cls(discord_id)

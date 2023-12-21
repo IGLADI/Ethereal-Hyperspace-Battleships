@@ -1,9 +1,12 @@
+import args
+
 import discord
 from discord.ext import commands
 
 from create_channels import create_channels
 
 import json
+import argparse
 import random
 import asyncio
 
