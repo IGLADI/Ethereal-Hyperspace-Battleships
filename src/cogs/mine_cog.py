@@ -42,6 +42,12 @@ class MineCommands(commands.Cog):
                 "You are already mining!", ephemeral=True
             )
             return
+        
+        if player._is_traveling:
+            await interaction.response.send_message(
+                "You can't mine while traveling!", ephemeral=True
+            )
+            return
 
         await interaction.response.send_message("Mining...", ephemeral=True)
         player._is_mining = True
