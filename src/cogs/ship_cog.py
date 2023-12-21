@@ -3,11 +3,11 @@ from discord import app_commands
 import discord
 from discord.ext import commands
 
+from ui.simple_banner import ErrorBanner, LoadingBanner, NormalBanner, SuccessBanner
 from typing import Literal
 from player import Player
-from utils import check_player_exists
-
-import data
+from tabulate import tabulate
+from utils import check_registered
 
 
 class ShipCommands(commands.Cog):
@@ -15,37 +15,41 @@ class ShipCommands(commands.Cog):
         self.client = client
 
     @app_commands.command(name="ship_info", description="Get info on your ship")
-    @app_commands.check(check_player_exists)
+    @app_commands.check(check_registered)
     async def ship_info(self, interaction: discord.Interaction):
         player = Player.get(interaction.user.id)
         ship = player.ship
-        ship_message = f"**{player.name}'s ship**\n"
-        ship_message += f"**Location:** {player.location_name()}\n"
-        ship_message += "**Modules:**\n"
-        modules_info = [str(module) for module in ship.modules.values()]
-        ship_message += f"{' '.join(modules_info)}"
-        ship_message += f"\nEnergy: {ship.energy}"
-        await interaction.response.send_message(ship_message, ephemeral=True)
+        header = "'s Ship"
+        table_data = []
+        for module in ship.modules.values():
+            table_data.append([module.name, module.level])
 
-    @app_commands.command(
-        name="inventory", description="Get info on your cargo and it's contents"
-    )
-    @app_commands.check(check_player_exists)
+        modules_info = tabulate(table_data, headers=['Module', 'Level'])
+
+        ship_message = f"```{modules_info}```"
+        coordinates = f"{player.x_pos}, {player.y_pos}"
+        ship_message += f"```Location: {coordinates}```"
+        ship_message += "```Energy: " + f"{ship.energy}```"
+        banner = NormalBanner(text=ship_message, user=interaction.user, extra_header=header)
+        await interaction.response.send_message(embed=banner.embed, ephemeral=True)
+
+    @app_commands.command(name="inventory", description="Get info on your cargo and it's contents")
+    @app_commands.check(check_registered)
     async def cargo_info(self, interaction: discord.Interaction):
         player = Player.get(interaction.user.id)
         ship = player.ship
-        ship_message = f"**{player.name}'s ship**\n"
-        ship_message += "**Cargo:**"
+        ship_message = ""
         ship_message += "".join(
-            f"\n- {resource}"
-            for resource in ship.modules["Cargo"].resources.values()
-            if resource.amount > 0
+            f"\n- {resource}" for resource in ship.modules["Cargo"].resources.values() if resource.amount > 0
         )
-        await interaction.response.send_message(ship_message, ephemeral=True)
+        banner = NormalBanner(
+            text=ship_message, user=interaction.user, extra_header="'s Inventory", is_code_block=True
+        )
+        await interaction.response.send_message(embed=banner.embed, ephemeral=True)
 
-    @app_commands.command(name="upgrade_ship", description="Upgrade a module")
-    @app_commands.check(check_player_exists)
-    async def upgrade_ship(
+    @app_commands.command(name="upgrade_module", description="Upgrade a module")
+    @app_commands.check(check_registered)
+    async def upgrade_module(
         self,
         interaction: discord.Interaction,
         module_name: Literal[
@@ -64,22 +68,19 @@ class ShipCommands(commands.Cog):
         module = ship.modules.get(module_name)
 
         if not module:
-            await interaction.response.send_message(
-                f"Couldn't find module {module_name}.", ephemeral=True
-            )
+            banner = ErrorBanner(text=f"Couldn't find module {module_name}.", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
 
         try:
             module.upgrade(player.ship.modules["Cargo"])
         except Exception as e:
-            await interaction.response.send_message(
-                f"Couldn't upgrade {module_name}: {e}", ephemeral=True
-            )
+            banner = ErrorBanner(text=f"Couldn't upgrade {module_name}: {e}", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
 
-        await interaction.response.send_message(
-            f"Upgraded {module_name} to level {module.level}.", ephemeral=True
-        )
+        banner = SuccessBanner(f"Upgraded {module_name} to level {module.level}.", user=interaction.user)
+        await interaction.response.send_message(embed=banner.embed, ephemeral=True)
 
     # ! For debugging purposes
     @app_commands.command(name="add_cargo", description="For debugging purposes")
@@ -87,62 +88,88 @@ class ShipCommands(commands.Cog):
     async def add_cargo(
         self,
         interaction: discord.Interaction,
-        resource: Literal[
-            "Rock", "Copper", "Silver", "Gold", "Uranium", "Black Matter"
-        ],
+        resource: Literal["Rock", "Copper", "Silver", "Gold", "Uranium", "Black Matter"],
         amount: int,
     ):
+
         player = Player.get(interaction.user.id)
         resource_name = resource.lower()
-        player.ship.modules["Cargo"].add_resource(resource_name, amount)
-        await interaction.response.send_message(
-            f"Added {amount} {resource}.",
-            ephemeral=True,
-        )
-
-    @app_commands.command(
-        name="toggle_energy_generator", description="Toggle on of the energy generator"
-    )
-    @app_commands.check(check_player_exists)
-    async def toggle_energy_generator(self, interaction: discord.Interaction, on: bool):
-        player = Player.get(interaction.user.id)
-        generator_status = player.ship.modules["EnergyGenerator"].is_on
-        if player.ship.modules["EnergyGenerator"].booting:
+        new_amount = player.ship.modules["Cargo"].add_resource(resource_name, amount)
+        
+        if new_amount == 0:
+            banner = ErrorBanner(
+                text=f"{resource} capacity is full, could not add to your ship.", user=interaction.user
+            )
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
+        elif new_amount < amount:
             await interaction.response.send_message(
-                "The generator is still booting.", ephemeral=True
+                f"You added {new_amount} tons of {resource} and left "
+                f"{amount - new_amount} tons behind, because you reached maximum capacity.",
+                ephemeral=True,
             )
+        else:
+            await interaction.response.send_message(
+                f"You added {amount} tons of {resource} to your ship.", ephemeral=True
+            )
+
+    @app_commands.command(name="toggle_energy_generator", description="Toggle on of the energy generator")
+    @app_commands.check(check_registered)
+    async def toggle_energy_generator(self, interaction: discord.Interaction, toggle: Literal["on", "off"]):
+
+        if toggle == "on":
+            toggle = True
+        elif toggle == "off":
+            toggle = False
+
+        player = Player.get(interaction.user.id)
+        if  player.ship.modules["EnergyGenerator"].booting:
+            banner = ErrorBanner(text="The generator is still booting.", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
-        if on is generator_status:
-            status_message = "Generator is already " + (
-                "on" if generator_status else "off"
+        
+        generator_status = player.ship.modules["EnergyGenerator"].is_on
+        if toggle is generator_status:
+            banner = ErrorBanner(
+                text="Generator is already " + ("on" if generator_status else "off"), user=interaction.user
             )
-            await interaction.response.send_message(status_message, ephemeral=True)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
 
-        if on and not generator_status:
+        if toggle and not generator_status:
             player.ship.modules["EnergyGenerator"].booting = True
-            await interaction.response.send_message("Booting up the generator...")
-            message = await interaction.followup.send("░░░░░░░░░░ 0%")
-            for percent in range(0, 100, 10):
+            banner = LoadingBanner(text="", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed)
+            for percent in range(0, 101, 10):
                 bar = "█" * (percent // 10) + "░" * ((100 - percent) // 10)
-                await message.edit(content=f"{bar} {percent}%")
+                banner = LoadingBanner(
+                    text=f"Booting up the generator...\n\n{bar} {percent}%",
+                    user=interaction.user,
+                )
+                await interaction.edit_original_response(embed=banner.embed)
                 await asyncio.sleep(0.5)
-            await message.delete()
 
-            await interaction.followup.send("Generator is now online!")
+            banner = SuccessBanner(text="Generator is now online!", user=interaction.user)
+            await interaction.edit_original_response(embed=banner.embed)
             player.ship.modules["EnergyGenerator"].turn_on()
             player.ship.modules["EnergyGenerator"].booting = False
-        elif not on and generator_status:
+        elif not toggle and generator_status:
             player.ship.modules["EnergyGenerator"].booting = True
-            await interaction.response.send_message("Shutting down the generator...")
-            message = await interaction.followup.send("██████████ 100%")
+            banner = LoadingBanner(
+                text="",
+                user=interaction.user,
+            )
+            await interaction.response.send_message(embed=banner.embed)
             for percent in range(100, 0, -10):
                 bar = "█" * (percent // 10) + "░" * ((100 - percent) // 10)
-                await message.edit(content=f"{bar} {percent}%")
-                # await asyncio.sleep(0.5)
-            await message.delete()
+                banner = LoadingBanner(
+                    text=f"Shutting down the generator...\n\n{bar} {percent}%",
+                    user=interaction.user,
+                )
+                await interaction.edit_original_response(embed=banner.embed)
+                await asyncio.sleep(0.5)
             player.ship.modules["EnergyGenerator"].turn_off()
-            await interaction.followup.send("Generator has been shut down.")
+            banner = SuccessBanner(text="Generator is now offline!", user=interaction.user)
+            await interaction.edit_original_response(embed=banner.embed)
             player.ship.modules["EnergyGenerator"].booting = False
 
 

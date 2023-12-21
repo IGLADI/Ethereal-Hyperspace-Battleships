@@ -10,9 +10,11 @@ from tabulate import tabulate
 
 import data
 from races import Racer
-from utils import check_player_exists
+from ui.simple_banner import ErrorBanner
+from utils import check_registered
 
 
+# TODO use banners (this is the hello world app so temporary let behind until we complete more of the important stuff)
 # TODO add imgs (AI/start w hardcoded)
 # TODO add casino info
 class RaceGame(commands.Cog):
@@ -56,13 +58,16 @@ class RaceGame(commands.Cog):
         max_speed = race_info["max_speed"]
 
         if amount_of_racers < 2:
-            await interaction.response.send_message("You need at least 2 racers.", ephemeral=True)
+            banner = ErrorBanner(text="You need at least 2 racers.", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
         if amount_of_racers > 64:
-            await interaction.response.send_message("You can't have more than 64 racers.", ephemeral=True)
+            banner = ErrorBanner(text="You can't have more than 64 racers.", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
         if interaction.channel_id in data.race_games:
-            await interaction.response.send_message("A race is already in progress in this channel.", ephemeral=True)
+            banner = ErrorBanner(text="A race is already in progress in this channel.", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
 
         data.race_games[interaction.channel_id] = {
@@ -78,7 +83,10 @@ class RaceGame(commands.Cog):
             user = bet["player"]
             gamblers.add(user)
         if len(gamblers) < 2:
-            await interaction.followup.send("At least two different users need to place bets to start the race.")
+            banner = ErrorBanner(
+                text="At least two different users need to place bets to start the race.", user=interaction.user
+            )
+            await interaction.followup.send(embed=banner.embed)
             del data.race_games[interaction.channel_id]
             return
 
@@ -98,25 +106,27 @@ class RaceGame(commands.Cog):
     @app_commands.check(check_player_exists)
     async def bet_on_race(self, interaction: discord.Interaction, betamount: int, racer_to_bet_on: str):
         if interaction.channel_id not in data.race_games:
-            await interaction.response.send_message(
-                "No race game is currently in progress in this channel.", ephemeral=True
-            )
+            banner = ErrorBanner(text="No race game is currently in progress in this channel.", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
         if betamount == 0:
-            await interaction.response.send_message("You can't bet $0.", ephemeral=True)
+            banner = ErrorBanner(text="You can't bet $0.", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
         # TODO change negative bets to take in account the multiplier
         # (so if thereare 5 racers and you bet -10 you lose 50)
         # TODO add a check to not bet 0$
         # TODO add a custom message for negative bets
         if data.players[interaction.user].money < abs(betamount):
-            await interaction.response.send_message("You don't have enough money.", ephemeral=True)
+            banner = ErrorBanner(text="You don't have enough money.", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
         # TODO this works but also need to be implemented in get betted amount
         amount_of_racers = len(data.race_games[interaction.channel_id]["racers"])
         if betamount < 0:
             if data.players[interaction.user].money < abs(betamount * (amount_of_racers - 1)):
-                await interaction.response.send_message("You don't have enough to bet on a lost.", ephemeral=True)
+                banner = ErrorBanner(text="You don't have enough to bet on a lost.", user=interaction.user)
+                await interaction.response.send_message(embed=banner.embed, ephemeral=True)
                 return
         if any(
             bet["player"] == interaction.user
@@ -124,10 +134,12 @@ class RaceGame(commands.Cog):
             for bet in data.race_games[interaction.channel_id]["bets"]
         ):
             # TODO modify the message once the ... commands are implemented
-            await interaction.response.send_message(
-                f"You have already bet on {racer_to_bet_on.capitalize()} for this race.\n use ... to change your bets",
-                ephemeral=True,
+            banner = ErrorBanner(
+                text=f"You have already bet on {racer_to_bet_on.capitalize()} for this race.\n"
+                f"Use ... to change your bets",
+                user=interaction.user,
             )
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
         racers_in_channel = data.race_games[interaction.channel_id]["racers"]
         if not any(

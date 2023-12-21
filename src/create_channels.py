@@ -16,7 +16,7 @@ async def create_channels(guild: discord.Guild):
     await create_category_general(guild, "Ethereal Hyperspace Battleships General")
 
     for guild_temp_name in data.guild_names:
-        #! have put guild_temp_name by guess because guilds are developed in the same time, should be checked
+        # ! have put guild_temp_name by guess because guilds are developed in the same time, should be checked
         await create_category_main_guilds(guild, guild_temp_name)
 
 

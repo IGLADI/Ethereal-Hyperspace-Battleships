@@ -2,6 +2,7 @@ from random import randrange
 from database import Database
 _db = Database()
 
+
 class Location:
     def __init__(self, x, y):
         self.x = x
@@ -17,7 +18,7 @@ class Location:
         return f"({self.x}, {self.y})"
 
     def is_planet(self):
-        '''Returns the planet name if the location is a planet, otherwise returns space'''
+        '''Returns the planet name if the location is a planet, otherwise returns None'''
         return _db.location_from_coordinates(self.x, self.y)
     
     def distance_to(self, location):

@@ -5,6 +5,7 @@ from discord.ext import commands
 from typing import Literal
 from mariadb import IntegrityError
 from player import Player
+from ui.help_banner import HelpBanner
 from utils import send_bug_report
 from utils import check_player_exists
 
@@ -25,44 +26,46 @@ class GeneralCommands(commands.Cog):
 
         # Main page command list
         def help_main():
-            help_message = "Here is a list of general commands:\n"
-            help_message += "/help {page name} - Show the commands from that page\n"
-            return help_message
+            return {
+                "help {page name}": "Show commands from that page"
+            }
         
         # Guild page command list
         def help_guild():
-            help_message = "Here is a list of guild commands:\n"
-            help_message += "/guild - Get guild info\n"
-            help_message += "/guild_members - Get guild members\n"
-            help_message += "/guild_leave - Leave your guild\n"
-            help_message += "/guild_join {guild name} - Join a guild\n"
-            help_message += "/guild_create {guild name} - Create a guild\n"
-            return help_message
-        
+            return {
+                "guild": "Get guild info",
+                "guild_members": "Get guild members",
+                "guild_leave": "Leave your guild",
+                "guild_join {guild name}": "Join a guild",
+                "guild_create {guild name}": "Create a guild",
+            }
+
         # Resources page command list
         def help_resources():
-            help_message = "Here is a list of resources commands:\n"
-            help_message += "/resources - Get info on resources and mining\n"
-            help_message += "/mine - Mine a random resource\n"
-            help_message += "/inventory - Check your cargo\n"
-            help_message += "/sell {resource} {amount} - Sell resources\n"
-            help_message += "/buy {resource} {amount} - Buy resources\n"
-            return help_message
-        
+            return {
+                "resources": "Get info on resources and mining",
+                "mine": "Mine a random resource",
+                "inventory": "Check your cargo",
+                "sell {resource} {amount}": "Sell resources",
+                "buy {resource} {amount}": "Buy resources",
+            }
+
         # Travel page command list
         def help_travel():
-            help_message = "Here is a list of travel commands:\n"
-            help_message += "/where_am_i - Get your location info\n"
-            help_message += "/travel {x} {y} - Travel to a location\n"
-            return help_message
-        
+            return {
+                "where_am_i": "Get your location info",
+                "travel {x} {y}": "Travel to a location",
+                "scan": "Scan the area for players and locations",
+            }
+
         # Economic page command list
         def help_economic():
-            help_message = "Here is a list of economic commands:\n"
-            help_message += "/balance - Check your money\n"
-            help_message += "/pay {amount} {player} - Give money to a player\n"
-            return help_message
-        
+            return {
+                "balance": "Check your money",
+                "pay {amount} {player}": "Give money to a player",
+                "trade": "idk, i didn't write this...",
+            }
+
         switch_dict = {
             'main': help_main,
             'guild': help_guild,
@@ -71,12 +74,11 @@ class GeneralCommands(commands.Cog):
             'economic': help_economic        
         }
 
-        # Welcome message and tutorial
-        help_message = "Welcome to Ethereal Hyperspace Battleships!\n"
         help_function = switch_dict.get(page)
-        help_message += help_function()
-
-        await interaction.response.send_message(help_message, ephemeral=True)
+        commands = help_function()
+        
+        banner = HelpBanner(commands, interaction.user)
+        await interaction.response.send_message(embed=banner.embed, ephemeral=True)
 
     # ? TODO maybe add a min lvl to give money (avoid spamming discord acounts)
     # Checked for race condition (spamming the command to multiply money because that money can't go under 0)
@@ -130,10 +132,7 @@ class GeneralCommands(commands.Cog):
     @app_commands.check(check_player_exists)
     async def balance(self, interaction: discord.Interaction):
         player = Player.get(interaction.user.id)
-        balance = player.money
-        await interaction.response.send_message(
-            f"Your current balance is ${balance}.", ephemeral=True
-        )
+        await interaction.response.send_message(f"Your current balance is ${player.money}.", ephemeral=True)
 
     # TODO maybe add displayname
     # ! (still keep id and add a check so that only one user can create an account with a name)
@@ -142,17 +141,11 @@ class GeneralCommands(commands.Cog):
         self,
         interaction: discord.Interaction,
         player_class: Literal["martian", "dwarf", "droid"],
-        guild_name: Literal[
-            "The Federation", "The Empire", "The Alliance", "The Independents"
-        ],
+        guild_name: Literal["The Federation", "The Empire", "The Alliance", "The Independents"],
     ):
         if Player.exists(interaction.user.id):
-            await interaction.response.send_message(
-                "You are already registered as a player.", ephemeral=True
-            )
+            await interaction.response.send_message("You are already registered as a player.", ephemeral=True)
             return
-
-        print("interaction.user.id:", interaction.user.id)
 
         try:
             Player.register(
@@ -163,15 +156,15 @@ class GeneralCommands(commands.Cog):
             )
         except IntegrityError:
             await interaction.response.send_message(
-                f"Duplicate values.",
+                "Duplicate values.",
                 ephemeral=True,
             )
             return
 
-        Player.get(interaction.user.id)
+        player = Player.get(interaction.user.id)
 
         await interaction.response.send_message(
-            f"Welcome to Ethereal Hyperspace Battleships {interaction.user.name}!",
+            f"Welcome to Ethereal Hyperspace Battleships {player.name}!",
             ephemeral=True,
         )
 

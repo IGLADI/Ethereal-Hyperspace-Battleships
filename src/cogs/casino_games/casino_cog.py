@@ -2,7 +2,8 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from utils import check_player_exists
+from ui.simple_banner import NormalBanner
+from utils import check_registered
 
 
 class CasinoGame(commands.Cog):
@@ -16,7 +17,8 @@ class CasinoGame(commands.Cog):
         casino_info += "/casino_info - Get info on the casino commands\n"
         casino_info += "/create_race - Create a race\n"
         casino_info += "/race_info - Bet on a race\n"
-        await interaction.response.send_message(casino_info, ephemeral=True)
+        banner = NormalBanner(text=casino_info, user=interaction.user)
+        await interaction.response.send_message(embed=banner.embed, ephemeral=True)
 
 
 async def setup(client: commands.Bot) -> None:
