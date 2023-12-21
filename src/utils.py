@@ -8,7 +8,6 @@ from database import Database
 import database
 _db = database.Database()
 
-
 async def check_registered(interaction: discord.Interaction) -> bool:
     if _db.player_exists(interaction.user.id):
         return True

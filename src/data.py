@@ -32,3 +32,10 @@ BUILDING_TYPES = [
     "trading station",
     "casino",
 ]
+
+# chances a player has to receive a reward when eligible
+REWARD_ON_MESSAGE_CHANCE = 100
+# seconds a player has to wait before he is eligible for message rewards
+REWARD_ON_MESSAGE_COOLDOWN = 900
+# Todo, set this wherever possible
+GENERAL_NAME = "Ethereal Hyperspace Battleships General"

@@ -6,9 +6,6 @@ from discord.ext import commands
 from ui.simple_banner import ErrorBanner, LoadingBanner, NormalBanner, SuccessBanner
 from typing import Literal
 from player import Player
-from database import Database
-_db = Database()
-
 from tabulate import tabulate
 from utils import check_registered
 
