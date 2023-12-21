@@ -4,6 +4,7 @@ from discord.ext import commands
 from create_channels import create_channels
 
 import json
+import argparse
 import random
 import asyncio
 
@@ -13,6 +14,12 @@ from player import Player
 
 from create_roles import create_roles
 from ui.simple_banner import SimpleBanner
+
+parser = argparse.ArgumentParser(prog="main.py")
+parser.add_argument("-c", "--cache-disabled", action="store_true", help="Disable cache.")
+args = parser.parse_args()
+
+data.CACHE_DISABLED = args.cache_disabled
 
 # check discord.py docs AND discord developer portal docs, please use cogs and slash commands (discord.py 2.0)
 # https://discordpy.readthedocs.io/en/stable/interactions/api.html
