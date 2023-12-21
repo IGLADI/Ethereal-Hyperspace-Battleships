@@ -220,7 +220,7 @@ class Cargo(Module):
 
         self.cargo_id = cargo_module_id
         self._capacity = 0
-        self._max_capacity = 600
+        self._max_capacity = 300
         self._resources = {}
 
         for item_id in item_ids:
@@ -264,19 +264,30 @@ class Cargo(Module):
             for i in range(1, 4):
                 self._cost[i]["amount"] += 100
 
-    def add_resource(self, resource_name, amount):
+    
+
+    def add_resource(self, player, resource_name, amount):
         """Adds a resource to the module, creates a new one or stack with existing resource."""
+        cargo_module_id = _db.player_id(player._id)
+
+        max_amount = player.ship.modules["Cargo"].max_capacity - (_db.item_amount_by_player_and_name(cargo_module_id, resource_name) if _db.item_amount_by_player_and_name(cargo_module_id, resource_name) else 0)
+        if amount >= max_amount:
+            a = max_amount
+        else:
+            a = amount
+
         resource_name = resource_name.lower()
         resource = self.resources.get(resource_name)
         if resource:
-            resource.amount += amount
-            self._capacity += amount
-            return
+            resource.amount += a
+            self._capacity += a
+            return a
 
-        resource_id = Resource.store(name=resource_name, amount=amount, cargo_module_id=self.cargo_id)
+        resource_id = Resource.store(name=resource_name, amount=a, cargo_module_id=self.cargo_id)
         resource = Resource(resource_id)
         self._resources[resource_name] = resource
         self._capacity += resource.amount
+        return a
 
     def __str__(self):
         resources_str = "".join(f"\n   - {resource}" for resource in self.resources.values() if resource.amount > 0)
