@@ -59,7 +59,7 @@ class Resource(Item):
         # 3. alter amount of resource
         if contribution > self.amount:
             raise ValueError(
-                f"Be more modest. {contribution} is much more than what you have {amount}"
+                f"Be more modest. {contribution} is much more than what you have {self.amount}"
             )
         contributed_item_id = _db.contribution_exists(
             building_id=building_id, item_name=self.name

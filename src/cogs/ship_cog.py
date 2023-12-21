@@ -6,6 +6,8 @@ from discord.ext import commands
 from ui.simple_banner import ErrorBanner, LoadingBanner, NormalBanner, SuccessBanner
 from typing import Literal
 from player import Player
+from database import Database
+_db = Database()
 
 from tabulate import tabulate
 from utils import check_registered
@@ -72,7 +74,6 @@ class ShipCommands(commands.Cog):
             banner = ErrorBanner(text=f"Couldn't find module {module_name}.", user=interaction.user)
             await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
-
         try:
             module.upgrade(player.ship.modules["Cargo"])
         except Exception as e:
@@ -92,26 +93,9 @@ class ShipCommands(commands.Cog):
         resource: Literal["Rock", "Copper", "Silver", "Gold", "Uranium", "Black Matter"],
         amount: int,
     ):
-
         player = Player.get(interaction.user.id)
-        resource_name = resource.lower()
-        new_amount = player.ship.modules["Cargo"].add_resource(resource_name, amount)
-        
-        if new_amount == 0:
-            banner = ErrorBanner(
-                text=f"{resource} capacity is full, could not add to your ship.", user=interaction.user
-            )
-            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
-        elif new_amount < amount:
-            await interaction.response.send_message(
-                f"You added {new_amount} tons of {resource} and left "
-                f"{amount - new_amount} tons behind, because you reached maximum capacity.",
-                ephemeral=True,
-            )
-        else:
-            await interaction.response.send_message(
-                f"You added {amount} tons of {resource} to your ship.", ephemeral=True
-            )
+        a = player.ship.modules["Cargo"].add_resource(player, resource, amount)
+
 
     @app_commands.command(name="toggle_energy_generator", description="Toggle on of the energy generator")
     @app_commands.check(check_registered)
