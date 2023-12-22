@@ -5,9 +5,8 @@ import data
 from database import Database
 from ship import Ship
 from utils import get_betted_amount
-from location import Location, Coordinate
+from location import Coordinate
 import threading
-import time
 
 _db = Database()
 

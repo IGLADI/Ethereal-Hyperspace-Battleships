@@ -1,15 +1,12 @@
-import asyncio
+from uu import Error
 from discord import app_commands
 import discord
 from discord.ext import commands
 
-from typing import Literal
 from player import Player
 from location import Location, Coordinate
-import asyncio
-from utils import check_registered
-from player import Player
-from ui.simple_banner import ErrorBanner, LoadingBanner, NormalBanner, SuccessBanner
+from ui.simple_banner import ErrorBanner, NormalBanner
+from utils import check_registered, loading_animation
 
 
 class TravelCommands(commands.Cog):
@@ -58,33 +55,37 @@ class TravelCommands(commands.Cog):
 
         try:
             distance = player.travel(destination)
-            banner = LoadingBanner(
-                text=f"{player.name} traveling to ({x}, {y}). Estimated duration = {distance}.",
-                user=interaction.user,
-                extra_header=" is travelling to a new location",
+            if distance == 0:
+                banner = ErrorBanner(
+                    user=interaction.user,
+                    text="You are already at that location!",
+                )
+                await interaction.response.send_message(embed=banner.embed, ephemeral=True)
+                return
+
+            location = None
+            if destination.is_location():
+                location = Location.fromcoordinate(destination)
+                image = location.image_path
+            else:
+                image = "../assets/space/space0.jpg"
+
+            if location is None:
+                location_name = "floating in space"
+            else:
+                location_name = location.name
+            image = discord.File(image, filename="image.png")
+
+            await loading_animation(
+                interaction,
+                sleep_time=distance / 10,
+                loading_text=f"Traveling to ({x}, {y}) aka {location_name}",
+                loaded_text=f"Arrived at ({x}, {y}) aka {location_name}",
+                extra_image=image,
             )
-            await interaction.response.send_message(embed=banner.embed)
         except Exception as e:
             await interaction.response.send_message(f"Couldn't travel: {e}", ephemeral=True)
             return
-        else:
-            await asyncio.sleep(distance * 1)
-
-            if destination.is_location():
-                l = Location.fromcoordinate(destination)
-                image = l.image_path
-                text = f"{player.name} arrived at {l.name}: ({x}, {y})."
-            else:
-                image = "../assets/space/space0.jpg"
-                text = f"{player.name} floating in space at ({x}, {y})."
-
-            banner = SuccessBanner(
-                text=text,
-                user=interaction.user,
-                extra_header=" arrived at a new location",
-            )
-
-            await interaction.followup.send(embed=banner.embed, file=discord.File(image))
 
     @app_commands.command(name="scan", description="Use your radar to scan the area")
     @app_commands.check(check_registered)
