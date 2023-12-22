@@ -26,31 +26,21 @@ class MineCommands(commands.Cog):
         player = Player.get(interaction.user.id)
 
         if player.ship.energy < 10 * mining_sessions:
-            await interaction.response.send_message(
-                "You don't have enough energy.", ephemeral=True
-            )
+            await interaction.response.send_message("You don't have enough energy.", ephemeral=True)
             return
 
         if Location(player.x_pos, player.y_pos).is_planet() == None:
-            await interaction.response.send_message(
-                "You can only mine on a planet.", ephemeral=True
-            )
+            await interaction.response.send_message("You can only mine on a planet.", ephemeral=True)
             return
-        
+
         if player._is_mining:
-            await interaction.response.send_message(
-                "You are already mining!", ephemeral=True
-            )
+            await interaction.response.send_message("You are already mining!", ephemeral=True)
             return
-        
+
         if player._is_traveling:
-            await interaction.response.send_message(
-                "You can't mine while traveling!", ephemeral=True
-            )
+            await interaction.response.send_message("You can't mine while traveling!", ephemeral=True)
             return
-        load_banner = LoadingBanner(
-            text="Mining...", user=interaction.user, extra_header="'s mining session"
-        )
+        load_banner = LoadingBanner(text="Mining...", user=interaction.user, extra_header="'s mining session")
         await interaction.response.send_message(embed=load_banner.embed, ephemeral=True)
         player._is_mining = True
         for i in range(mining_sessions):
@@ -62,13 +52,26 @@ class MineCommands(commands.Cog):
             amount = math.floor((random.random() * mining_bonus) / 2)
             added = player.ship.modules["Cargo"].add_resource(player, resource_name, amount)
             if amount == added:
-                banner = SuccessBanner(text=f"You mined {amount} tons of {resource_name}.", user=interaction.user, extra_header="'s mining session")
+                banner = SuccessBanner(
+                    text=f"You mined {amount} tons of {resource_name}.",
+                    user=interaction.user,
+                    extra_header="'s mining session",
+                )
             elif added > 0:
-                banner = LoadingBanner( text=f"You mined {amount} tons of {resource_name}. You only had space for {added} tons.", user=interaction.user, extra_header="'s mining session")
+                banner = LoadingBanner(
+                    text=f"You mined {amount} tons of {resource_name}. You only had space for {added} tons.",
+                    user=interaction.user,
+                    extra_header="'s mining session",
+                )
             else:
-                banner = ErrorBanner(text=f"You mined {amount} tons of {resource_name}. But you have no space left in your Cargo Module... Try upgrading it!", user=interaction.user, extra_header="'s mining session")
+                banner = ErrorBanner(
+                    text=f"You mined {amount} tons of {resource_name}. But you have no space left in your Cargo Module... Try upgrading it!",
+                    user=interaction.user,
+                    extra_header="'s mining session",
+                )
             await interaction.followup.send(embed=banner.embed, ephemeral=True)
         player._is_mining = False
+
 
 async def setup(client: commands.Bot) -> None:
     await client.add_cog(MineCommands(client))
