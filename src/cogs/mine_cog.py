@@ -9,7 +9,7 @@ from ui.simple_banner import LoadingBanner, NormalBanner
 from data import RESOURCE_NAMES
 from player import Player
 from utils import check_registered
-from location import Location
+from location import Location, Coordinate
 import asyncio
 
 
@@ -26,31 +26,22 @@ class MineCommands(commands.Cog):
         player = Player.get(interaction.user.id)
 
         if player.ship.energy < 10 * mining_sessions:
-            await interaction.response.send_message(
-                "You don't have enough energy.", ephemeral=True
-            )
+            await interaction.response.send_message("You don't have enough energy.", ephemeral=True)
             return
 
-        if Location(player.x_pos, player.y_pos).is_planet() == None:
-            await interaction.response.send_message(
-                "You can only mine on a planet.", ephemeral=True
-            )
+        position = Coordinate(player.x_pos, player.y_pos)
+        if position.is_location() == False:
+            await interaction.response.send_message("You can only mine on a planet.", ephemeral=True)
             return
-        
+
         if player._is_mining:
-            await interaction.response.send_message(
-                "You are already mining!", ephemeral=True
-            )
+            await interaction.response.send_message("You are already mining!", ephemeral=True)
             return
-        
+
         if player._is_traveling:
-            await interaction.response.send_message(
-                "You can't mine while traveling!", ephemeral=True
-            )
+            await interaction.response.send_message("You can't mine while traveling!", ephemeral=True)
             return
-        load_banner = LoadingBanner(
-            text="Mining...", user=interaction.user, extra_header="'s mining session"
-        )
+        load_banner = LoadingBanner(text="Mining...", user=interaction.user, extra_header="'s mining session")
         await interaction.response.send_message(embed=load_banner.embed, ephemeral=True)
         player._is_mining = True
         for i in range(mining_sessions):
@@ -63,7 +54,10 @@ class MineCommands(commands.Cog):
             player.ship.modules["Cargo"].add_resource(resource_name, amount)
 
             banner = NormalBanner(
-            text=f"You mined {amount} tons of {resource_name}.", user=interaction.user, extra_header="'s mining session", is_code_block=True
+                text=f"You mined {amount} tons of {resource_name}.",
+                user=interaction.user,
+                extra_header="'s mining session",
+                is_code_block=True,
             )
             await interaction.followup.send(embed=banner.embed, ephemeral=True)
         player._is_mining = False

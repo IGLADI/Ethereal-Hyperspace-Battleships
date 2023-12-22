@@ -68,9 +68,9 @@ class Location:
     def name(self):
         return self._name
 
-    def is_planet(self) -> bool:
+    def is_planet(self):
         """Returns the planet id if the location is a planet."""
-        return True if _db.planet_id_by_pos(self.x, self.y) > 0 else False
+        raise NotImplementedError
 
     def __str__(self):
         return f"{self.name}: ({self.x}, {self.y}) [{self.image_path}]"
