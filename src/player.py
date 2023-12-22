@@ -5,7 +5,7 @@ import data
 from database import Database
 from ship import Ship
 from utils import get_betted_amount
-from location import Location
+from location import Location, Coordinate
 import threading
 import time
 
@@ -87,6 +87,10 @@ class Player:
     def is_traveling(self):
         return self._is_traveling
 
+    @is_traveling.setter
+    def is_traveling(self, is_traveling):
+        self._is_traveling = is_traveling
+
     # TODO make a secondary module like solar panels (slow but doesn't consume uranium=>players don't get stuck)
     def update_energy(self):
         while True:
@@ -128,25 +132,25 @@ class Player:
         return p
 
     # Travel Commands
-    def travel(self, x_coordinate, y_coordinate):
-        """Travels to the given coordinates"""
-        old_location = Location(self.x_pos, self.y_pos)
-        new_location = Location(x_coordinate, y_coordinate)
-        distance = int(old_location.distance_to(new_location))
+    def travel(self, destination: Coordinate) -> int:
+        """Travels to the given coordinates and returns distance."""
+
+        old_pos = Coordinate(self.x_pos, self.y_pos)
+        distance = int(old_pos.distance_to(destination))
 
         if distance > self.ship.modules["TravelModule"].max_distance:
             raise Exception("You can't travel that far! You need to upgrade your travel module.")
 
         def travel_thread():
             self.is_traveling = True
-            while self._x_pos != new_location.x or self._y_pos != new_location.y:
-                if self._x_pos < new_location.x:
+            while self._x_pos != destination.x or self._y_pos != destination.y:
+                if self._x_pos < destination.x:
                     self._x_pos += 1
-                elif self._x_pos > new_location.x:
+                elif self._x_pos > destination.x:
                     self._x_pos -= 1
-                if self._y_pos < new_location.y:
+                if self._y_pos < destination.y:
                     self._y_pos += 1
-                elif self._y_pos > new_location.y:
+                elif self._y_pos > destination.y:
                     self._y_pos -= 1
                 time.sleep(1)
             _db.player_set_x_pos(self.id, self._x_pos)
@@ -160,7 +164,6 @@ class Player:
     def scan(self, discord_id):
         """Returns a list of locations in a grid around the ship, depending on the radar module level"""
         scan_range = self.ship._modules["Radar"].radar_range // 2
-        location = Location(self._x_pos, self._y_pos)
-        locations = _db.location_from_scan(location.x, location.y, scan_range)
-        locations += _db.player_from_scan(location.x, location.y, scan_range, discord_id)
+        locations = _db.location_from_scan(self.x_pos, self.y_pos, scan_range)
+        locations += _db.player_from_scan(self.x_pos, self.y_pos, scan_range, discord_id)
         return locations
