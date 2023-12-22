@@ -159,22 +159,6 @@ class MiningModule(Module):
     def mining_bonus(self):
         return self._mining_bonus[self.level - 1]
 
-    def upgrade(self, cargo_player):
-        super().upgrade(cargo_player)
-
-        if self.level == 2:
-            self._mining_bonus += 1
-        elif self.level == 3 or self.level == 4:
-            self._mining_bonus += 2
-        elif self.level == 5:
-            self._mining_bonus += 5
-        if self.level == 2:
-            for i in [1, 3]:
-                self._cost[i]["amount"] = 200
-        else:
-            for i in range(1, 4):
-                self._cost[i]["amount"] += 100
-
     def __str__(self):
         return f"{super().__str__()} - Mining Bonus: {self._mining_bonus}%\n"
 
@@ -224,9 +208,6 @@ class Cargo(Module):
             raise ValueError("Storage exceeded")
         self._capacity = capacity
 
-    def upgrade(self, cargo_player):
-        super().upgrade(cargo_player)
-
     def add_resource(self, resource_name: str, amount: int) -> None:
         """Adds a resource to the cargo, stacks amount with existing one or creates a new object."""
         resource_name = resource_name.lower()
@@ -262,25 +243,11 @@ class Canon(Module):
                 {"resource": "gold", "amount": [300, 450, 600, 750, 0]},
             ],
         )
-
         self._strength = [100, 110, 130, 145, 150]
 
     @property
     def strength(self):
         return self._strength[self.level - 1]
-
-    def upgrade(self, cargo_player):
-        super().upgrade(cargo_player)
-        if self.level == 2:
-            self._strength += 10
-        elif self.level == 3:
-            self._strength += 20
-        elif self.level == 4:
-            self._strength += 15
-        elif self.level == 5:
-            self._strength += 5
-        for i in range(1, 4):
-            self._cost[i]["amount"] += 150
 
     def __str__(self):
         return f"{super().__str__()} - Strength: {self._strength} firepower\n"
@@ -304,19 +271,6 @@ class Shield(Module):
     @property
     def defense(self):
         return self._defense[self.level - 1]
-
-    def upgrade(self, cargo_player):
-        super().upgrade(cargo_player)
-        if self.level == 2:
-            self._defense += 10
-        elif self.level == 3:
-            self._defense += 20
-        elif self.level == 4:
-            self._defense += 15
-        elif self.level == 5:
-            self._defense += 5
-        for i in range(1, 4):
-            self._cost[i]["amount"] += 150
 
     def __str__(self):
         return f"{super().__str__()} - Defense: {self._defense} armor\n"
@@ -350,9 +304,6 @@ class Fuel(Module):
         _db.fuel_module_set_fuel(module_id=self.id, fuel=fuel)
         self._fuel = fuel
 
-    def upgrade(self, cargo_player):
-        super().upgrade(cargo_player)
-
     def __str__(self):
         return f"{super().__str__()} - Current Fuel: {self._fuel}%\n"
 
@@ -380,15 +331,6 @@ class Radar(Module):
     @property
     def radar_range(self):
         return self._radar_range[self.level - 1]
-
-    def upgrade(self, cargo_player):
-        super().upgrade(cargo_player)
-        if self.level < 6:
-            self._radar_range += 10
-        else:
-            self._radar_range += 5
-        for i in range(1, 4):
-            self._cost[i]["amount"] += 150
 
     def __str__(self):
         return f"{super().__str__()} - Radar Range: {self._radar_range} lightyears\n"
@@ -420,17 +362,6 @@ class EnergyGenerator(Module):
     def is_on(self):
         return self._is_on
 
-    def upgrade(self, cargo_player):
-        super().upgrade(cargo_player)
-        if self.level == 2 or self.level == 3:
-            self._generation += 10
-        elif self.level == 4 or self.level == 5:
-            self._generation += 20
-        else:
-            self._generation += 30
-        for i in range(1, 4):
-            self._cost[i]["amount"] += 150
-
     def __str__(self):
         return f"{super().__str__()} - Generation: {self._generation} per minute\n"
 
@@ -459,17 +390,6 @@ class SolarPanel(Module):
     @property
     def generation(self):
         return self._generation[self.level - 1]
-
-    def upgrade(self, cargo_player):
-        super().upgrade(cargo_player)
-        if self.level == 2 or self.level == 3:
-            self._generation += 1
-        elif self.level == 4 or self.level == 5:
-            self._generation += 2
-        else:
-            self._generation += 3
-        for i in range(1, 4):
-            self._cost[i]["amount"] += 150
 
     def __str__(self):
         return f"{super().__str__()} - Generation: {self._generation} per minute\n"
