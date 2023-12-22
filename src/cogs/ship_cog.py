@@ -9,6 +9,8 @@ from player import Player
 from tabulate import tabulate
 from utils import check_registered
 
+from utils import loading_animation
+
 
 class ShipCommands(commands.Cog):
     def __init__(self, client: commands.Bot):
@@ -81,6 +83,7 @@ class ShipCommands(commands.Cog):
         banner = SuccessBanner(f"Upgraded {module_name} to level {module.level}.", user=interaction.user)
         await interaction.response.send_message(embed=banner.embed, ephemeral=True)
 
+
     @app_commands.command(name="toggle_energy_generator", description="Toggle on of the energy generator")
     @app_commands.check(check_registered)
     async def toggle_energy_generator(self, interaction: discord.Interaction, toggle: Literal["on", "off"]):
@@ -105,39 +108,22 @@ class ShipCommands(commands.Cog):
 
         if toggle and not generator_status:
             player.ship.modules["EnergyGenerator"].booting = True
-            banner = LoadingBanner(text="", user=interaction.user)
-            await interaction.response.send_message(embed=banner.embed)
-            for percent in range(0, 101, 10):
-                bar = "█" * (percent // 10) + "░" * ((100 - percent) // 10)
-                banner = LoadingBanner(
-                    text=f"Booting up the generator...\n\n{bar} {percent}%",
-                    user=interaction.user,
-                )
-                await interaction.edit_original_response(embed=banner.embed)
-                await asyncio.sleep(0.5)
-
-            banner = SuccessBanner(text="Generator is now online!", user=interaction.user)
-            await interaction.edit_original_response(embed=banner.embed)
+            await loading_animation(
+                loading_text="Booting up the generator...",
+                loaded_text="Generator is now online!",
+                interaction=interaction,
+            )
             player.ship.modules["EnergyGenerator"].turn_on()
             player.ship.modules["EnergyGenerator"].booting = False
         elif not toggle and generator_status:
             player.ship.modules["EnergyGenerator"].booting = True
-            banner = LoadingBanner(
-                text="",
-                user=interaction.user,
+            await loading_animation(
+                loading_text="Shutting down the generator...",
+                loaded_text="Generator is now offline!",
+                interaction=interaction,
+                reverse=True,
             )
-            await interaction.response.send_message(embed=banner.embed)
-            for percent in range(100, 0, -10):
-                bar = "█" * (percent // 10) + "░" * ((100 - percent) // 10)
-                banner = LoadingBanner(
-                    text=f"Shutting down the generator...\n\n{bar} {percent}%",
-                    user=interaction.user,
-                )
-                await interaction.edit_original_response(embed=banner.embed)
-                await asyncio.sleep(0.5)
             player.ship.modules["EnergyGenerator"].turn_off()
-            banner = SuccessBanner(text="Generator is now offline!", user=interaction.user)
-            await interaction.edit_original_response(embed=banner.embed)
             player.ship.modules["EnergyGenerator"].booting = False
 
 
