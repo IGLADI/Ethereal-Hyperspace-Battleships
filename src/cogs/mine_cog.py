@@ -57,12 +57,6 @@ class MineCommands(commands.Cog):
                     user=interaction.user,
                     extra_header="'s mining session",
                 )
-            elif added > 0:
-                banner = LoadingBanner(
-                    text=f"You mined {amount} tons of {resource_name}. You only had space for {added} tons.",
-                    user=interaction.user,
-                    extra_header="'s mining session",
-                )
             else:
                 banner = ErrorBanner(
                     text=f"You mined {amount} tons of {resource_name}. But you have no space left in your Cargo Module... Try upgrading it!",
