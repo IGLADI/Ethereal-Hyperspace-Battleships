@@ -24,7 +24,7 @@ class ShipCommands(commands.Cog):
         for module in ship.modules.values():
             table_data.append([module.name, module.level])
 
-        modules_info = tabulate(table_data, headers=['Module', 'Level'])
+        modules_info = tabulate(table_data, headers=["Module", "Level"])
 
         ship_message = f"```{modules_info}```"
         coordinates = f"{player.x_pos}, {player.y_pos}"
@@ -82,51 +82,20 @@ class ShipCommands(commands.Cog):
         banner = SuccessBanner(f"Upgraded {module_name} to level {module.level}.", user=interaction.user)
         await interaction.response.send_message(embed=banner.embed, ephemeral=True)
 
-    # ! For debugging purposes
-    @app_commands.command(name="add_cargo", description="For debugging purposes")
-    @app_commands.check(check_registered)
-    async def add_cargo(
-        self,
-        interaction: discord.Interaction,
-        resource: Literal["Rock", "Copper", "Silver", "Gold", "Uranium", "Black Matter"],
-        amount: int,
-    ):
-
-        player = Player.get(interaction.user.id)
-        resource_name = resource.lower()
-        new_amount = player.ship.modules["Cargo"].add_resource(resource_name, amount)
-        
-        if new_amount == 0:
-            banner = ErrorBanner(
-                text=f"{resource} capacity is full, could not add to your ship.", user=interaction.user
-            )
-            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
-        elif new_amount < amount:
-            await interaction.response.send_message(
-                f"You added {new_amount} tons of {resource} and left "
-                f"{amount - new_amount} tons behind, because you reached maximum capacity.",
-                ephemeral=True,
-            )
-        else:
-            await interaction.response.send_message(
-                f"You added {amount} tons of {resource} to your ship.", ephemeral=True
-            )
-
     @app_commands.command(name="toggle_energy_generator", description="Toggle on of the energy generator")
     @app_commands.check(check_registered)
     async def toggle_energy_generator(self, interaction: discord.Interaction, toggle: Literal["on", "off"]):
-
         if toggle == "on":
             toggle = True
         elif toggle == "off":
             toggle = False
 
         player = Player.get(interaction.user.id)
-        if  player.ship.modules["EnergyGenerator"].booting:
+        if player.ship.modules["EnergyGenerator"].booting:
             banner = ErrorBanner(text="The generator is still booting.", user=interaction.user)
             await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
-        
+
         generator_status = player.ship.modules["EnergyGenerator"].is_on
         if toggle is generator_status:
             banner = ErrorBanner(

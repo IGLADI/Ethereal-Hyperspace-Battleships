@@ -264,19 +264,17 @@ class Cargo(Module):
             for i in range(1, 4):
                 self._cost[i]["amount"] += 100
 
-    def add_resource(self, resource_name, amount):
-        """Adds a resource to the module, creates a new one or stack with existing resource."""
+    def add_resource(self, resource_name: str, amount: int) -> None:
+        """Adds a resource to the cargo, stacks amount with existing one or creates a new object."""
         resource_name = resource_name.lower()
         resource = self.resources.get(resource_name)
-        if resource:
-            resource.amount += amount
-            self._capacity += amount
-            return
+        if not resource:
+            resource_id = Resource.store(name=resource_name, amount=amount, cargo_module_id=self.cargo_id)
+            resource = Resource(resource_id)
+            self._resources[resource_name] = resource
 
-        resource_id = Resource.store(name=resource_name, amount=amount, cargo_module_id=self.cargo_id)
-        resource = Resource(resource_id)
-        self._resources[resource_name] = resource
-        self._capacity += resource.amount
+        resource.amount += amount
+        self._capacity += amount
 
     def __str__(self):
         resources_str = "".join(f"\n   - {resource}" for resource in self.resources.values() if resource.amount > 0)
