@@ -20,9 +20,8 @@ class TravelCommands(commands.Cog):
         player = Player.get(interaction.user.id)
         coordinates = (player.x_pos, player.y_pos)
         if player._is_traveling:
-            await interaction.response.send_message(
-                f"You are currently traveling. But you are at {coordinates} right now!", ephemeral=True
-            )
+            banner = NormalBanner(text=f"You are currently traveling. Now at {coordinates}.", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
 
         pos = Coordinate(x=player.x_pos, y=player.y_pos)
@@ -41,14 +40,15 @@ class TravelCommands(commands.Cog):
         player = Player.get(interaction.user.id)
 
         if player._is_traveling:
-            await interaction.response.send_message(
-                "Wait untill you arrive before you start a new journey!", ephemeral=True
-            )
+            text = "Wait untill you arrive before you start a new journey!"
+            banner = ErrorBanner(text=text, user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
+
         if player._is_mining:
-            await interaction.response.send_message(
-                "Wait untill you are done mining before you start travelling!", ephemeral=True
-            )
+            text = "Wait untill you are done mining before you start travelling!"
+            banner = ErrorBanner(text=text, user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
 
         destination = Coordinate(x, y)
@@ -79,7 +79,7 @@ class TravelCommands(commands.Cog):
             await loading_animation(
                 interaction,
                 sleep_time=distance / 10,
-                loading_text=f"Traveling to ({x}, {y}) aka {location_name}",
+                loading_text=f"Traveling to ({x}, {y})",
                 loaded_text=f"Arrived at ({x}, {y}) aka {location_name}",
                 extra_image=image,
             )
