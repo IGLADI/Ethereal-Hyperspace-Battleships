@@ -40,7 +40,9 @@ class Module:
 
     @property
     def cost(self):
-        return self._cost
+        return [
+            {"resource": resource, "amount": self._cost[resource][self.level - 1]} for resource in self._cost_values
+        ]
 
     @level.setter
     def level(self, level):
@@ -52,7 +54,7 @@ class Module:
 
     def upgrade(self, cargo):
         """Uses resources in cargo of player to upgrade module."""
-        if self._level == self._max_level:
+        if self.level == self.max_level:
             raise Exception("Module is already at max level.")
 
         if not self.can_upgrade(cargo):
@@ -60,7 +62,7 @@ class Module:
 
         for cost in self._cost:
             resource_name = cost["resource"]
-            required_amount = cost["amount"]
+            required_amount = cost["amount"][self.level - 1]
 
             if required_amount == 0:
                 continue
@@ -79,7 +81,7 @@ class Module:
         """Utility function to check if a player has enough resources to upgrade a module."""
         for cost in self._cost:
             resource_name = cost["resource"]
-            required_amount = cost["amount"]
+            required_amount = cost["amount"][self.level - 1]
 
             if required_amount == 0:
                 continue
@@ -95,17 +97,17 @@ class Module:
     def __str__(self):
         # TODO upgrade cost should be printed in a separate command, else /ship_info will be wayyyyy too long
         # cost_str = "".join(f"\n   - {cost['resource']}: {cost['amount']}" for cost in self._cost)
-        if self._level == self._max_level:
+        if self.level == self.max_level:
             return (
                 f" - Name: {self._name}\n"
                 f" - Description: {self._description}\n"
-                f" - Level: {self._level}/{self._max_level}\n"
+                f" - Level: {self.level}/{self.max_level}\n"
                 # f" - Upgrade Cost: MAX LEVEL\n"
             )
         return (
             f" - Name: {self._name}\n"
             f" - Description: {self._description}\n"
-            f" - Level: {self._level}/{self._max_level}\n"
+            f" - Level: {self.level}/{self.max_level}\n"
             # f" - Upgrade Cost: {cost_str}\n"
         )
 
@@ -123,33 +125,16 @@ class TravelModule(Module):
             "Increases the distance the ship can travel.",
             6,
             [
-                {"resource": "rock", "amount": 0},
-                {"resource": "copper", "amount": 200},
-                {"resource": "silver", "amount": 0},
-                {"resource": "gold", "amount": 0},
+                {"resource": "copper", "amount": [200, 300, 400, 500, 600, 0]},
+                {"resource": "silver", "amount": [200, 300, 400, 500, 600, 0]},
+                {"resource": "gold", "amount": [200, 300, 400, 500, 600, 0]},
             ],
         )
-        self._max_distance = 1000
+        self._max_distance = [1000, 1500, 1900, 2200, 2400, 2500]
 
     @property
     def max_distance(self):
-        return self._max_distance
-
-    # max_distance levels:  1000,   1500,   1900,   2200,     2400,     2500
-    # rock cost levels:    100,    300,    900,    2700,     8100,     24300
-    # copper cost levels:   200,    200,    300,    400,      500,      600
-    # silver cost levels:   0,      200,    300,    400,      500,      600
-    # gold cost levels:     0,      200,    300,    400,      500,      600
-    def upgrade(self, cargo_player):
-        super().upgrade(cargo_player)
-        upgrade_amount = 500 - (100 * (self.level - 2))
-        self._max_distance += upgrade_amount
-        if self.level == 2:
-            for i in range(2, 4):
-                self._cost[i]["amount"] = 200
-        else:
-            for i in range(1, 4):
-                self._cost[i]["amount"] += 100
+        return self._max_distance[self.level - 1]
 
     def __str__(self):
         return f"{super().__str__()} - Max Distance: {self._max_distance} lightyears\n"
@@ -163,38 +148,16 @@ class MiningModule(Module):
             "Increases the amount of resources the ship can mine.",
             5,
             [
-                {"resource": "rock", "amount": 0},
-                {"resource": "copper", "amount": 150},
-                {"resource": "silver", "amount": 150},
-                {"resource": "gold", "amount": 150},
+                {"resource": "copper", "amount": [200, 300, 500, 700, 0]},
+                {"resource": "silver", "amount": [200, 300, 500, 700, 0]},
+                {"resource": "gold", "amount": [200, 300, 500, 700, 0]},
             ],
         )
-        self._mining_bonus = 100
+        self._mining_bonus = [100, 101, 103, 105, 110]
 
     @property
     def mining_bonus(self):
-        return self._mining_bonus
-
-    # mining_bonus levels:  100,    101,    103,    105,      110
-    # rock cost levels:    100,    300,    900,    2700,     8100
-    # copper cost levels:   0,      200,    300,    400,      500
-    # silver cost levels:   200,    200,    300,    400,      500
-    # gold cost levels:     0,      200,    300,    400,      500
-    def upgrade(self, cargo_player):
-        super().upgrade(cargo_player)
-
-        if self.level == 2:
-            self._mining_bonus += 1
-        elif self.level == 3 or self.level == 4:
-            self._mining_bonus += 2
-        elif self.level == 5:
-            self._mining_bonus += 5
-        if self.level == 2:
-            for i in [1, 3]:
-                self._cost[i]["amount"] = 200
-        else:
-            for i in range(1, 4):
-                self._cost[i]["amount"] += 100
+        return self._mining_bonus[self.level - 1]
 
     def __str__(self):
         return f"{super().__str__()} - Mining Bonus: {self._mining_bonus}%\n"
@@ -208,10 +171,9 @@ class Cargo(Module):
             "Increases the amount of cargo the ship can hold.",
             6,
             [
-                {"resource": "rock", "amount": 0},
-                {"resource": "copper", "amount": 150},
-                {"resource": "silver", "amount": 150},
-                {"resource": "gold", "amount": 150},
+                {"resource": "copper", "amount": [200, 300, 400, 500, 600, 0]},
+                {"resource": "silver", "amount": [200, 300, 400, 500, 600, 0]},
+                {"resource": "gold", "amount": [200, 300, 400, 500, 600, 0]},
             ],
         )
         global _db
@@ -220,7 +182,7 @@ class Cargo(Module):
 
         self.cargo_id = cargo_module_id
         self._capacity = 0
-        self._max_capacity = 600
+        self._max_capacity = [800, 1000, 1500, 1800, 2300, 3000]
         self._resources = {}
 
         for item_id in item_ids:
@@ -234,7 +196,7 @@ class Cargo(Module):
 
     @property
     def max_capacity(self):
-        return self._max_capacity
+        return self._max_capacity[self.level - 1]
 
     @property
     def resources(self):
@@ -242,39 +204,25 @@ class Cargo(Module):
 
     @capacity.setter
     def capacity(self, capacity: int):
-        if self._capacity + capacity > self.max_capacity:
+        if capacity > self.max_capacity:
             raise ValueError("Storage exceeded")
         self._capacity = capacity
-
-    # max_capacity levels:  300,    400,    500,    600,      800,      1000
-    # rock cost levels:    100,    300,    900,    2700,     8100,     24300
-    # copper cost levels:   0       200,    300,    400,      500,      600
-    # silver cost levels:   0,      200,    300,    400,      500,      600
-    # gold cost levels:     200,    200,    300,    400,      500,      600
-    def upgrade(self, cargo_player):
-        super().upgrade(cargo_player)
-        if self.level < 5:
-            self._max_capacity += 100
-        else:
-            self._max_capacity += 200
-        if self.level == 2:
-            for i in range(1, 3):
-                self._cost[i]["amount"] = 200
-        else:
-            for i in range(1, 4):
-                self._cost[i]["amount"] += 100
 
     def add_resource(self, resource_name: str, amount: int) -> None:
         """Adds a resource to the cargo, stacks amount with existing one or creates a new object."""
         resource_name = resource_name.lower()
         resource = self.resources.get(resource_name)
         if not resource:
-            resource_id = Resource.store(name=resource_name, amount=amount, cargo_module_id=self.cargo_id)
+            resource_id = Resource.store(name=resource_name, amount=0, cargo_module_id=self.cargo_id)
             resource = Resource(resource_id)
             self._resources[resource_name] = resource
 
-        resource.amount += amount
-        self._capacity += amount
+        try:
+            self.capacity += amount
+            resource.amount += amount
+            return amount
+        except ValueError:
+            return 0
 
     def __str__(self):
         resources_str = "".join(f"\n   - {resource}" for resource in self.resources.values() if resource.amount > 0)
@@ -294,36 +242,16 @@ class Canon(Module):
             "Increases the ship's attack damage.",
             5,
             [
-                {"resource": "rock", "amount": 0},
-                {"resource": "copper", "amount": 150},
-                {"resource": "silver", "amount": 150},
-                {"resource": "gold", "amount": 150},
+                {"resource": "copper", "amount": [300, 450, 600, 750, 0]},
+                {"resource": "silver", "amount": [300, 450, 600, 750, 0]},
+                {"resource": "gold", "amount": [300, 450, 600, 750, 0]},
             ],
         )
-
-        self._strength = 100
+        self._strength = [100, 110, 130, 145, 150]
 
     @property
     def strength(self):
-        return self._strength
-
-    # strength levels:      100,    110,    130,    145,    150
-    # rock cost levels:    200,    600,    1200,   3600,   10800
-    # copper cost levels:   150,    300,    450,    600,    750
-    # silver cost levels:   150,    300,    450,    600,    750
-    # gold cost levels:     150,    300,    450,    600,    750
-    def upgrade(self, cargo_player):
-        super().upgrade(cargo_player)
-        if self.level == 2:
-            self._strength += 10
-        elif self.level == 3:
-            self._strength += 20
-        elif self.level == 4:
-            self._strength += 15
-        elif self.level == 5:
-            self._strength += 5
-        for i in range(1, 4):
-            self._cost[i]["amount"] += 150
+        return self._strength[self.level - 1]
 
     def __str__(self):
         return f"{super().__str__()} - Strength: {self._strength} firepower\n"
@@ -337,35 +265,16 @@ class Shield(Module):
             "Increases the ship's defense.",
             5,
             [
-                {"resource": "rock", "amount": 0},
-                {"resource": "copper", "amount": 150},
-                {"resource": "silver", "amount": 150},
-                {"resource": "gold", "amount": 150},
+                {"resource": "copper", "amount": [300, 450, 600, 750, 0]},
+                {"resource": "silver", "amount": [300, 450, 600, 750, 0]},
+                {"resource": "gold", "amount": [300, 450, 600, 750, 0]},
             ],
         )
-        self._defense = 100
+        self._defense = [100, 110, 130, 145, 150]
 
     @property
     def defense(self):
-        return self._defense
-
-    # defense levels:       100,    110,    130,    145,    150
-    # rock cost levels:    200,    600,    1200,   3600,   10800
-    # copper cost levels:   150,    300,    450,    600,    750
-    # silver cost levels:   150,    300,    450,    600,    750
-    # gold cost levels:     150,    300,    450,    600,    750
-    def upgrade(self, cargo_player):
-        super().upgrade(cargo_player)
-        if self.level == 2:
-            self._defense += 10
-        elif self.level == 3:
-            self._defense += 20
-        elif self.level == 4:
-            self._defense += 15
-        elif self.level == 5:
-            self._defense += 5
-        for i in range(1, 4):
-            self._cost[i]["amount"] += 150
+        return self._defense[self.level - 1]
 
     def __str__(self):
         return f"{super().__str__()} - Defense: {self._defense} armor\n"
@@ -379,10 +288,9 @@ class Fuel(Module):
             "Holds the ship's fuel.",
             1,
             [
-                {"resource": "rock", "amount": 0},
-                {"resource": "copper", "amount": 0},
-                {"resource": "silver", "amount": 0},
-                {"resource": "gold", "amount": 0},
+                {"resource": "copper", "amount": [0]},
+                {"resource": "silver", "amount": [0]},
+                {"resource": "gold", "amount": [0]},
             ],
         )
         global _db
@@ -399,9 +307,6 @@ class Fuel(Module):
         global _db
         _db.fuel_module_set_fuel(module_id=self.id, fuel=fuel)
         self._fuel = fuel
-
-    def upgrade(self, cargo_player):
-        super().upgrade(cargo_player)
 
     def __str__(self):
         return f"{super().__str__()} - Current Fuel: {self._fuel}%\n"
@@ -420,31 +325,16 @@ class Radar(Module):
             "Increases the ship's radar range.",
             7,
             [
-                {"resource": "rock", "amount": 0},
-                {"resource": "copper", "amount": 50},
-                {"resource": "silver", "amount": 50},
-                {"resource": "gold", "amount": 50},
+                {"resource": "copper", "amount": [200, 350, 500, 650, 800, 950, 0]},
+                {"resource": "silver", "amount": [200, 350, 500, 650, 800, 950, 0]},
+                {"resource": "gold", "amount": [200, 350, 500, 650, 800, 950, 0]},
             ],
         )
-        self._radar_range = 50
+        self._radar_range = [50, 60, 70, 80, 90, 95, 100]
 
     @property
     def radar_range(self):
-        return self._radar_range
-
-    # radar_range levels:   50,     60,     70,     80,     90,     95,     100
-    # rock cost levels:    500,    1000,   2000,   4000,   8000,   16000,  32000
-    # copper cost levels:   50,     200,    350,    500,    650,    800,    950
-    # silver cost levels:   50,     200,    350,    500,    650,    800,    950
-    # gold cost levels:     50,     200,    350,    500,    650,    800,    950
-    def upgrade(self, cargo_player):
-        super().upgrade(cargo_player)
-        if self.level < 6:
-            self._radar_range += 10
-        else:
-            self._radar_range += 5
-        for i in range(1, 4):
-            self._cost[i]["amount"] += 150
+        return self._radar_range[self.level - 1]
 
     def __str__(self):
         return f"{super().__str__()} - Radar Range: {self._radar_range} lightyears\n"
@@ -459,39 +349,22 @@ class EnergyGenerator(Module):
             "Increases the ship's energy generation.",
             7,
             [
-                {"resource": "rock", "amount": 0},
-                {"resource": "copper", "amount": 50},
-                {"resource": "silver", "amount": 50},
-                {"resource": "gold", "amount": 50},
+                {"resource": "copper", "amount": [200, 350, 500, 650, 800, 950, 0]},
+                {"resource": "silver", "amount": [200, 350, 500, 650, 800, 950, 0]},
+                {"resource": "gold", "amount": [200, 350, 500, 650, 800, 950, 0]},
             ],
         )
-        self._generation = 10
+        self._generation = [10, 20, 30, 50, 70, 100, 130]
         self._is_on = True
         self.booting = False
 
     @property
     def generation(self):
-        return self._generation
+        return self._generation[self.level - 1]
 
     @property
     def is_on(self):
         return self._is_on
-
-    # generation levels:    10,     20,     30,     50,     70,     100,    130
-    # rock cost levels:    1000,   2000,   4000,   8000,   16000,  32000,  64000
-    # copper cost levels:   50,     200,    350,    500,    650,    800,    950
-    # silver cost levels:   50,     200,    350,    500,    650,    800,    950
-    # gold cost levels:     50,     200,    350,    500,    650,    800,    950
-    def upgrade(self, cargo_player):
-        super().upgrade(cargo_player)
-        if self.level == 2 or self.level == 3:
-            self._generation += 10
-        elif self.level == 4 or self.level == 5:
-            self._generation += 20
-        else:
-            self._generation += 30
-        for i in range(1, 4):
-            self._cost[i]["amount"] += 150
 
     def __str__(self):
         return f"{super().__str__()} - Generation: {self._generation} per minute\n"
@@ -511,33 +384,16 @@ class SolarPanel(Module):
             "Increases the ship's energy generation.",
             7,
             [
-                {"resource": "rock", "amount": 0},
-                {"resource": "copper", "amount": 50},
-                {"resource": "silver", "amount": 50},
-                {"resource": "gold", "amount": 50},
+                {"resource": "copper", "amount": [200, 350, 500, 650, 800, 950, 0]},
+                {"resource": "silver", "amount": [200, 350, 500, 650, 800, 950, 0]},
+                {"resource": "gold", "amount": [200, 350, 500, 650, 800, 950, 0]},
             ],
         )
-        self._generation = 1
+        self._generation = [1, 2, 3, 5, 7, 10, 13]
 
     @property
     def generation(self):
-        return self._generation
-
-    # generation levels:    1,      2,      3,      5,      7,      10,     13
-    # rock cost levels:    1000,   2000,   4000,   8000,   16000,  32000,  64000
-    # copper cost levels:   50,     200,    350,    500,    650,    800,    950
-    # silver cost levels:   50,     200,    350,    500,    650,    800,    950
-    # gold cost levels:     50,     200,    350,    500,    650,    800,    950
-    def upgrade(self, cargo_player):
-        super().upgrade(cargo_player)
-        if self.level == 2 or self.level == 3:
-            self._generation += 1
-        elif self.level == 4 or self.level == 5:
-            self._generation += 2
-        else:
-            self._generation += 3
-        for i in range(1, 4):
-            self._cost[i]["amount"] += 150
+        return self._generation[self.level - 1]
 
     def __str__(self):
         return f"{super().__str__()} - Generation: {self._generation} per minute\n"

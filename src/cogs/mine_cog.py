@@ -5,11 +5,11 @@ from discord.ext import commands
 import math
 import random
 
-from ui.simple_banner import LoadingBanner, NormalBanner
+from ui.simple_banner import ErrorBanner, LoadingBanner, NormalBanner, SuccessBanner
 from data import RESOURCE_NAMES
 from player import Player
 from utils import check_registered
-from location import Location, Coordinate
+from location import Coordinate
 import asyncio
 
 
@@ -51,14 +51,19 @@ class MineCommands(commands.Cog):
             mining_bonus = player.ship.modules["MiningModule"].mining_bonus
             resource_name = random.choices(RESOURCE_NAMES, weights=[45, 30, 20, 3, 2, 1])[0]
             amount = math.floor((random.random() * mining_bonus) / 2)
-            player.ship.modules["Cargo"].add_resource(resource_name, amount)
-
-            banner = NormalBanner(
-                text=f"You mined {amount} tons of {resource_name}.",
-                user=interaction.user,
-                extra_header="'s mining session",
-                is_code_block=True,
-            )
+            added = player.ship.modules["Cargo"].add_resource(resource_name, amount)
+            if amount == added:
+                banner = SuccessBanner(
+                    text=f"You mined {amount} tons of {resource_name}.",
+                    user=interaction.user,
+                    extra_header="'s mining session",
+                )
+            else:
+                banner = ErrorBanner(
+                    text=f"You mined {amount} tons of {resource_name}. But you have no space left in your Cargo Module... Try upgrading it!",
+                    user=interaction.user,
+                    extra_header="'s mining session",
+                )
             await interaction.followup.send(embed=banner.embed, ephemeral=True)
         player._is_mining = False
 

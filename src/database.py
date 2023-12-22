@@ -60,6 +60,16 @@ class Database:
         )
         return self._cursor.rowcount != 0
 
+    def player_id(self, discord_id) -> int:
+        """Return player_id for discord_id"""
+        return self.get_only_result(
+            """
+            SELECT player_id FROM players
+            WHERE discord_id = ?
+            """,
+            (discord_id,),
+        )
+
     def player_location_name(self, discord_id) -> str:
         """Retunrs the location name of where the player is located."""
         return self.get_only_result(

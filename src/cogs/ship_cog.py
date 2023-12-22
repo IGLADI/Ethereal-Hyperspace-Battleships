@@ -61,6 +61,7 @@ class ShipCommands(commands.Cog):
             "Cargo",
             "Radar",
             "EnergyGenerator",
+            "SolarPanel",
         ],
     ):
         player = Player.get(interaction.user.id)
@@ -71,7 +72,6 @@ class ShipCommands(commands.Cog):
             banner = ErrorBanner(text=f"Couldn't find module {module_name}.", user=interaction.user)
             await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
-
         try:
             module.upgrade(player.ship.modules["Cargo"])
         except Exception as e:
@@ -79,7 +79,7 @@ class ShipCommands(commands.Cog):
             await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
 
-        banner = SuccessBanner(f"Upgraded {module_name} to level {module.level}.", user=interaction.user)
+        banner = SuccessBanner(text=f"Upgraded {module_name} to level {module.level}.", user=interaction.user)
         await interaction.response.send_message(embed=banner.embed, ephemeral=True)
 
     @app_commands.command(name="toggle_energy_generator", description="Toggle on of the energy generator")
