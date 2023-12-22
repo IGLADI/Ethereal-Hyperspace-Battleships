@@ -4,9 +4,9 @@ import discord
 from discord.ext import commands
 
 from player import Player
-from location import Location
+from location import Location, Coordinate
+from ui.simple_banner import ErrorBanner, LoadingBanner, NormalBanner, SuccessBanner
 from utils import check_registered, loading_animation
-from ui.simple_banner import LoadingBanner, SuccessBanner
 
 
 class TravelCommands(commands.Cog):
@@ -20,48 +20,87 @@ class TravelCommands(commands.Cog):
         player = Player.get(interaction.user.id)
         coordinates = (player.x_pos, player.y_pos)
         if player._is_traveling:
-            await interaction.response.send_message(
-                f"You are currently traveling. But you are at {coordinates} right now!", ephemeral=True
-            )
+            banner = NormalBanner(text=f"You are currently traveling. Now at {coordinates}.", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
+            return
+
+        pos = Coordinate(x=player.x_pos, y=player.y_pos)
+        if pos.is_location():
+            location_name = Location(x_pos=player.x_pos, y_pos=player.y_pos).name
+            text = f"You are currently at {coordinates}, also known as {location_name}."
         else:
-            location_name = (
-                Location(player.x_pos, player.y_pos).is_planet()
-                if Location(player.x_pos, player.y_pos).is_planet()
-                else "floating in space"
-            )
-            await interaction.response.send_message(
-                f"You are currently at {coordinates}, also known as {location_name}.",
-                ephemeral=True,
-            )
+            text = f"floating in space at {coordinates}"
+
+        banner = NormalBanner(text=text, user=interaction.user)
+        await interaction.response.send_message(embed=banner.embed, ephemeral=True)
 
     @app_commands.command(name="travel", description="Travel to a new location")
     @app_commands.check(check_registered)
-    async def travel(self, interaction: discord.Interaction, x_coordinate: int, y_coordinate: int):
+    async def travel(self, interaction: discord.Interaction, x: int, y: int):
         player = Player.get(interaction.user.id)
 
         if player._is_traveling:
-            await interaction.response.send_message(
-                "Wait untill you arrive before you start a new journey!", ephemeral=True
-            )
-            return
-        if player._is_mining:
-            await interaction.response.send_message(
-                "Wait untill you are done mining before you start travelling!", ephemeral=True
-            )
+            text = "Wait untill you arrive before you start a new journey!"
+            banner = ErrorBanner(text=text, user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
 
+        if player._is_mining:
+            text = "Wait untill you are done mining before you start travelling!"
+            banner = ErrorBanner(text=text, user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
+            return
+
+        destination = Coordinate(x, y)
+
         try:
-            sleep = player.travel(x_coordinate, y_coordinate)
-            image, image_name = Location(x_coordinate, y_coordinate).get_image()
-            image = discord.File(image, filename="image.png")
-            await loading_animation(
-                interaction,
-                sleep_time=sleep / 10,
-                loading_text=f"Traveling to ({x_coordinate}, {y_coordinate})",
-                loaded_text=f"Arrived at ({x_coordinate}, {y_coordinate} aka {image_name}",
-                extra_image=image,
-            )
+            distance = player.travel(destination)
+            if distance == 0:
+                banner = ErrorBanner(
+                    user=interaction.user,
+                    text="You are already at that location!",
+                )
+                await interaction.response.send_message(embed=banner.embed, ephemeral=True)
+                return
+
+            location = None
+            if destination.is_location():
+                location = Location.fromcoordinate(destination)
+                image = location.image_path
+            else:
+                image = "../assets/space/space0.jpg"
+
+            if location is None:
+                location_name = "floating in space"
+            else:
+                location_name = location.name
+            image = discord.File(image)
+
+            if distance >= 50:
+                await loading_animation(
+                    interaction,
+                    sleep_time=distance / 10,
+                    loading_text=f"Traveling to ({x}, {y})",
+                    loaded_text=f"Arrived at ({x}, {y}) aka {location_name}",
+                    extra_image=image,
+                )
+            else:
+                banner = LoadingBanner(
+                    text=f"Traveling to ({x}, {y}) aka {location_name}",
+                    user=interaction.user,
+                    extra_header="",
+                )
+                await interaction.response.send_message(embed=banner.embed, ephemeral=True)
+
+                await asyncio.sleep(distance)
+                banner = SuccessBanner(
+                    text=f"Arrived at ({x}, {y}) aka {location_name}",
+                    user=interaction.user,
+                    extra_header="",
+                )
+                await interaction.edit_original_response(embed=banner.embed, attachments=[image])
         except Exception as e:
+            print(e)
             await interaction.response.send_message(f"Couldn't travel: {e}", ephemeral=True)
             return
 

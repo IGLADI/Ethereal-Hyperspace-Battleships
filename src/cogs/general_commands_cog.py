@@ -1,4 +1,3 @@
-from uu import Error
 from discord import app_commands
 import discord
 from discord.ext import commands
