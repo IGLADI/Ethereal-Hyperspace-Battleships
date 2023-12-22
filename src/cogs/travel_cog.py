@@ -90,7 +90,7 @@ class TravelCommands(commands.Cog):
                     user=interaction.user,
                     extra_header="",
                 )
-                await interaction.response.send_message(embed=banner.embed, ephemeral=True)
+                await interaction.response.send_message(embed=banner.embed)
 
                 await asyncio.sleep(distance)
                 banner = SuccessBanner(
