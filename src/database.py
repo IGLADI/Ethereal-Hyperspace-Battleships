@@ -33,9 +33,15 @@ class Database:
 
     # utils ###################################################################
     def get_results(self, statement, values=None) -> list:
-        """Returns result of query."""
+        """Returns results of a query."""
         self._cursor.execute(statement, values)
         return list(self._cursor)
+
+    def get_result(self, statement, values=None) -> tuple:
+        """Returns first result of a query."""
+        self._cursor.execute(statement, values)
+        results = self.get_results(statement, values)
+        return results[0] if results else None
 
     def get_only_result(self, statement, values=None):
         """get_results but returns the only result."""
@@ -163,6 +169,16 @@ class Database:
         return results if results else []
 
     # location ################################################################
+    def location_init(self, x_pos: int, y_pos: int) -> list:
+        """Get info for creaing a Location object."""
+        return self.get_result(
+            """
+            SELECT name, image FROM locations
+            WHERE location_x_pos = ? AND location_y_pos = ?
+            """,
+            (x_pos, y_pos),
+        )
+
     def location_from_scan(self, x_pos, y_pos, distance) -> str:
         """Returns the location name from coordinates in a certain distance."""
         statement = """
@@ -199,6 +215,18 @@ class Database:
             """,
             (image, x_pos, y_pos),
         )
+
+    # planet ##################################################################
+    def planet_id_by_pos(self, x_pos: int, y_pos: int) -> int:
+        """Return planet_id of planet by position."""
+        planet_id = self.get_only_result(
+            """
+            SELECT planet_id FROM planets
+            WHERE location_x_pos = ? AND location_y_pos = ?
+            """,
+            (x_pos, y_pos),
+        )
+        return planet_id if planet_id else 0
 
     # fuel ####################################################################
     def fuel_module_fuel(self, module_id) -> int:
