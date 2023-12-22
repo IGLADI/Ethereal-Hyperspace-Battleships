@@ -50,7 +50,7 @@ class MineCommands(commands.Cog):
             mining_bonus = player.ship.modules["MiningModule"].mining_bonus
             resource_name = random.choices(RESOURCE_NAMES, weights=[45, 30, 20, 3, 2, 1])[0]
             amount = math.floor((random.random() * mining_bonus) / 2)
-            added = player.ship.modules["Cargo"].add_resource(player, resource_name, amount)
+            added = player.ship.modules["Cargo"].add_resource(resource_name, amount)
             if amount == added:
                 banner = SuccessBanner(
                     text=f"You mined {amount} tons of {resource_name}.",
