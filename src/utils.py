@@ -58,24 +58,21 @@ async def loading_animation(
         user=interaction.user,
     )
     await interaction.response.send_message(embed=banner.embed)
+
     if reverse:
-        for percent in range(100, 0, -10):
-            bar = loaded_logo * (percent // 10) + loading_logo * ((100 - percent) // 10)
-            banner = LoadingBanner(
-                text=f"{loading_text}\n\n{bar} {percent}%",
-                user=interaction.user,
-            )
-            await interaction.edit_original_response(embed=banner.embed)
-            await asyncio.sleep(sleep_time)
+        steps = 100, 0, -10
     else:
-        for percent in range(0, 100, 10):
-            bar = loaded_logo * (percent // 10) + loading_logo * ((100 - percent) // 10)
-            banner = LoadingBanner(
-                text=f"{loading_text}\n\n{bar} {percent}%",
-                user=interaction.user,
-            )
-            await interaction.edit_original_response(embed=banner.embed)
-            await asyncio.sleep(sleep_time)
+        steps = 0, 100, 10
+
+    for percent in range(*steps):
+        bar = loaded_logo * (percent // 10) + loading_logo * ((100 - percent) // 10)
+        banner = LoadingBanner(
+            text=f"{loading_text}\n\n{bar} {percent}%",
+            user=interaction.user,
+        )
+        await interaction.edit_original_response(embed=banner.embed)
+        await asyncio.sleep(sleep_time)
+
     banner = SuccessBanner(text=loaded_text, user=interaction.user)
     await interaction.edit_original_response(embed=banner.embed)
     if extra_image:
