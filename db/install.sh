@@ -1,5 +1,8 @@
 #!/bin/sh
 
+THISDIR="$(dirname "$(readlink -f "$0")")"
+cd "$THISDIR" || exit 1
+
 # only needed for the print statement
 REMOTE='localhost'
 USER='ethb'

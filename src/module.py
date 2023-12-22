@@ -227,32 +227,17 @@ class Cargo(Module):
     def upgrade(self, cargo_player):
         super().upgrade(cargo_player)
 
-    def add_resource(self, player, resource_name, amount):
-        """Adds a resource to the module, creates a new one or stack with existing resource."""
-        cargo_module_id = _db.player_id(player._id)
-
-        max_amount = player.ship.modules["Cargo"].max_capacity - (
-            _db.item_amount_by_player_and_name(cargo_module_id, resource_name)
-            if _db.item_amount_by_player_and_name(cargo_module_id, resource_name)
-            else 0
-        )
-        if amount >= max_amount:
-            a = max_amount
-        else:
-            a = amount
-
+    def add_resource(self, resource_name: str, amount: int) -> None:
+        """Adds a resource to the cargo, stacks amount with existing one or creates a new object."""
         resource_name = resource_name.lower()
         resource = self.resources.get(resource_name)
-        if resource:
-            resource.amount += a
-            self._capacity += a
-            return a
+        if not resource:
+            resource_id = Resource.store(name=resource_name, amount=amount, cargo_module_id=self.cargo_id)
+            resource = Resource(resource_id)
+            self._resources[resource_name] = resource
 
-        resource_id = Resource.store(name=resource_name, amount=a, cargo_module_id=self.cargo_id)
-        resource = Resource(resource_id)
-        self._resources[resource_name] = resource
-        self._capacity += resource.amount
-        return a
+        resource.amount += amount
+        self._capacity += amount
 
     def __str__(self):
         resources_str = "".join(f"\n   - {resource}" for resource in self.resources.values() if resource.amount > 0)

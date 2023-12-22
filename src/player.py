@@ -83,6 +83,10 @@ class Player:
     def on_message_reward_cooldown(self, on_message_reward_cooldown: bool):
         self._on_message_reward_cooldown = on_message_reward_cooldown
 
+    @property
+    def is_traveling(self):
+        return self._is_traveling
+
     # TODO make a secondary module like solar panels (slow but doesn't consume uranium=>players don't get stuck)
     def update_energy(self):
         while True:
@@ -94,9 +98,7 @@ class Player:
                     # always use 1 uranium for now, will probably add a different rendement per level later on
                     uranium = self.ship.modules["Cargo"].resources.get("Uranium")
                     if uranium and uranium.amount >= 1:
-                        self.ship.add_energy(
-                            self.ship.modules["EnergyGenerator"].generation
-                        )
+                        self.ship.add_energy(self.ship.modules["EnergyGenerator"].generation)
                         uranium.amount -= 1
                 time.sleep(60)
 
@@ -117,6 +119,8 @@ class Player:
     def get(cls, discord_id):
         """Gets a player from the players cache, if player is not found add it to the cache.
         Note: This assumes player with discord_id exists in the database."""
+        if data.CACHE_DISABLED:
+            return cls(discord_id)
         p = data.players.get(discord_id)
         if p is None:
             p = cls(discord_id)
@@ -125,16 +129,16 @@ class Player:
 
     # Travel Commands
     def travel(self, x_coordinate, y_coordinate):
-        '''Travels to the given coordinates'''
-        old_location = Location(self._x_pos, self._y_pos)
+        """Travels to the given coordinates"""
+        old_location = Location(self.x_pos, self.y_pos)
         new_location = Location(x_coordinate, y_coordinate)
         distance = int(old_location.distance_to(new_location))
 
-        if distance > self.ship._modules["TravelModule"].max_distance:
+        if distance > self.ship.modules["TravelModule"].max_distance:
             raise Exception("You can't travel that far! You need to upgrade your travel module.")
-        
+
         def travel_thread():
-            self._is_traveling = True
+            self.is_traveling = True
             while self._x_pos != new_location.x or self._y_pos != new_location.y:
                 if self._x_pos < new_location.x:
                     self._x_pos += 1
@@ -147,16 +151,16 @@ class Player:
                 time.sleep(1)
             _db.player_set_x_pos(self.id, self._x_pos)
             _db.player_set_y_pos(self.id, self._y_pos)
-            self._is_traveling = False
-        
+            self.is_traveling = False
+
         travel_thread_instance = threading.Thread(target=travel_thread)
         travel_thread_instance.start()
         return distance
-    
+
     def scan(self, discord_id):
-        '''Returns a list of locations in a grid around the ship, depending on the radar module level'''
-        scan_range = self.ship._modules["Radar"].radar_range//2
+        """Returns a list of locations in a grid around the ship, depending on the radar module level"""
+        scan_range = self.ship._modules["Radar"].radar_range // 2
         location = Location(self._x_pos, self._y_pos)
         locations = _db.location_from_scan(location.x, location.y, scan_range)
         locations += _db.player_from_scan(location.x, location.y, scan_range, discord_id)
-        return locations 
+        return locations
