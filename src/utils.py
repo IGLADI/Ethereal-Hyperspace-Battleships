@@ -51,6 +51,7 @@ async def loading_animation(
     loaded_text="",
     sleep_time=0.5,
     reverse=False,
+    extra_image=None,
 ):
     banner = LoadingBanner(
         text="",
@@ -77,3 +78,5 @@ async def loading_animation(
             await asyncio.sleep(sleep_time)
     banner = SuccessBanner(text=loaded_text, user=interaction.user)
     await interaction.edit_original_response(embed=banner.embed)
+    if extra_image:
+        await interaction.edit_original_response(attachments=[extra_image])
