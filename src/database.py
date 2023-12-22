@@ -53,7 +53,7 @@ class Database:
             (discord_id,),
         )
         return self._cursor.rowcount != 0
-    
+
     def player_id(self, discord_id) -> int:
         """Return player_id for discord_id"""
         return self.get_only_result(
@@ -291,16 +291,6 @@ class Database:
             WHERE item_id = ?
             """,
             (item_id,),
-        )
-    
-    def item_amount_by_player_and_name(self, module_id, item_name) -> int:
-        """Return amount for item_id."""
-        return self.get_only_result(
-            """
-            SELECT amount FROM items
-            WHERE cargo_module_id = ? AND name = ?
-            """,
-            (module_id, item_name),
         )
 
     def item_name(self, item_id) -> str:

@@ -182,7 +182,7 @@ class Cargo(Module):
 
         self.cargo_id = cargo_module_id
         self._capacity = 0
-        self._max_capacity = [300, 400, 500, 600, 800, 1000]
+        self._max_capacity = [800, 1000, 1500, 1800, 2300, 3000]
         self._resources = {}
 
         for item_id in item_ids:
@@ -204,7 +204,7 @@ class Cargo(Module):
 
     @capacity.setter
     def capacity(self, capacity: int):
-        if self._capacity + capacity > self.max_capacity:
+        if capacity > self.max_capacity:
             raise ValueError("Storage exceeded")
         self._capacity = capacity
 
@@ -213,12 +213,12 @@ class Cargo(Module):
         resource_name = resource_name.lower()
         resource = self.resources.get(resource_name)
         if not resource:
-            resource_id = Resource.store(name=resource_name, amount=amount, cargo_module_id=self.cargo_id)
+            resource_id = Resource.store(name=resource_name, amount=0, cargo_module_id=self.cargo_id)
             resource = Resource(resource_id)
             self._resources[resource_name] = resource
 
+        self.capacity += amount
         resource.amount += amount
-        self._capacity += amount
 
     def __str__(self):
         resources_str = "".join(f"\n   - {resource}" for resource in self.resources.values() if resource.amount > 0)
