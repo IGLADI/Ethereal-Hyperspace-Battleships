@@ -1,7 +1,8 @@
+import asyncio
 import discord
 
 import data
-from ui.simple_banner import ErrorBanner
+from ui.simple_banner import ErrorBanner, LoadingBanner, SuccessBanner
 
 import database
 
@@ -40,3 +41,39 @@ def get_resource_amount(cargo, resource_name: str) -> int:
 
 def send_bug_report(discord_id, bug_report):
     _db.store_bug_report(discord_id, bug_report)
+
+
+async def loading_animation(
+    interaction: discord.Interaction,
+    loading_logo="░",
+    loaded_logo="█",
+    loading_text="",
+    loaded_text="",
+    sleep_time=0.5,
+    reverse=False,
+):
+    banner = LoadingBanner(
+        text="",
+        user=interaction.user,
+    )
+    await interaction.response.send_message(embed=banner.embed)
+    if reverse:
+        for percent in range(100, 0, -10):
+            bar = loaded_logo * (percent // 10) + loading_logo * ((100 - percent) // 10)
+            banner = LoadingBanner(
+                text=f"{loading_text}\n\n{bar} {percent}%",
+                user=interaction.user,
+            )
+            await interaction.edit_original_response(embed=banner.embed)
+            await asyncio.sleep(sleep_time)
+    else:
+        for percent in range(0, 100, 10):
+            bar = loaded_logo * (percent // 10) + loading_logo * ((100 - percent) // 10)
+            banner = LoadingBanner(
+                text=f"{loading_text}\n\n{bar} {percent}%",
+                user=interaction.user,
+            )
+            await interaction.edit_original_response(embed=banner.embed)
+            await asyncio.sleep(sleep_time)
+    banner = SuccessBanner(text=loaded_text, user=interaction.user)
+    await interaction.edit_original_response(embed=banner.embed)
