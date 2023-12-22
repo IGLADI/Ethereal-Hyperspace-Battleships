@@ -31,6 +31,7 @@ class Database:
         self._connection = get_connection()
         self._cursor = self._connection.cursor()
 
+    # utils ###################################################################
     def get_results(self, statement, values=None) -> list:
         """Returns result of query."""
         self._cursor.execute(statement, values)
@@ -41,6 +42,7 @@ class Database:
         results = self.get_results(statement, values)
         return results[0][0] if results else None
 
+    # player ##################################################################
     def player_exists(self, discord_id) -> bool:
         """Checks if a player exists in the database."""
         self._cursor.execute(
@@ -144,9 +146,13 @@ class Database:
         WHERE x_pos BETWEEN ? AND ? AND y_pos BETWEEN ? AND ?
         AND discord_id <> ?
         """
-        results = self.get_results(statement, (x_pos - distance, x_pos + distance, y_pos - distance, y_pos + distance, excluded_player_discord_id))
+        results = self.get_results(
+            statement,
+            (x_pos - distance, x_pos + distance, y_pos - distance, y_pos + distance, excluded_player_discord_id),
+        )
         return results if results else []
-    
+
+    # location ################################################################
     def location_from_scan(self, x_pos, y_pos, distance) -> str:
         """Returns the location name from coordinates in a certain distance."""
         statement = """
@@ -155,7 +161,7 @@ class Database:
         """
         results = self.get_results(statement, (x_pos - distance, x_pos + distance, y_pos - distance, y_pos + distance))
         return results if results else []
-    
+
     def location_from_coordinates(self, x_pos, y_pos) -> str:
         """Returns the location name from coordinates."""
         statement = """
@@ -164,7 +170,7 @@ class Database:
         """
         results = self.get_results(statement, (x_pos, y_pos))
         return results[0][0] if results else None
-    
+
     def location_image(self, x_pos, y_pos) -> str:
         """Returns the location image from coordinates."""
         statement = """
@@ -173,7 +179,7 @@ class Database:
         """
         results = self.get_results(statement, (x_pos, y_pos))
         return results if results else []
-    
+
     def set_location_image(self, x_pos, y_pos, image):
         """Set the location image from coordinates."""
         self._cursor.execute(
@@ -184,6 +190,7 @@ class Database:
             (image, x_pos, y_pos),
         )
 
+    # fuel ####################################################################
     def fuel_module_fuel(self, module_id) -> int:
         """Return fuel in a fuel module by module_id"""
         return self.get_only_result(
@@ -204,6 +211,7 @@ class Database:
             (fuel, module_id),
         )
 
+    # ship ####################################################################
     def ship_module_ids(self, ship_id) -> list:
         """Returns a list of module_ids."""
         statement = """
@@ -214,6 +222,7 @@ class Database:
         ids = [result[0] for result in results]
         return ids
 
+    # module ##################################################################
     def module_type(self, module_id) -> str:
         """Return the module type for a module_id."""
         return self.get_only_result(
@@ -253,6 +262,7 @@ class Database:
             (module_level, module_id),
         )
 
+    # item ####################################################################
     def item_type(self, item_id) -> int:
         """Return amount for item_id."""
         return self.get_only_result(
@@ -309,6 +319,7 @@ class Database:
             (item_id,),
         )
 
+    # contribution ############################################################
     def contribution_exists(self, building_id, item_name: str) -> int:
         """Check if an item is in contributions."""
         return self.get_only_result(
@@ -320,6 +331,7 @@ class Database:
             (building_id, item_name),
         )
 
+    # cargo ###################################################################
     def cargo_resource_ids(self, cargo_module_id) -> list:
         """Returns a list of item ids."""
         statement = """
@@ -436,7 +448,7 @@ class Database:
             """,
             (ship_id,),
         )
-    
+
     def store_bug_report(self, discord_id, bug_report):
         """Store a bug report."""
         self._cursor.execute(
