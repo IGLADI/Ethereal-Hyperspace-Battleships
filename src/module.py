@@ -207,7 +207,6 @@ class Cargo(Module):
         if capacity > self.max_capacity:
             raise ValueError("Storage exceeded")
         self._capacity = capacity
-        print(self._capacity, self.max_capacity)
 
     def add_resource(self, resource_name: str, amount: int) -> None:
         """Adds a resource to the cargo, stacks amount with existing one or creates a new object."""

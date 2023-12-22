@@ -5,11 +5,11 @@ from discord.ext import commands
 import math
 import random
 
-from ui.simple_banner import LoadingBanner, NormalBanner
+from ui.simple_banner import ErrorBanner, LoadingBanner, NormalBanner, SuccessBanner
 from data import RESOURCE_NAMES
 from player import Player
 from utils import check_registered
-from location import Location, Coordinate
+from location import Coordinate
 import asyncio
 
 
@@ -64,7 +64,6 @@ class MineCommands(commands.Cog):
                     user=interaction.user,
                     extra_header="'s mining session",
                 )
-
             await interaction.followup.send(embed=banner.embed, ephemeral=True)
         player._is_mining = False
 
