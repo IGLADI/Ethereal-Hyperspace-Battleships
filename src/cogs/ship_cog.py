@@ -1,15 +1,13 @@
-import asyncio
-from discord import app_commands
-import discord
-from discord.ext import commands
-
-from ui.simple_banner import ErrorBanner, LoadingBanner, NormalBanner, SuccessBanner
 from typing import Literal
-from player import Player
-from tabulate import tabulate
-from utils import check_registered
 
-from utils import loading_animation
+import discord
+from discord import app_commands
+from discord.ext import commands
+from tabulate import tabulate
+
+from player import Player
+from ui.simple_banner import ErrorBanner, NormalBanner, SuccessBanner
+from utils import check_registered, loading_animation
 
 
 class ShipCommands(commands.Cog):
@@ -82,7 +80,6 @@ class ShipCommands(commands.Cog):
 
         banner = SuccessBanner(f"Upgraded {module_name} to level {module.level}.", user=interaction.user)
         await interaction.response.send_message(embed=banner.embed, ephemeral=True)
-
 
     @app_commands.command(name="toggle_energy_generator", description="Toggle on of the energy generator")
     @app_commands.check(check_registered)

@@ -5,11 +5,11 @@ from discord.ext import commands
 import math
 import random
 
-from ui.simple_banner import ErrorBanner, LoadingBanner, NormalBanner, SuccessBanner
+from ui.simple_banner import LoadingBanner, NormalBanner
 from data import RESOURCE_NAMES
 from player import Player
 from utils import check_registered
-from location import Location
+from location import Location, Coordinate
 import asyncio
 
 
@@ -29,7 +29,8 @@ class MineCommands(commands.Cog):
             await interaction.response.send_message("You don't have enough energy.", ephemeral=True)
             return
 
-        if Location(player.x_pos, player.y_pos).is_planet() == None:
+        position = Coordinate(player.x_pos, player.y_pos)
+        if position.is_location() == False:
             await interaction.response.send_message("You can only mine on a planet.", ephemeral=True)
             return
 
@@ -69,6 +70,7 @@ class MineCommands(commands.Cog):
                     user=interaction.user,
                     extra_header="'s mining session",
                 )
+
             await interaction.followup.send(embed=banner.embed, ephemeral=True)
         player._is_mining = False
 

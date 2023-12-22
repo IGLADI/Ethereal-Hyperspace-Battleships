@@ -10,9 +10,6 @@ _db = database.Database()
 
 
 async def check_registered(interaction: discord.Interaction) -> bool:
-    if data.players.get(interaction.user.id):
-        return True
-
     if _db.player_exists(interaction.user.id):
         return True
 
