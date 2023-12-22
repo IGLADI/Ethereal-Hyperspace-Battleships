@@ -1,3 +1,4 @@
+import asyncio
 from uu import Error
 from discord import app_commands
 import discord
@@ -5,7 +6,7 @@ from discord.ext import commands
 
 from player import Player
 from location import Location, Coordinate
-from ui.simple_banner import ErrorBanner, NormalBanner
+from ui.simple_banner import ErrorBanner, LoadingBanner, NormalBanner, SuccessBanner
 from utils import check_registered, loading_animation
 
 
@@ -74,16 +75,33 @@ class TravelCommands(commands.Cog):
                 location_name = "floating in space"
             else:
                 location_name = location.name
-            image = discord.File(image, filename="image.png")
+            image = discord.File(image)
 
-            await loading_animation(
-                interaction,
-                sleep_time=distance / 10,
-                loading_text=f"Traveling to ({x}, {y}) aka {location_name}",
-                loaded_text=f"Arrived at ({x}, {y}) aka {location_name}",
-                extra_image=image,
-            )
+            if distance >= 50:
+                await loading_animation(
+                    interaction,
+                    sleep_time=distance / 10,
+                    loading_text=f"Traveling to ({x}, {y}) aka {location_name}",
+                    loaded_text=f"Arrived at ({x}, {y}) aka {location_name}",
+                    extra_image=image,
+                )
+            else:
+                banner = LoadingBanner(
+                    text=f"Traveling to ({x}, {y}) aka {location_name}",
+                    user=interaction.user,
+                    extra_header="",
+                )
+                await interaction.response.send_message(embed=banner.embed, ephemeral=True)
+
+                await asyncio.sleep(distance)
+                banner = SuccessBanner(
+                    text=f"Arrived at ({x}, {y}) aka {location_name}",
+                    user=interaction.user,
+                    extra_header="",
+                )
+                await interaction.edit_original_response(embed=banner.embed, attachments=[image])
         except Exception as e:
+            print(e)
             await interaction.response.send_message(f"Couldn't travel: {e}", ephemeral=True)
             return
 
