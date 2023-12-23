@@ -92,6 +92,14 @@ class Player:
     def is_traveling(self, is_traveling):
         self._is_traveling = is_traveling
 
+    @property
+    def tutorial(self):
+        return self._tutorial
+    
+    @tutorial.setter
+    def tutorial(self, int):
+        self._tutorial = int
+
     # TODO make a secondary module like solar panels (slow but doesn't consume uranium=>players don't get stuck)
     def update_energy(self):
         while True:

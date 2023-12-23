@@ -29,4 +29,28 @@ class Tutorial:
     def await_scan(self):
         while (self._used_radar == False):
             time.sleep(1)
-            print("waiting for scan")
+
+    # TODO add combat!
+    # def combat(self):
+    #     combatThread = Thread(target=self.await_combat, args=())
+    #     combatThread.start()
+
+    # def await_combat(self):
+    #     while (self._combat == False):
+    #         time.sleep(1)
+
+    def mine(self):
+        mineThread = Thread(target=self.await_mine, args=())
+        mineThread.start()
+
+    def await_mine(self):
+        while (self._mined == False):
+            time.sleep(1)
+    
+    def upgrade(self):
+        upgradeThread = Thread(target=self.await_upgrade, args=())
+        upgradeThread.start()
+
+    def await_upgrade(self):
+        while (self._upgraded == False):
+            time.sleep(1)

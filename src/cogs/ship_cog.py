@@ -72,15 +72,24 @@ class ShipCommands(commands.Cog):
             banner = ErrorBanner(text=f"Couldn't find module {module_name}.", user=interaction.user)
             await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
-        try:
-            module.upgrade(player.ship.modules["Cargo"])
-        except Exception as e:
-            banner = ErrorBanner(text=f"Couldn't upgrade {module_name}: {e}", user=interaction.user)
+        
+        # Free upgrade for tutorial
+        if player.tutorial == 0:
+            exploit = module.free_upgrade(player.id)
+            if exploit:
+                banner = ErrorBanner(text=f"Are you trying to make me upgrade 2 modules for you? Do you want to start a war?", user=interaction.user)
+            else:
+                banner = SuccessBanner(text=f"Ruebñ upgraded your {module_name} to level {module.level} free of charge!", user=interaction.user)
             await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
-
-        banner = SuccessBanner(text=f"Upgraded {module_name} to level {module.level}.", user=interaction.user)
-        await interaction.response.send_message(embed=banner.embed, ephemeral=True)
+        
+        try:
+            module.upgrade(player.ship.modules["Cargo"])
+            banner = SuccessBanner(text=f"Upgraded {module_name} to level {module.level}.", user=interaction.user)
+        except Exception as e:
+            banner = ErrorBanner(text=f"Couldn't upgrade {module_name}: {e}", user=interaction.user)
+        finally:
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
 
     @app_commands.command(name="toggle_energy_generator", description="Toggle on of the energy generator")
     @app_commands.check(check_registered)

@@ -1,5 +1,6 @@
 from database import Database
 from item import Resource
+import data
 
 
 _db = Database()
@@ -53,7 +54,7 @@ class Module:
         _db.module_set_level(self.id, level)
 
     def upgrade(self, cargo):
-        """Uses resources in cargo of player to upgrade module."""
+        """Uses resources in cargo of player to upgrade module."""        
         if self.level == self.max_level:
             raise Exception("Module is already at max level.")
 
@@ -92,6 +93,16 @@ class Module:
             if resource.amount < required_amount:
                 return False
 
+        return True
+    
+    def free_upgrade(self, playerID):
+        """Upgrades a module without paying the costs."""
+        # Free tutorial upgrade (only once)
+        if data.tutorials[playerID]._upgraded == False:
+            data.tutorials[playerID]._upgraded = True
+            self.level += 1
+            return False
+        # Exploit to upgrade modules for free
         return True
 
     def __str__(self):
