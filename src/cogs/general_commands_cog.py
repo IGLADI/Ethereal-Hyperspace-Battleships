@@ -9,6 +9,8 @@ from ui.help_banner import HelpBanner
 from ui.simple_banner import ErrorBanner, NormalBanner
 from utils import send_bug_report
 from utils import check_registered
+from tutorial import Tutorial
+import asyncio
 
 
 class GeneralCommands(commands.Cog):
@@ -69,6 +71,37 @@ class GeneralCommands(commands.Cog):
             user=interaction.user,
         )
         await interaction.response.send_message(embed=banner.embed, ephemeral=True)
+
+    @app_commands.command(name="tutorial", description="Start a tutorial to learn how to play")
+    @app_commands.check(check_registered)
+    async def tutorial(self, interaction: discord.Interaction):
+        player = Player.get(interaction.user.id)
+        if player._tutorial == 1:
+            banner = ErrorBanner(interaction.user, "You have already completed the tutorial.")
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
+            return
+        if player._tutorial == 0:
+            banner = ErrorBanner(interaction.user, "You are already in the tutorial.")
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
+            return
+        player._tutorial = 0
+
+        banner = NormalBanner(
+            text=f"Welcome to the tutorial {interaction.user.name}!\n We just got a distress call from Ruebñ... He need help on the coordinates (0,0). Can you travel to him and help him out using the /travel command?",
+            user=interaction.user,
+        )
+        await interaction.response.send_message(embed=banner.embed, ephemeral=True)
+        tut = Tutorial(player)
+        tut.travel_to_Ruebn()
+        while tut._travelled == False:
+            await asyncio.sleep(1)
+        banner = NormalBanner(
+            text=f"Thank you for coming {interaction.user.name}!\n We just got attacked by space pirates! They fled right before you arrived. Can you use your radar to scan the area and find them? (/scan)",
+            user=interaction.user,
+        )
+        await asyncio.sleep(3)
+        await interaction.followup.send(embed=banner.embed, ephemeral=True)
+        tut.scan_for_pirates()
 
     @app_commands.command(name="bug_report", description="Report a bug")
     async def bug_report(

@@ -3,6 +3,7 @@
 race_games = {}
 players = {}
 planets = {}
+tutorials = {}
 
 guild_names = ["The Federation", "The Empire", "The Alliance", "The Independents"]
 

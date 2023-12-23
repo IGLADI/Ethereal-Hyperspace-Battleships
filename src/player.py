@@ -31,6 +31,8 @@ class Player:
         self._energy_thread.start()
         self._is_traveling = False
         self._is_mining = False
+        # -1 = not in tutorial, 0 = in tutorial, 1 = tutorial finished
+        self._tutorial = -1
 
     @property
     def id(self):
@@ -165,4 +167,7 @@ class Player:
         scan_range = self.ship._modules["Radar"].radar_range // 2
         locations = _db.location_from_scan(self.x_pos, self.y_pos, scan_range)
         locations += _db.player_from_scan(self.x_pos, self.y_pos, scan_range, discord_id)
+        if self._tutorial == 0:
+            locations += [('Space pirates', 1, 0)]
+            data.tutorials[self.id]._used_radar = True
         return locations
