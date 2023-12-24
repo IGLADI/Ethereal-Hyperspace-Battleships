@@ -104,9 +104,9 @@ class CombatCommands(commands.Cog):
         await player_discord.send(f"Your ship has been destroyed by {killer.name}!")
 
     # TODO when different weopons will exist add a toggle on&off for the weopons
-    @app_commands.command(name="attack", description="Attack a player")
+    @app_commands.command(name="fire", description="Attack a player")
     @app_commands.check(check_registered)
-    async def attack(self, interaction: discord.Interaction):
+    async def fire(self, interaction: discord.Interaction):
         player = Player.get(interaction.user.id)
         if player.target is None:
             banner = ErrorBanner(text="You need to target a player first.", user=interaction.user)
