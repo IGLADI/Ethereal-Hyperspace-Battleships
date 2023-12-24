@@ -133,7 +133,7 @@ CREATE TABLE `items` (
     CONSTRAINT `UN__items` UNIQUE (`name`, `cargo_module_id`)
 );
 
--- TODO UPDATE DOCUMENATION
+-- TODO UPDATE DOCUMENTATION
 CREATE TABLE `contributions` (
     `building_id` INT(11) NOT NULL,
     CONSTRAINT `FK__buildings__contributions` FOREIGN KEY (`building_id`)
@@ -143,6 +143,17 @@ CREATE TABLE `contributions` (
 	    REFERENCES `items` (`item_id`),
     CONSTRAINT `UN__contributions` UNIQUE (building_id, item_id)
 );
+
+CREATE TABLE `reputation` (
+    `attributor_discord_id` DECIMAL(32) NOT NULL,
+    CONSTRAINT `FK__attributor__id` FOREIGN KEY (`attributor_discord_id`)
+        REFERENCES `players` (`discord_id`),
+    `recipient_discord_id` DECIMAL(32) NOT NULL,
+    CONSTRAINT `FK__recipient__id` FOREIGN KEY (`recipient_discord_id`)
+        REFERENCES `players` (`discord_id`),
+    `date` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 
 -- Setup default values -------------------------------------------------------
 -- planets

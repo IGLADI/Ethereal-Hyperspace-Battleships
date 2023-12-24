@@ -9,6 +9,9 @@ from ui.help_banner import HelpBanner
 from ui.simple_banner import ErrorBanner, NormalBanner
 from utils import send_bug_report
 from utils import check_registered
+import database
+
+_db = database.Database()
 
 
 class GeneralCommands(commands.Cog):
@@ -85,6 +88,30 @@ class GeneralCommands(commands.Cog):
         await interaction.user.send(
             f"Thank you for your bug report: {bug_description}. The team will take a look and fix this issue as soon as possible."
         )
+
+    @app_commands.command(name="give_reputation", description="gives reputation to a player")
+    async def give_reputation(
+        self,
+        interaction: discord.Interaction,
+        reputation_recipient: discord.Member,
+    ):
+        """adds reputation to a player, required for guild hierarchy"""
+        sender = interaction.user.id
+        recipient = reputation_recipient.id
+
+        if sender == recipient:
+            banner = ErrorBanner(text="You can't give reputation to yourself.", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
+            return
+        
+        if not Player.exists(recipient):
+            banner = ErrorBanner(text="The recipient doesn't have an account.", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
+            return
+        # _db.give_reputation(sender, recipient) 
+        # await interaction.response.send_message(f"You gave reputation to {reputation_recipient.name}", ephemeral=True)
+        date = _db.last_reputation(sender)
+        await interaction.response.send_message(f"{date}", ephemeral=True)
 
 
 async def setup(client: commands.Bot) -> None:
