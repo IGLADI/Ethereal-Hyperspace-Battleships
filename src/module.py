@@ -317,11 +317,11 @@ class Fuel(Module):
         _db.store_fuel_module(ship_id)
 
 
-class Radar(Module):
+class RadarModule(Module):
     def __init__(self, module_id):
         super().__init__(
             module_id,
-            "Radar",
+            "RadarModule",
             "Increases the ship's radar range.",
             7,
             [
@@ -337,7 +337,7 @@ class Radar(Module):
         return self._radar_range[self.level - 1]
 
     def __str__(self):
-        return f"{super().__str__()} - Radar Range: {self._radar_range} lightyears\n"
+        return f"{super().__str__()} - RadarModule Range: {self._radar_range} lightyears\n"
 
 
 # generation = amount / minute
@@ -407,6 +407,6 @@ DEFAULT_MODULES = {
     "Shield": Shield,
     "Fuel": Fuel,
     "Cargo": Cargo,
-    "Radar": Radar,
+    "RadarModule": RadarModule,
     "EnergyGenerator": EnergyGenerator,
 }

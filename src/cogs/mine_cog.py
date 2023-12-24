@@ -5,7 +5,7 @@ from discord.ext import commands
 import math
 import random
 
-from ui.simple_banner import ErrorBanner, LoadingBanner, NormalBanner, SuccessBanner
+from ui.simple_banner import ErrorBanner, LoadingBanner, SuccessBanner
 from data import RESOURCE_NAMES
 from player import Player
 from utils import check_registered

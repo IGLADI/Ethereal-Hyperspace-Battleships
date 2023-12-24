@@ -1,4 +1,3 @@
-import args
 
 import discord
 from discord.ext import commands
@@ -6,12 +5,10 @@ from discord.ext import commands
 from create_channels import create_channels
 
 import json
-import argparse
 import random
 import asyncio
 
 import data
-from planet import Planet
 from player import Player
 
 from create_roles import create_roles
@@ -87,7 +84,7 @@ async def on_guild_join(guild):
     try:
         await create_roles(guild)
         await create_channels(guild)
-    except Exception as e:
+    except Exception:
         await channel.send(
             "This bot can only run on community servers. Not on private servers! Bye!\n https://support.discord.com/hc/en-us/articles/360047132851-Enabling-Your-Community-Server"
         )

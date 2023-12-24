@@ -1,4 +1,3 @@
-from random import randrange
 from database import Database
 
 _db = Database()

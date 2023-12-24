@@ -114,6 +114,17 @@ class Database:
             (amount, discord_id),
         )
 
+    def player_guild_name(self, discord_id) -> int:
+        """Return guild_name for discord_id"""
+        return self.get_only_result(
+            """
+            SELECT g.name FROM guilds g
+            JOIN players p ON p.guild_id = g.guild_id
+            WHERE p.discord_id = ?
+            """,
+            (discord_id,),
+        )
+
     def player_name(self, discord_id) -> int:
         """Return ship_id for player_id"""
         return self.get_only_result(
@@ -158,7 +169,7 @@ class Database:
     def player_from_scan(self, x_pos, y_pos, distance, excluded_player_discord_id) -> int:
         """Returns the player in a certain distance."""
         statement = """
-        SELECT discord_name, x_pos, y_pos FROM players
+        SELECT discord_id, discord_name, x_pos, y_pos FROM players
         WHERE x_pos BETWEEN ? AND ? AND y_pos BETWEEN ? AND ?
         AND discord_id <> ?
         """

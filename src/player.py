@@ -18,9 +18,11 @@ class Player:
         money = _db.player_money(discord_id)
         x_pos, y_pos = _db.player_coordinates(discord_id)
         name = _db.player_name(discord_id)
+        guild_name = _db.player_guild_name(discord_id)
 
         self._id = discord_id
         self._name = name
+        self._guild_name = guild_name
         self._ship = Ship(ship_id)
         self._money = money
         self._x_pos = x_pos
@@ -39,6 +41,10 @@ class Player:
     @property
     def name(self):
         return self._name
+
+    @property
+    def guild_name(self):
+        return self._guild_name
 
     @property
     def money(self):
@@ -162,7 +168,5 @@ class Player:
 
     def scan(self):
         """Returns a list of locations in a grid around the ship, depending on the radar module level"""
-        scan_range = self.ship._modules["Radar"].radar_range // 2
-        locations = _db.location_from_scan(self.x_pos, self.y_pos, scan_range)
-        players = _db.player_from_scan(self.x_pos, self.y_pos, scan_range, self.id)
-        return {"locations": locations, "players": players}
+        scan_range = self.ship._modules["RadarModule"].radar_range // 2
+        return _db.player_from_scan(self.x_pos, self.y_pos, scan_range, self.id)
