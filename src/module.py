@@ -248,6 +248,11 @@ class Canon(Module):
             ],
         )
         self._strength = [100, 110, 130, 145, 150]
+        self._hit_chance = [60, 65, 70, 75, 80]
+
+    @property
+    def hit_chance(self):
+        return self._hit_chance[self.level - 1]
 
     @property
     def strength(self):
@@ -270,12 +275,20 @@ class Armor(Module):
                 {"resource": "gold", "amount": [300, 450, 600, 750, 0]},
             ],
         )
-        self._defense = [1000, 1100, 1300, 1450, 1500]
-        self._hit_chance = [60, 65, 70, 75, 80]
+        self._defense = [500, 600, 700, 800, 1000]
+        self._hp = self.defense
 
     @property
     def defense(self):
         return self._defense[self.level - 1]
+
+    @property
+    def hp(self):
+        return self._hp
+
+    @hp.setter
+    def hp(self, hp):
+        self._hp = hp
 
     def __str__(self):
         return f"{super().__str__()} - Defense: {self._defense} armor\n"

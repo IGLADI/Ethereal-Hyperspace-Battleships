@@ -30,6 +30,7 @@ class ShipCommands(commands.Cog):
         coordinates = f"{player.x_pos}, {player.y_pos}"
         ship_message += f"```Location: {coordinates}```"
         ship_message += "```Energy: " + f"{ship.energy}```"
+        ship_message += "```Armor: " + f"{ship.modules['Armor'].hp}```"
         banner = NormalBanner(text=ship_message, user=interaction.user, extra_header=header)
         await interaction.response.send_message(embed=banner.embed, ephemeral=True)
 

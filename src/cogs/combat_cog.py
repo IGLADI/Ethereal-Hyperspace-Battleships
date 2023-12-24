@@ -65,7 +65,43 @@ class CombatCommands(commands.Cog):
 
         for _ in range(10):
             player.bonus_hit_chance -= 1
-            await asyncio.sleep(1)
+            await asyncio.sleep(10)
+
+    # TODO when different weopons will exist add a toggle on&off for the weopons
+    @app_commands.command(name="attack", description="Attack a player")
+    @app_commands.check(check_registered)
+    async def attack(self, interaction: discord.Interaction):
+        player = Player.get(interaction.user.id)
+        if player.target is None:
+            banner = ErrorBanner(text="You need to target a player first.", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
+            return
+
+        player = Player.get(interaction.user.id)
+        target_player = Player.get(player.target.id)
+
+        if self.distance_to_player(interaction.user, player, target_player) > 10:
+            banner = ErrorBanner(text="You can only attack players within 10 units.", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
+            return
+
+        if player.ship.energy < 10:
+            banner = ErrorBanner(text="You don't have enough energy.", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
+            return
+        player.ship.energy -= 10
+
+        if random.random() * 100 > player.bonus_hit_chance + player.ship.modules["Canon"].hit_chance:
+            banner = ErrorBanner(text="You missed!", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed)
+            return
+
+        damage = player.ship.modules["Canon"].strength
+        target_player.ship.modules["Armor"].hp -= damage
+
+        
+        banner = SuccessBanner(text=f"You hit {target_player.name} for {damage} damage!", user=interaction.user)
+        await interaction.response.send_message(embed=banner.embed)
 
 
 async def setup(client: commands.Bot) -> None:
