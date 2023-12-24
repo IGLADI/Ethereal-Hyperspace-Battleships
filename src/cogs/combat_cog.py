@@ -43,7 +43,8 @@ class CombatCommands(commands.Cog):
             await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
 
-        await target.send(f"{player.name} is targeting you!")
+        banner = ErrorBanner(text=f"{player.name} is targeting you!", user=target)
+        await target.send(embed=banner.embed)
 
         player.target = target_player
         player.bonus_hit_chance = 0
@@ -100,7 +101,10 @@ class CombatCommands(commands.Cog):
 
         # send a dm that he died
         player_discord = self.client.get_user(player.id)
-        await player_discord.send(f"Your ship has been destroyed by {killer.name}!")
+        banner = ErrorBanner(
+            text=f"You have been killed by {killer.name}!\n You lost half of your cargo.", user=player_discord
+        )
+        await player_discord.send(embed=banner.embed)
 
     # TODO when different weopons will exist add a toggle on&off for the weopons
     @app_commands.command(name="fire", description="Attack a player")
