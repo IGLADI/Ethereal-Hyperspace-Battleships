@@ -4,6 +4,15 @@ from tabulate import tabulate
 from ui.simple_banner import NormalBanner
 
 
+def help_general():
+    return {
+        "title": "General Commands",
+        "help": "Get help on commands",
+        "tutorial": "Get a tutorial on how to play",
+        "ship_info": "Get info on your ship",
+        "upgrade_module": "Upgrade your ship",
+    }
+
 def help_guild():
     return {
         "title": "Guild Commands",
@@ -43,13 +52,22 @@ def help_economic():
         "trade": "idk, i didn't write this...",
     }
 
+def help_events():
+    return {
+        "title": "Event Commands",
+        "join_event": "Join an event",
+        "locate {x} {y}": "Find a lost object/ship",
+    }
+
 
 def help_commands():
     return [
-        {"help_guild": help_guild()},
+        {"help_general": help_general()},
+        #{"help_guild": help_guild()},
         {"help_resources": help_resources()},
         {"help_travel": help_travel()},
         {"help_economic": help_economic()},
+        {"help_events": help_events()},
     ]
 
 
