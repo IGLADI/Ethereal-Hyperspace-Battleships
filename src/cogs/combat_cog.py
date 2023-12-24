@@ -88,7 +88,7 @@ class CombatCommands(commands.Cog):
             player.bonus_hit_chance -= 1
             await asyncio.sleep(10)
 
-    def respawn_player(self, player: Player, killer: Player = None):
+    async def respawn_player(self, player: Player, killer: Player = None):
         player.x_pos = 0
         player.y_pos = 0
 
@@ -98,6 +98,10 @@ class CombatCommands(commands.Cog):
             if killer:
                 killer.ship.modules["Cargo"].add_resource(resource.name, int(resource.amount * 0.5))
             resource.amount = int(resource.amount * 0.5)
+
+        # send a dm that he died
+        player_discord = self.client.get_user(player.id)
+        await player_discord.send(f"Your ship has been destroyed by {killer.name}!")
 
     # TODO when different weopons will exist add a toggle on&off for the weopons
     @app_commands.command(name="attack", description="Attack a player")
@@ -149,7 +153,7 @@ class CombatCommands(commands.Cog):
             )
             await interaction.response.send_message(embed=banner.embed)
 
-            self.respawn_player(target_player, player)
+            await self.respawn_player(target_player, player)
 
         else:
             banner = SuccessBanner(text=f"You hit {target_player.name} for {damage} damage!", user=interaction.user)
