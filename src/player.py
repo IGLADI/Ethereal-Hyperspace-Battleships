@@ -175,7 +175,12 @@ class Player:
         scan_range = self.ship._modules["Radar"].radar_range // 2
         locations = _db.location_from_scan(self.x_pos, self.y_pos, scan_range)
         locations += _db.player_from_scan(self.x_pos, self.y_pos, scan_range, discord_id)
+        # Tutorial space pirates
         if self._tutorial == 0:
             locations += [('Space pirates', 1, 0)]
             data.tutorials[self.id]._used_radar = True
+        # Event locations
+        if data.event_manager.events != {}:
+            if Coordinate(self.x_pos, self.y_pos).distance_to(Coordinate(data.event_manager.events[1].x_pos, data.event_manager.events[1].y_pos)) <= 10:
+                locations += ["Ruebñ's lost ship", data.event_manager.events[1].x_pos, data.event_manager.events[1].y_pos]
         return locations

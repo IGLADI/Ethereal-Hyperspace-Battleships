@@ -53,7 +53,6 @@ class LocateEvent(Event):
         super().__init__(id, "Ruebñ's fleet lost connection with a scout ship, can you locate it for him? It should be somewhere between (-100,-100) and (100,100).", EVENT_CATEGORY["locacte"])
         self._x_pos = random.randint(-100, 100)
         self._y_pos = random.randint(-100, 100)
-        print(self._x_pos, self._y_pos)
 
     @property
     def x_pos(self):
