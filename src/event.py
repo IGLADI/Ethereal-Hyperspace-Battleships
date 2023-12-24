@@ -84,9 +84,8 @@ class EventManager:
         event_id = 0
         while True:
             event_id += 1
-            # 1 = LocateEvent | 2 = SolveEvent
-            # TODO MAKE 9
-            if random.randint(1, 1) == 1:
+            # 1 = LocateEvent
+            if random.randint(1, 5) == 1:
                 event = LocateEvent(event_id)
                 self._events[event_id] = event
                 banner = NormalBanner(
