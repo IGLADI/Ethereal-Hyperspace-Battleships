@@ -109,8 +109,11 @@ class TravelCommands(commands.Cog):
     async def scan(self, interaction: discord.Interaction):
         player = Player.get(interaction.user.id)
 
-        found = player.scan(interaction.user.id)
-        await interaction.response.send_message(f"Scanned the area. Found {found} .", ephemeral=True)
+        scan_results = player.scan()
+        players, locations = scan_results["players"], scan_results["locations"]
+        await interaction.response.send_message(
+            f"Scanned the area. Found:\nplayers: {players}\nlocations: {locations} .", ephemeral=True
+        )
 
 
 async def setup(client: commands.Bot) -> None:

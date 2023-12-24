@@ -160,9 +160,9 @@ class Player:
         travel_thread_instance.start()
         return distance
 
-    def scan(self, discord_id):
+    def scan(self):
         """Returns a list of locations in a grid around the ship, depending on the radar module level"""
         scan_range = self.ship._modules["Radar"].radar_range // 2
         locations = _db.location_from_scan(self.x_pos, self.y_pos, scan_range)
-        locations += _db.player_from_scan(self.x_pos, self.y_pos, scan_range, discord_id)
-        return locations
+        players = _db.player_from_scan(self.x_pos, self.y_pos, scan_range, self.id)
+        return {"locations": locations, "players": players}
