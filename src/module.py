@@ -257,11 +257,11 @@ class Canon(Module):
         return f"{super().__str__()} - Strength: {self._strength} firepower\n"
 
 
-class Shield(Module):
+class Armor(Module):
     def __init__(self, module_id):
         super().__init__(
             module_id,
-            "Shield",
+            "Armor",
             "Increases the ship's defense.",
             5,
             [
@@ -270,7 +270,8 @@ class Shield(Module):
                 {"resource": "gold", "amount": [300, 450, 600, 750, 0]},
             ],
         )
-        self._defense = [100, 110, 130, 145, 150]
+        self._defense = [1000, 1100, 1300, 1450, 1500]
+        self._hit_chance = [60, 65, 70, 75, 80]
 
     @property
     def defense(self):
@@ -278,6 +279,9 @@ class Shield(Module):
 
     def __str__(self):
         return f"{super().__str__()} - Defense: {self._defense} armor\n"
+
+
+# TODO add shield (uses energy to block damage, bridge to control it and use +- energy)
 
 
 class Fuel(Module):
@@ -404,7 +408,7 @@ DEFAULT_MODULES = {
     "TravelModule": TravelModule,
     "MiningModule": MiningModule,
     "Canon": Canon,
-    "Shield": Shield,
+    "Armor": Armor,
     "Fuel": Fuel,
     "Cargo": Cargo,
     "Radar": Radar,

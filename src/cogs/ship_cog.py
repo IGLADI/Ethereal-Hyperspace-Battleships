@@ -56,7 +56,7 @@ class ShipCommands(commands.Cog):
             "TravelModule",
             "MiningModule",
             "Canon",
-            "Shield",
+            "Armor",
             "Fuel",
             "Cargo",
             "Radar",
