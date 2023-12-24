@@ -1,5 +1,6 @@
 from database import Database
 from item import Resource
+import data
 
 
 _db = Database()
@@ -53,7 +54,7 @@ class Module:
         _db.module_set_level(self.id, level)
 
     def upgrade(self, cargo):
-        """Uses resources in cargo of player to upgrade module."""
+        """Uses resources in cargo of player to upgrade module."""        
         if self.level == self.max_level:
             raise Exception("Module is already at max level.")
 
@@ -92,6 +93,16 @@ class Module:
             if resource.amount < required_amount:
                 return False
 
+        return True
+    
+    def free_upgrade(self, playerID):
+        """Upgrades a module without paying the costs."""
+        # Free tutorial upgrade (only once)
+        if data.tutorials[playerID]._upgraded == False:
+            data.tutorials[playerID]._upgraded = True
+            self.level += 1
+            return False
+        # Exploit to upgrade modules for free
         return True
 
     def __str__(self):
@@ -248,6 +259,11 @@ class Canon(Module):
             ],
         )
         self._strength = [100, 110, 130, 145, 150]
+        self._hit_chance = [60, 65, 70, 75, 80]
+
+    @property
+    def hit_chance(self):
+        return self._hit_chance[self.level - 1]
 
     @property
     def strength(self):
@@ -257,11 +273,11 @@ class Canon(Module):
         return f"{super().__str__()} - Strength: {self._strength} firepower\n"
 
 
-class Shield(Module):
+class Armor(Module):
     def __init__(self, module_id):
         super().__init__(
             module_id,
-            "Shield",
+            "Armor",
             "Increases the ship's defense.",
             5,
             [
@@ -270,14 +286,26 @@ class Shield(Module):
                 {"resource": "gold", "amount": [300, 450, 600, 750, 0]},
             ],
         )
-        self._defense = [100, 110, 130, 145, 150]
+        self._defense = [500, 600, 700, 800, 1000]
+        self._hp = self.defense
 
     @property
     def defense(self):
         return self._defense[self.level - 1]
 
+    @property
+    def hp(self):
+        return self._hp
+
+    @hp.setter
+    def hp(self, hp):
+        self._hp = hp
+
     def __str__(self):
         return f"{super().__str__()} - Defense: {self._defense} armor\n"
+
+
+# TODO add shield (uses energy to block damage, bridge to control it and use +- energy)
 
 
 class Fuel(Module):
@@ -404,7 +432,7 @@ DEFAULT_MODULES = {
     "TravelModule": TravelModule,
     "MiningModule": MiningModule,
     "Canon": Canon,
-    "Shield": Shield,
+    "Armor": Armor,
     "Fuel": Fuel,
     "Cargo": Cargo,
     "Radar": Radar,

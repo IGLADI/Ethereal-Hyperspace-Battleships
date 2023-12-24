@@ -23,14 +23,41 @@ class Player:
         self._name = name
         self._ship = Ship(ship_id)
         self._money = money
+
         self._x_pos = x_pos
         self._y_pos = y_pos
+
         self._on_message_reward_cooldown = False
+
         self._energy_thread = Thread(target=self.update_energy)
         self._energy_thread.daemon = True
         self._energy_thread.start()
+
         self._is_traveling = False
         self._is_mining = False
+        # -1 = not in tutorial, 0 = in tutorial, 1 = tutorial finished
+        self._tutorial = -1
+
+        self._bonus_hit_chance = 0
+        self._target: Player = None
+
+    @property
+    def target(self):
+        return self._target
+
+    @target.setter
+    def target(self, target):
+        self._target = target
+
+    @property
+    def bonus_hit_chance(self):
+        return self._bonus_hit_chance
+
+    @bonus_hit_chance.setter
+    def bonus_hit_chance(self, bonus_hit_chance):
+        self._bonus_hit_chance = bonus_hit_chance
+        if self._bonus_hit_chance > 20:
+            self._bonus_hit_chance = 20
 
     @property
     def id(self):
@@ -68,6 +95,10 @@ class Player:
     def ship(self):
         return self._ship
 
+    @ship.setter
+    def ship(self, ship):
+        self._ship = ship
+
     @money.setter
     def money(self, amount):
         global _db
@@ -89,6 +120,14 @@ class Player:
     @is_traveling.setter
     def is_traveling(self, is_traveling):
         self._is_traveling = is_traveling
+
+    @property
+    def tutorial(self):
+        return self._tutorial
+    
+    @tutorial.setter
+    def tutorial(self, int):
+        self._tutorial = int
 
     # TODO make a secondary module like solar panels (slow but doesn't consume uranium=>players don't get stuck)
     def update_energy(self):
@@ -165,4 +204,12 @@ class Player:
         scan_range = self.ship._modules["Radar"].radar_range // 2
         locations = _db.location_from_scan(self.x_pos, self.y_pos, scan_range)
         locations += _db.player_from_scan(self.x_pos, self.y_pos, scan_range, discord_id)
+        # Tutorial space pirates
+        if self._tutorial == 0:
+            locations += [('Space pirates', 1, 0)]
+            data.tutorials[self.id]._used_radar = True
+        # Event locations
+        if data.event_manager.events != {}:
+            if Coordinate(self.x_pos, self.y_pos).distance_to(Coordinate(data.event_manager.events[1].x_pos, data.event_manager.events[1].y_pos)) <= 10:
+                locations += ["Ruebñ's lost ship", data.event_manager.events[1].x_pos, data.event_manager.events[1].y_pos]
         return locations

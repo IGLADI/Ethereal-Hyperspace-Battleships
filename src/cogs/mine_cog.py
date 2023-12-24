@@ -11,6 +11,7 @@ from player import Player
 from utils import check_registered
 from location import Coordinate
 import asyncio
+import data
 
 
 class MineCommands(commands.Cog):
@@ -66,6 +67,8 @@ class MineCommands(commands.Cog):
                 )
             await interaction.followup.send(embed=banner.embed, ephemeral=True)
         player._is_mining = False
+        if player.tutorial == 0:
+            data.tutorials[player.id]._mined = True
 
 
 async def setup(client: commands.Bot) -> None:
