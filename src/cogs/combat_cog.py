@@ -18,7 +18,6 @@ class CombatCommands(commands.Cog):
     @app_commands.command(name="target", description="Target a player")
     @app_commands.check(check_registered)
     # TODO can't target around the spawn
-    # TODO send msg on target
     async def target(self, interaction: discord.Interaction, target: discord.User):
         player = Player.get(interaction.user.id)
 
@@ -38,6 +37,14 @@ class CombatCommands(commands.Cog):
             banner = ErrorBanner(text="You can't target yourself.", user=interaction.user)
             await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
+
+        # check if your in the spawn
+        if abs(target_player.x_pos) <= 20 and abs(target_player.y_pos) <= 20:
+            banner = ErrorBanner(text="You can't target players within 20 units of the spawn.", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
+            return
+
+        await target.send(f"{player.name} is targeting you!")
 
         player.target = target_player
         player.bonus_hit_chance = 0
@@ -104,6 +111,16 @@ class CombatCommands(commands.Cog):
 
         player = Player.get(interaction.user.id)
         target_player = Player.get(player.target.id)
+
+        if abs(target_player.x_pos) <= 20 and abs(target_player.y_pos) <= 20:
+            banner = ErrorBanner(text="You can't attack players within 20 units of the spawn.", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
+            return
+
+        if abs(player.x_pos) <= 20 and abs(player.y_pos) <= 20:
+            banner = ErrorBanner(text="You can't attack players while you are in the spawn.", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
+            return
 
         if self.distance_to_player(interaction.user, player, target_player) > 10:
             banner = ErrorBanner(text="You can only attack players within 10 units.", user=interaction.user)
