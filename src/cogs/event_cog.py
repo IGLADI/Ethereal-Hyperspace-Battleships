@@ -6,6 +6,7 @@ from utils import check_registered, check_event_channel
 from ui.simple_banner import ErrorBanner, LoadingBanner, NormalBanner, SuccessBanner
 from player import Player
 import data
+import time
 
 class EventCommands(commands.Cog):
     def __init__(self, client: commands.Bot):
@@ -22,7 +23,9 @@ class EventCommands(commands.Cog):
         
         player = Player.get(interaction.user.id)
         data.event_manager.events[1].participants = player
-        banner = SuccessBanner(text=f"{player.name} joined the event!\nParticipants: {[part.name for part in data.event_manager.events[1].participants]}", user=interaction.user)
+        participants = [part.name for part in data.event_manager.events[1].participants]
+        participants_text = ', '.join(participants)
+        banner = SuccessBanner(text=f"{player.name} joined the event!\nParticipants: {participants_text}", user=interaction.user)
         await interaction.response.send_message(embed=banner.embed)
         private_banner = SuccessBanner(text=f"Try to find Ruebñ's lost ship by scanning the search area, if you found it, use /locate [x_pos] [y_pos] to let Ruebñ know!\n", user=interaction.user)
         await interaction.followup.send(embed=private_banner.embed, ephemeral=True)
@@ -46,7 +49,7 @@ class EventCommands(commands.Cog):
             for participant in data.event_manager.events[1].participants:
                 participant.ship.modules["Cargo"].add_resource(data.event_manager.events[1].prize[0], data.event_manager.events[1].prize[1])
             banner = SuccessBanner(text=f"Congratulations, you found the lost ship!\nAll participants got {data.event_manager.events[1].prize[1]} tons of {data.event_manager.events[1].prize[0]}!", user=interaction.user)
-            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
+            await interaction.response.send_message(embed=banner.embed)
             data.event_manager.events[1].completed = True
             return
 
