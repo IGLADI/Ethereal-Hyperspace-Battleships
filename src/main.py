@@ -45,6 +45,7 @@ class Client(commands.Bot):
             "cogs.mine_cog",
             "cogs.travel_cog",
             "cogs.trade_cog",
+            "cogs.combat_cog",
             "cogs.event_cog",
         ]
 
