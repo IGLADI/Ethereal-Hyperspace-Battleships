@@ -4,6 +4,7 @@ race_games = {}
 players = {}
 planets = {}
 tutorials = {}
+event_manager = None
 
 guild_names = ["The Federation", "The Empire", "The Alliance", "The Independents"]
 

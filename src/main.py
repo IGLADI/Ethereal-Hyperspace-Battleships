@@ -45,6 +45,7 @@ class Client(commands.Bot):
             "cogs.mine_cog",
             "cogs.travel_cog",
             "cogs.trade_cog",
+            "cogs.event_cog",
         ]
 
     # this overwrites the default sync setup (used by self.tree.sync in on_ready)
@@ -67,7 +68,7 @@ class Client(commands.Bot):
         guild = self.guilds[0]
         event_manager = EventManager(guild)
         event_manager.start_event_timer()
-
+        data.event_manager = event_manager
 
 
 # load the bot token from config.json KEEP THIS TOKEN PRIVATE (gitignore)

@@ -39,12 +39,29 @@ class Event:
     def completed(self):
         return self._completed
     
+    @participants.setter
+    def participants(self, player):
+        self._participants.append(player)
+
+    @completed.setter
+    def completed(self, completed):
+        self._completed = completed        
+    
 
 class LocateEvent(Event):
     def __init__(self, id):
         super().__init__(id, "Ruebñ's fleet lost connection with a scout ship, can you locate it for him? It should be somewhere between (-100,-100) and (100,100).", EVENT_CATEGORY["locacte"])
         self._x_pos = random.randint(-100, 100)
         self._y_pos = random.randint(-100, 100)
+        print(self._x_pos, self._y_pos)
+
+    @property
+    def x_pos(self):
+        return self._x_pos
+    
+    @property
+    def y_pos(self):
+        return self._y_pos
 
 class EventManager:
     def __init__(self, guild):
