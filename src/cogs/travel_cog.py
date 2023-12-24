@@ -131,10 +131,9 @@ class TravelCommands(commands.Cog):
         radar.others_to_relative()
         player_str = ""
         for other in radar.others:
-            player_str += f", {other[2]}*{other[0]}*: ({other[1][0]}, {other[1][1]})"
-        player_str = player_str[2:]
+            player_str += f"{other[0]} **{other[2]}**: ({other[1][0]}, {other[1][1]})\n"
 
-        text = f"({player.x_pos}, {player.y_pos})\n" + "```\n" + radar.grid() + "\n```" + player_str
+        text = f"({player.x_pos}, {player.y_pos})\n" + "```\n" + str(radar) + "\n```" + player_str
 
         banner = NormalBanner(text=text, user=interaction.user)
         await interaction.response.send_message(embed=banner.embed, ephemeral=True)
