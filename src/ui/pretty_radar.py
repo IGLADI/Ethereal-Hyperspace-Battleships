@@ -130,7 +130,7 @@ class Radar:
         s += self.cell(end=False)
         return s + "\n"
 
-    def grid(self):
+    def __str__(self):
         grid_str = ""
 
         # grid_str += self.crosses()
@@ -188,15 +188,15 @@ class Radar:
         self.others = relative_others_upscaled
 
 
-def surround(f, **kwargs) -> str:
-    return "```\n" + f(**kwargs) + "```"
+def surround(f) -> str:
+    return "```\n" + str(f) + "```"
 
 
 def main():
     others = [("e", (33, 7)), ("f", (0, -17)), ("e", (43, 28))]
     r = Radar(length=7, center=(3, 4), range=50, others=others)
     r.others_to_relative()
-    print(surround(r.grid))
+    print(surround(r))
 
 
 if __name__ == "__main__":
