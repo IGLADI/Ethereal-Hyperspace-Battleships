@@ -93,6 +93,10 @@ class Player:
     def ship(self):
         return self._ship
 
+    @ship.setter
+    def ship(self, ship):
+        self._ship = ship
+
     @money.setter
     def money(self, amount):
         global _db

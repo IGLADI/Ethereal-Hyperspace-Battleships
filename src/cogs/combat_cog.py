@@ -1,6 +1,5 @@
 import asyncio
 import random
-from uu import Error
 import discord
 from discord.ext import commands
 from discord import app_commands
@@ -11,12 +10,15 @@ from ui.simple_banner import ErrorBanner, SuccessBanner
 from utils import check_registered
 
 
+# TODO add combat in /help
 class CombatCommands(commands.Cog):
     def __init__(self, client: commands.Bot):
         self.client = client
 
     @app_commands.command(name="target", description="Target a player")
     @app_commands.check(check_registered)
+    # TODO can't target around the spawn
+    # TODO send msg on target
     async def target(self, interaction: discord.Interaction, target: discord.User):
         player = Player.get(interaction.user.id)
 
@@ -32,10 +34,15 @@ class CombatCommands(commands.Cog):
             await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
 
+        if player == target_player:
+            banner = ErrorBanner(text="You can't target yourself.", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
+            return
+
         player.target = target_player
         player.bonus_hit_chance = 0
 
-        banner = SuccessBanner(text=f"You are now targeting {target_player.name}.", user=interaction.user)
+        banner = SuccessBanner(text=f"You are now targeting {target.mention}.", user=interaction.user)
         await interaction.response.send_message(embed=banner.embed)
 
     def distance_to_player(self, user: discord.User, player: Player, target: Player) -> float:
@@ -57,7 +64,14 @@ class CombatCommands(commands.Cog):
             await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
 
+        if player.ship.energy < 10:
+            banner = ErrorBanner(text="You don't have enough energy.", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
+            return
+
+        player.ship.energy -= 10
         player.bonus_hit_chance += 10
+
         banner = SuccessBanner(
             text=f"Your hit chance increased, your bonus is now {player.bonus_hit_chance}.", user=interaction.user
         )
@@ -66,6 +80,17 @@ class CombatCommands(commands.Cog):
         for _ in range(10):
             player.bonus_hit_chance -= 1
             await asyncio.sleep(10)
+
+    def respawn_player(self, player: Player, killer: Player = None):
+        player.x_pos = 0
+        player.y_pos = 0
+
+        player.ship.modules["Armor"].hp = player.ship.modules["Armor"].defense
+
+        for resource in player.ship.modules["Cargo"].resources.values():
+            if killer:
+                killer.ship.modules["Cargo"].add_resource(resource.name, int(resource.amount * 0.5))
+            resource.amount = int(resource.amount * 0.5)
 
     # TODO when different weopons will exist add a toggle on&off for the weopons
     @app_commands.command(name="attack", description="Attack a player")
@@ -99,9 +124,19 @@ class CombatCommands(commands.Cog):
         damage = player.ship.modules["Canon"].strength
         target_player.ship.modules["Armor"].hp -= damage
 
-        
-        banner = SuccessBanner(text=f"You hit {target_player.name} for {damage} damage!", user=interaction.user)
-        await interaction.response.send_message(embed=banner.embed)
+        if target_player.ship.modules["Armor"].hp <= 0:
+            # TODO add an image of an exploded ship
+            banner = SuccessBanner(
+                text=f"You hit {target_player.name} for {damage} damage and destroyed their ship!",
+                user=interaction.user,
+            )
+            await interaction.response.send_message(embed=banner.embed)
+
+            self.respawn_player(target_player, player)
+
+        else:
+            banner = SuccessBanner(text=f"You hit {target_player.name} for {damage} damage!", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed)
 
 
 async def setup(client: commands.Bot) -> None:
