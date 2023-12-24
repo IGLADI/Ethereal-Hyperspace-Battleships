@@ -119,7 +119,6 @@ class TravelCommands(commands.Cog):
             char = "f" if player.guild_name == p.guild_name else "e"
             others.append((char, (result[2], result[3]), result[1]))
 
-        print("others:", others)
         # fmt:off
         radar = Radar(
             length=7,
@@ -131,7 +130,6 @@ class TravelCommands(commands.Cog):
 
         radar.others_to_relative()
         player_str = ""
-        print("radar.others:", radar.others)
         for other in radar.others:
             player_str += f", {other[2]}*{other[0]}*: ({other[1][0]}, {other[1][1]})"
         player_str = player_str[2:]

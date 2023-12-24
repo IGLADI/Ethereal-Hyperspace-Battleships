@@ -162,7 +162,6 @@ class Radar:
     def others_to_relative(self) -> list:
         """Transform self.others to have relative positions to center, upscaled to make range math length."""
         # fmt:off
-        print("self.others:", self.others)
         relative_others = [
             (other[0],
              (other[1][0] - self.center[0],

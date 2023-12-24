@@ -60,7 +60,7 @@ class ShipCommands(commands.Cog):
             "Armor",
             "Fuel",
             "Cargo",
-            "Radar",
+            "RadarModule",
             "EnergyGenerator",
             "SolarPanel",
         ],
@@ -73,17 +73,23 @@ class ShipCommands(commands.Cog):
             banner = ErrorBanner(text=f"Couldn't find module {module_name}.", user=interaction.user)
             await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
-        
+
         # Free upgrade for tutorial
         if player.tutorial == 0:
             exploit = module.free_upgrade(player.id)
             if exploit:
-                banner = ErrorBanner(text=f"Are you trying to make me upgrade 2 modules for you? Do you want to start a war?", user=interaction.user)
+                banner = ErrorBanner(
+                    text=f"Are you trying to make me upgrade 2 modules for you? Do you want to start a war?",
+                    user=interaction.user,
+                )
             else:
-                banner = SuccessBanner(text=f"Ruebñ upgraded your {module_name} to level {module.level} free of charge!", user=interaction.user)
+                banner = SuccessBanner(
+                    text=f"Ruebñ upgraded your {module_name} to level {module.level} free of charge!",
+                    user=interaction.user,
+                )
             await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
-        
+
         try:
             module.upgrade(player.ship.modules["Cargo"])
             banner = SuccessBanner(text=f"Upgraded {module_name} to level {module.level}.", user=interaction.user)

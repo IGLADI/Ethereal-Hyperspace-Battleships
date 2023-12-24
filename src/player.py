@@ -207,11 +207,11 @@ class Player:
 
     def scan(self):
         """Returns a list of locations in a grid around the ship, depending on the radar module level"""
-        scan_range = self.ship._modules["RadarModule"].radar_range // 2
+        scan_range = self.ship.modules["RadarModule"].radar_range // 2
         return _db.player_from_scan(self.x_pos, self.y_pos, scan_range, self.id)
 
     def long_scan(self):
-        scan_range = self.ship._modules["Radar"].radar_range // 2
+        scan_range = self.ship.modules["RadarModule"].radar_range // 2
         locations = _db.location_from_scan(self.x_pos, self.y_pos, scan_range)
         # Tutorial space pirates
         if self._tutorial == 0:
