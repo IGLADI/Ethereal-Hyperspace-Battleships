@@ -15,6 +15,15 @@ def help_guild():
     }
 
 
+def help_combat():
+    return {
+        "title": "Combat Commands",
+        "target {player}": "Target a player",
+        "lock": "Increase your hit chance",
+        "fire": "Fire at your target",
+    }
+
+
 def help_resources():
     return {
         "title": "Resource Commands",
@@ -47,6 +56,7 @@ def help_economic():
 def help_commands():
     return [
         {"help_guild": help_guild()},
+        {"help_combat": help_combat()},
         {"help_resources": help_resources()},
         {"help_travel": help_travel()},
         {"help_economic": help_economic()},

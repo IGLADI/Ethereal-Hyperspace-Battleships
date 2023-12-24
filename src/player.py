@@ -23,14 +23,39 @@ class Player:
         self._name = name
         self._ship = Ship(ship_id)
         self._money = money
+
         self._x_pos = x_pos
         self._y_pos = y_pos
+
         self._on_message_reward_cooldown = False
+
         self._energy_thread = Thread(target=self.update_energy)
         self._energy_thread.daemon = True
         self._energy_thread.start()
+
         self._is_traveling = False
         self._is_mining = False
+
+        self._bonus_hit_chance = 0
+        self._target: Player = None
+
+    @property
+    def target(self):
+        return self._target
+
+    @target.setter
+    def target(self, target):
+        self._target = target
+
+    @property
+    def bonus_hit_chance(self):
+        return self._bonus_hit_chance
+
+    @bonus_hit_chance.setter
+    def bonus_hit_chance(self, bonus_hit_chance):
+        self._bonus_hit_chance = bonus_hit_chance
+        if self._bonus_hit_chance > 20:
+            self._bonus_hit_chance = 20
 
     @property
     def id(self):
@@ -67,6 +92,10 @@ class Player:
     @property
     def ship(self):
         return self._ship
+
+    @ship.setter
+    def ship(self, ship):
+        self._ship = ship
 
     @money.setter
     def money(self, amount):
