@@ -106,7 +106,7 @@ class GeneralCommands(commands.Cog):
             await asyncio.sleep(1)
         # TODO add combat!
         # banner = NormalBanner(
-        #     text=f"Great job {interaction.user.name}!\n We have found the space pirates, they are at coordinates (1,0). Let's attack them to get my resources back! (/attack)",
+        #     text=f"Great job {interaction.user.name}!\n We have found the space pirates, they are at coordinates (1,0). Let's attack them to get my resources back!\n Use /target to choose who you want ot attack. Then use /fire to shoot or /lock if you want to increase your accuracy.",
         #     user=interaction.user,
         # )
         # await interaction.followup.send(embed=banner.embed, ephemeral=True)
@@ -129,7 +129,7 @@ class GeneralCommands(commands.Cog):
         while tut._upgraded == False:
             await asyncio.sleep(1)
         banner = SuccessBanner(
-            text=f"Thank you for playing the tutorial {interaction.user.name}!\n I hope you have fun playing Ethereal Hyperspace Battleships!",
+            text=f"Thank you for playing the tutorial {interaction.user.name}!\n I hope you have fun playing Ethereal Hyperspace Battleships!\n To attack other players, use /target to choose who you want to attack. Then use /fire to shoot or /lock if you want to increase your accuracy. Good luck!",
             user=interaction.user,
         )
         await interaction.followup.send(embed=banner.embed, ephemeral=True)
