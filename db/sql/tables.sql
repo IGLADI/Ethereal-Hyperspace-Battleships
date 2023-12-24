@@ -50,7 +50,6 @@ CREATE TABLE `players` (
     `discord_name` VARCHAR(255) NOT NULL UNIQUE,
     `class` ENUM('dwarf', 'martian', 'droid') NOT NULL,
     `money` INT(11) NOT NULL DEFAULT 1000,
-    `reputation` INT(11) NOT NULL DEFAULT 0,
     `x_pos` INT(11) NOT NULL,
     `y_pos` INT(11) NOT NULL,
     `guild_id` INT(11) NOT NULL,

@@ -35,7 +35,7 @@ class EventCommands(commands.Cog):
     @app_commands.check(check_event_channel)
     async def locate(self, interaction: discord.Interaction, x_pos: int, y_pos: int):
         if data.event_manager is None or data.event_manager.events == {}:
-            banner = ErrorBanner(text="There is nothing lost right now. So no need to locate somthing.", user=interaction.user)
+            banner = ErrorBanner(text="There is nothing lost right now. So no need to locate something.", user=interaction.user)
             await interaction.response.send_message(embed=banner.embed, ephemeral=True)
             return
         
