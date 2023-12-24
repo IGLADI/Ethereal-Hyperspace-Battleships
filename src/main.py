@@ -13,6 +13,7 @@ import asyncio
 import data
 from planet import Planet
 from player import Player
+from event import EventManager
 
 from create_roles import create_roles
 from ui.simple_banner import SimpleBanner
@@ -62,6 +63,11 @@ class Client(commands.Bot):
         except Exception as e:
             print(e)
         print("--------------------------------------------")
+        # EventManager (only workking on 1 server)
+        guild = self.guilds[0]
+        event_manager = EventManager(guild)
+        event_manager.start_event_timer()
+
 
 
 # load the bot token from config.json KEEP THIS TOKEN PRIVATE (gitignore)
@@ -72,17 +78,16 @@ with open("config.json", "r") as f:
 # create the bot
 client = Client()
 
-
 # message from the bot when it joins a server
 @client.event
 async def on_guild_join(guild):
     # Forloop used per the documentation to send the message in the first channel that the bot can send messages in
     # by discord this is the welcome channel (where you see people join a server)
+    global_guild = guild
     for channel in guild.text_channels:
         if channel.permissions_for(guild.me).send_messages:
             # TODO should have a complete intro message
-            banner = SimpleBanner(text="Hello! Welcome to Ethereal Hyperspace Battleships type /help for more info.")
-            await channel.send(embed=banner.embed)
+            await channel.send("Hello! Welcome to Ethereal Hyperspace Battleships type /help for more info.")
         break
     try:
         await create_roles(guild)

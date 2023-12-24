@@ -18,8 +18,9 @@ guild_channels = [
 
 general_channels = [
     {"type": "text", "name": "general", "position": 1},
-    {"type": "forum", "name": "questions", "position": 2},
-    {"type": "voice", "name": "general", "position": 3},
+    {"type": "text", "name": "events", "position": 2},
+    {"type": "forum", "name": "questions", "position": 3},
+    {"type": "voice", "name": "general", "position": 4},
 ]
 
 RESOURCE_NAMES = ["rock", "copper", "silver", "gold", "uranium", "black matter"]
