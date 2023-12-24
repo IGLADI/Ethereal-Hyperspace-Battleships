@@ -17,6 +17,13 @@ async def check_registered(interaction: discord.Interaction) -> bool:
     await interaction.response.send_message(embed=banner.embed, ephemeral=True)
     return False
 
+async def check_event_channel(interaction: discord.Interaction) -> bool:
+    if interaction.channel.name == "events":
+        return True
+
+    banner = ErrorBanner(interaction.user, "You can only use this command in the events channel.")
+    await interaction.response.send_message(embed=banner.embed, ephemeral=True)
+    return False
 
 # TODO make this work with negative betts (with the multiplier)
 def get_betted_amount(discord_id):
