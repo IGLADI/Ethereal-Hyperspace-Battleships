@@ -42,7 +42,8 @@ class Module:
     @property
     def cost(self):
         return [
-            {"resource": resource, "amount": self._cost[resource][self.level - 1]} for resource in self._cost_values
+            {"resource": resource, "amount": self._cost[resource][self.level - 1]}
+            for resource in self._cost_values
         ]
 
     @level.setter
@@ -54,7 +55,7 @@ class Module:
         _db.module_set_level(self.id, level)
 
     def upgrade(self, cargo):
-        """Uses resources in cargo of player to upgrade module."""        
+        """Uses resources in cargo of player to upgrade module."""
         if self.level == self.max_level:
             raise Exception("Module is already at max level.")
 
@@ -94,11 +95,11 @@ class Module:
                 return False
 
         return True
-    
+
     def free_upgrade(self, playerID):
         """Upgrades a module without paying the costs."""
         # Free tutorial upgrade (only once)
-        if data.tutorials[playerID]._upgraded == False:
+        if data.tutorials[playerID]._upgraded is False:
             data.tutorials[playerID]._upgraded = True
             self.level += 1
             return False
@@ -224,7 +225,9 @@ class Cargo(Module):
         resource_name = resource_name.lower()
         resource = self.resources.get(resource_name)
         if not resource:
-            resource_id = Resource.store(name=resource_name, amount=0, cargo_module_id=self.cargo_id)
+            resource_id = Resource.store(
+                name=resource_name, amount=0, cargo_module_id=self.cargo_id
+            )
             resource = Resource(resource_id)
             self._resources[resource_name] = resource
 
@@ -236,7 +239,11 @@ class Cargo(Module):
             return 0
 
     def __str__(self):
-        resources_str = "".join(f"\n   - {resource}" for resource in self.resources.values() if resource.amount > 0)
+        resources_str = "".join(
+            f"\n   - {resource}"
+            for resource in self.resources.values()
+            if resource.amount > 0
+        )
         return f"{super().__str__()} - Capacity: {resources_str} \n - Storage: {self.capacity}/{self._max_capacity} tons\n"
 
     @classmethod
@@ -345,11 +352,11 @@ class Fuel(Module):
         _db.store_fuel_module(ship_id)
 
 
-class Radar(Module):
+class RadarModule(Module):
     def __init__(self, module_id):
         super().__init__(
             module_id,
-            "Radar",
+            "RadarModule",
             "Increases the ship's radar range.",
             7,
             [
@@ -365,7 +372,9 @@ class Radar(Module):
         return self._radar_range[self.level - 1]
 
     def __str__(self):
-        return f"{super().__str__()} - Radar Range: {self._radar_range} lightyears\n"
+        return (
+            f"{super().__str__()} - RadarModule Range: {self._radar_range} lightyears\n"
+        )
 
 
 # generation = amount / minute
@@ -435,6 +444,6 @@ DEFAULT_MODULES = {
     "Armor": Armor,
     "Fuel": Fuel,
     "Cargo": Cargo,
-    "Radar": Radar,
+    "RadarModule": RadarModule,
     "EnergyGenerator": EnergyGenerator,
 }

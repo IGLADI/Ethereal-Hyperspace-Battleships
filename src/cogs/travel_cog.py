@@ -6,6 +6,7 @@ from discord.ext import commands
 from player import Player
 from location import Location, Coordinate
 from ui.simple_banner import ErrorBanner, LoadingBanner, NormalBanner, SuccessBanner
+from ui.pretty_radar import Radar
 from utils import check_registered, loading_animation
 
 
@@ -109,8 +110,33 @@ class TravelCommands(commands.Cog):
     async def scan(self, interaction: discord.Interaction):
         player = Player.get(interaction.user.id)
 
-        found = player.scan(interaction.user.id)
-        await interaction.response.send_message(f"Scanned the area. Found {found} .", ephemeral=True)
+        scan_results = player.scan()
+        others = []
+
+        # convert scan_results to format for Radar
+        for result in scan_results:
+            char = "f" if player.guild_name == result[4] else "e"
+            others.append((char, (result[2], result[3]), result[1]))
+
+        range = player.ship.modules["RadarModule"].radar_range // 2
+        # fmt:off
+        radar = Radar(
+            length=7,
+            center=(player.x_pos, player.y_pos),
+            range=range,
+            others=others
+        )
+        # fmt:on
+
+        radar.others_to_relative()
+        player_str = ""
+        for other in radar.others:
+            player_str += f"{other[0]} **{other[2]}**: ({other[1][0]}, {other[1][1]})\n"
+
+        text = f"({player.x_pos}, {player.y_pos})\n" + "```\n" + str(radar) + "\n```" + player_str
+
+        banner = NormalBanner(text=text, user=interaction.user)
+        await interaction.response.send_message(embed=banner.embed, ephemeral=True)
 
 
 async def setup(client: commands.Bot) -> None:

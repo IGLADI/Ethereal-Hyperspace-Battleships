@@ -96,7 +96,7 @@ CREATE TABLE `modules` (
     CONSTRAINT `PK__modules` PRIMARY KEY (`module_id`),
     `level` INT(11) NOT NULL DEFAULT 1,
     `state` ENUM('active', 'inactive') NULL,
-    `type` ENUM('SolarPanel', 'TravelModule', 'MiningModule', 'Canon', 'Armor', 'Fuel', 'Cargo', 'Radar', 'EnergyGenerator') NOT NULL,
+    `type` ENUM('SolarPanel', 'TravelModule', 'MiningModule', 'Canon', 'Armor', 'Shield', 'Fuel', 'Cargo', 'RadarModule', 'EnergyGenerator') NOT NULL,
     `ship_id` INT(11) NOT NULL,
     CONSTRAINT `FK__ships__modules` FOREIGN KEY (`ship_id`)
 	    REFERENCES `ships` (`ship_id`),

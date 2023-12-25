@@ -1,12 +1,10 @@
 from threading import Thread
-import time
 
 import data
 from database import Database
 from ship import Ship
 from utils import get_betted_amount
 from location import Coordinate
-import threading
 
 _db = Database()
 
@@ -18,9 +16,11 @@ class Player:
         money = _db.player_money(discord_id)
         x_pos, y_pos = _db.player_coordinates(discord_id)
         name = _db.player_name(discord_id)
+        guild_name = _db.player_guild_name(discord_id)
 
         self._id = discord_id
         self._name = name
+        self._guild_name = guild_name
         self._ship = Ship(ship_id)
         self._money = money
 
@@ -66,6 +66,10 @@ class Player:
     @property
     def name(self):
         return self._name
+
+    @property
+    def guild_name(self):
+        return self._guild_name
 
     @property
     def money(self):
@@ -124,7 +128,7 @@ class Player:
     @property
     def tutorial(self):
         return self._tutorial
-    
+
     @tutorial.setter
     def tutorial(self, int):
         self._tutorial = int
@@ -142,7 +146,7 @@ class Player:
                     if uranium and uranium.amount >= 1:
                         self.ship.add_energy(self.ship.modules["EnergyGenerator"].generation)
                         uranium.amount -= 1
-                time.sleep(60)
+                asyncio.sleep(60)
 
     @classmethod
     def register(cls, discord_id, discord_name, player_class, guild_name):
@@ -190,26 +194,40 @@ class Player:
                     self._y_pos += 1
                 elif self._y_pos > destination.y:
                     self._y_pos -= 1
-                time.sleep(1)
+                asyncio.sleep(1)
             _db.player_set_x_pos(self.id, self._x_pos)
             _db.player_set_y_pos(self.id, self._y_pos)
             self.is_traveling = False
 
-        travel_thread_instance = threading.Thread(target=travel_thread)
+        travel_thread_instance = Thread(target=travel_thread)
         travel_thread_instance.start()
         return distance
 
-    def scan(self, discord_id):
+    def scan(self):
         """Returns a list of locations in a grid around the ship, depending on the radar module level"""
-        scan_range = self.ship._modules["Radar"].radar_range // 2
+        scan_range = self.ship.modules["RadarModule"].radar_range // 2
+        return _db.players_from_scan(
+            x_pos=self.x_pos, y_pos=self.y_pos, distance=scan_range, excluded_player_discord_id=self.id
+        )
+
+    def long_scan(self):
+        scan_range = self.ship.modules["RadarModule"].radar_range // 2
         locations = _db.location_from_scan(self.x_pos, self.y_pos, scan_range)
-        locations += _db.player_from_scan(self.x_pos, self.y_pos, scan_range, discord_id)
         # Tutorial space pirates
         if self._tutorial == 0:
-            locations += [('Space pirates', 1, 0)]
+            locations += [("Space pirates", 1, 0)]
             data.tutorials[self.id]._used_radar = True
         # Event locations
-        if data.event_manager.events != {}:
-            if Coordinate(self.x_pos, self.y_pos).distance_to(Coordinate(data.event_manager.events[1].x_pos, data.event_manager.events[1].y_pos)) <= 10:
-                locations += ["Ruebñ's lost ship", data.event_manager.events[1].x_pos, data.event_manager.events[1].y_pos]
+        if data.event_manager.events == {}:
+            if (
+                Coordinate(self.x_pos, self.y_pos).distance_to(
+                    Coordinate(data.event_manager.events[1].x_pos, data.event_manager.events[1].y_pos)
+                )
+                <= 10
+            ):
+                locations += [
+                    "Ruebñ's lost ship",
+                    data.event_manager.events[1].x_pos,
+                    data.event_manager.events[1].y_pos,
+                ]
         return locations

@@ -1,17 +1,13 @@
-import args
-
 import discord
 from discord.ext import commands
 
 from create_channels import create_channels
 
 import json
-import argparse
 import random
 import asyncio
 
 import data
-from planet import Planet
 from player import Player
 from event import EventManager
 
@@ -80,21 +76,23 @@ with open("config.json", "r") as f:
 # create the bot
 client = Client()
 
+
 # message from the bot when it joins a server
 @client.event
 async def on_guild_join(guild):
     # Forloop used per the documentation to send the message in the first channel that the bot can send messages in
     # by discord this is the welcome channel (where you see people join a server)
-    global_guild = guild
     for channel in guild.text_channels:
         if channel.permissions_for(guild.me).send_messages:
             # TODO should have a complete intro message
-            await channel.send("Hello! Welcome to Ethereal Hyperspace Battleships type /help for more info.")
+            await channel.send(
+                "Hello! Welcome to Ethereal Hyperspace Battleships type /help for more info."
+            )
         break
     try:
         await create_roles(guild)
         await create_channels(guild)
-    except Exception as e:
+    except Exception:
         await channel.send(
             "This bot can only run on community servers. Not on private servers! Bye!\n https://support.discord.com/hc/en-us/articles/360047132851-Enabling-Your-Community-Server"
         )
@@ -122,7 +120,11 @@ async def on_message(message):
         return
 
     player.money += 1000
-    banner = SimpleBanner(text="You got 1000$ for sending a message!", user=message.author, color=discord.Color.gold())
+    banner = SimpleBanner(
+        text="You got 1000$ for sending a message!",
+        user=message.author,
+        color=discord.Color.gold(),
+    )
     await channel.send(embed=banner.embed)
 
     # 4. if he got a reward start the cooldown

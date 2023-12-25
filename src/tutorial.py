@@ -1,7 +1,7 @@
 from player import Player
 from threading import Thread
 import data
-import time
+
 
 class Tutorial:
     def __init__(self, player: Player):
@@ -18,8 +18,8 @@ class Tutorial:
         locationThread.start()
 
     def await_location(self, player: Player):
-        while (player.x_pos != 0 or player.y_pos != 0):
-            time.sleep(1)
+        while player.x_pos != 0 or player.y_pos != 0:
+            asyncio.sleep(1)
         self._travelled = True
 
     def scan_for_pirates(self):
@@ -27,8 +27,8 @@ class Tutorial:
         scanThread.start()
 
     def await_scan(self):
-        while (self._used_radar == False):
-            time.sleep(1)
+        while self._used_radar is False:
+            asyncio.sleep(1)
 
     # TODO add combat!
     # def combat(self):
@@ -36,21 +36,21 @@ class Tutorial:
     #     combatThread.start()
 
     # def await_combat(self):
-    #     while (self._combat == False):
-    #         time.sleep(1)
+    #     while (self._combat is False):
+    #         asyncio.sleep(1)
 
     def mine(self):
         mineThread = Thread(target=self.await_mine, args=())
         mineThread.start()
 
     def await_mine(self):
-        while (self._mined == False):
-            time.sleep(1)
-    
+        while self._mined is False:
+            asyncio.sleep(1)
+
     def upgrade(self):
         upgradeThread = Thread(target=self.await_upgrade, args=())
         upgradeThread.start()
 
     def await_upgrade(self):
-        while (self._upgraded == False):
-            time.sleep(1)
+        while self._upgraded is False:
+            asyncio.sleep(1)

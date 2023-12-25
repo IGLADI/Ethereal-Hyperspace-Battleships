@@ -2,25 +2,23 @@ import mariadb
 import json
 import sys
 
+with open("config.json", "r") as f:
+    data = json.load(f)
+    conn_params = data["database"]
+
+try:
+    pool = mariadb.ConnectionPool(pool_name="ethbdbpool", pool_size=50, **conn_params)
+except mariadb.Error as e:
+    print("Error connecting to MariaDB:", e)
+    sys.exit(1)
+
 
 def get_connection():
     """Returns a connection to the database using credentials in config.json"""
-    with open("config.json", "r") as f:
-        data = json.load(f)
-        db_data = data["database"]
-
-    host = db_data["host"]
-    user = db_data["user"]
-    password = db_data["password"]
-    database = db_data["database"]
-
-    try:
-        connection = mariadb.connect(host=host, user=user, password=password, port=3306, database=database)
-        connection.autocommit = True
-        return connection
-    except mariadb.Error as e:
-        print("Error connecting to MariaDB:", e)
-        sys.exit(1)
+    global pool
+    connection = pool.get_connection()
+    connection.autocommit = True
+    return connection
 
 
 class Database:
@@ -115,6 +113,17 @@ class Database:
             (amount, discord_id),
         )
 
+    def player_guild_name(self, discord_id) -> int:
+        """Return guild_name for discord_id"""
+        return self.get_only_result(
+            """
+            SELECT g.name FROM guilds g
+            JOIN players p ON p.guild_id = g.guild_id
+            WHERE p.discord_id = ?
+            """,
+            (discord_id,),
+        )
+
     def player_name(self, discord_id) -> int:
         """Return ship_id for player_id"""
         return self.get_only_result(
@@ -156,17 +165,28 @@ class Database:
             (y_pos, discord_id),
         )
 
-    def player_from_scan(self, x_pos, y_pos, distance, excluded_player_discord_id) -> int:
-        """Returns the player in a certain distance."""
+    def players_from_scan(self, x_pos, y_pos, distance, excluded_player_discord_id) -> int:
+        """Returns the player in a certain distance.
+        .. 0: id
+        .. 1: name
+        .. 2: x
+        .. 3: y
+        .. 4: guild_name
+        """
         statement = """
-        SELECT discord_name, x_pos, y_pos FROM players
+        SELECT p.discord_id, p.discord_name, p.x_pos, p.y_pos, g.name FROM players p
+        JOIN guilds g ON g.guild_id = p.guild_id
         WHERE x_pos BETWEEN ? AND ? AND y_pos BETWEEN ? AND ?
         AND discord_id <> ?
         """
+        # fmt:off
         results = self.get_results(
             statement,
-            (x_pos - distance, x_pos + distance, y_pos - distance, y_pos + distance, excluded_player_discord_id),
+            (x_pos - distance, x_pos + distance,
+             y_pos - distance, y_pos + distance,
+             excluded_player_discord_id),
         )
+        # fmt:on
         return results if results else []
 
     # location ################################################################
@@ -186,7 +206,10 @@ class Database:
         SELECT name, location_x_pos, location_y_pos FROM locations
         WHERE location_x_pos BETWEEN ? AND ? AND location_y_pos BETWEEN ? AND ?
         """
-        results = self.get_results(statement, (x_pos - distance, x_pos + distance, y_pos - distance, y_pos + distance))
+        results = self.get_results(
+            statement,
+            (x_pos - distance, x_pos + distance, y_pos - distance, y_pos + distance),
+        )
         return results if results else []
 
     def location_from_coordinates(self, x_pos, y_pos) -> str:
@@ -467,7 +490,7 @@ class Database:
         self.store_module(ship_id, "Cargo")
         return self.get_only_result(
             """
-            INSERT INTO cargo_modules (`module_id`) 
+            INSERT INTO cargo_modules (`module_id`)
             SELECT module_id FROM modules
             WHERE ship_id = ? AND type = 'Cargo'
             RETURNING cargo_module_id
