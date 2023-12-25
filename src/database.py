@@ -166,17 +166,28 @@ class Database:
             (y_pos, discord_id),
         )
 
-    def player_from_scan(self, x_pos, y_pos, distance, excluded_player_discord_id) -> int:
-        """Returns the player in a certain distance."""
+    def players_from_scan(self, x_pos, y_pos, distance, excluded_player_discord_id) -> int:
+        """Returns the player in a certain distance.
+        .. 0: id
+        .. 1: name
+        .. 2: x
+        .. 3: y
+        .. 4: guild_name
+        """
         statement = """
-        SELECT discord_id, discord_name, x_pos, y_pos FROM players
+        SELECT p.discord_id, p.discord_name, p.x_pos, p.y_pos, g.name FROM players p
+        JOIN guilds g ON g.guild_id = p.guild_id
         WHERE x_pos BETWEEN ? AND ? AND y_pos BETWEEN ? AND ?
         AND discord_id <> ?
         """
+        # fmt:off
         results = self.get_results(
             statement,
-            (x_pos - distance, x_pos + distance, y_pos - distance, y_pos + distance, excluded_player_discord_id),
+            (x_pos - distance, x_pos + distance,
+             y_pos - distance, y_pos + distance,
+             excluded_player_discord_id),
         )
+        # fmt:on
         return results if results else []
 
     # location ################################################################

@@ -115,15 +115,15 @@ class TravelCommands(commands.Cog):
 
         # convert scan_results to format for Radar
         for result in scan_results:
-            p = Player.get(result[0])
-            char = "f" if player.guild_name == p.guild_name else "e"
+            char = "f" if player.guild_name == result[4] else "e"
             others.append((char, (result[2], result[3]), result[1]))
 
+        range = player.ship.modules["RadarModule"].radar_range // 2
         # fmt:off
         radar = Radar(
             length=7,
             center=(player.x_pos, player.y_pos),
-            range=player.ship.modules["RadarModule"].radar_range,
+            range=range,
             others=others
         )
         # fmt:on
