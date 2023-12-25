@@ -501,13 +501,15 @@ class Database:
     # Reputation commands #####################################################
     def last_reputation(self, attributor_discord_id) -> int:
         """Checks when sender last sent reputation."""
-        self.get_result(
+        return self.get_result(
             """
-            SELECT date FROM reputation
+            SELECT max(date) FROM reputation
             WHERE attributor_discord_id = ?
             """,
             (attributor_discord_id,),
         )
+
+        
     
     def give_reputation(self, attributor_discord_id, recipient_discord_id):
         """Give reputation to a player."""
