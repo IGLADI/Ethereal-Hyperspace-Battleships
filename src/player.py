@@ -1,5 +1,4 @@
 from threading import Thread
-import time
 
 import data
 from database import Database
@@ -147,7 +146,7 @@ class Player:
                     if uranium and uranium.amount >= 1:
                         self.ship.add_energy(self.ship.modules["EnergyGenerator"].generation)
                         uranium.amount -= 1
-                time.sleep(60)
+                asyncio.sleep(60)
 
     @classmethod
     def register(cls, discord_id, discord_name, player_class, guild_name):
@@ -195,7 +194,7 @@ class Player:
                     self._y_pos += 1
                 elif self._y_pos > destination.y:
                     self._y_pos -= 1
-                time.sleep(1)
+                asyncio.sleep(1)
             _db.player_set_x_pos(self.id, self._x_pos)
             _db.player_set_y_pos(self.id, self._y_pos)
             self.is_traveling = False
