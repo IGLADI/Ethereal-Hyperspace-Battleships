@@ -6,7 +6,6 @@ from database import Database
 from ship import Ship
 from utils import get_betted_amount
 from location import Coordinate
-import threading
 
 _db = Database()
 
@@ -201,14 +200,16 @@ class Player:
             _db.player_set_y_pos(self.id, self._y_pos)
             self.is_traveling = False
 
-        travel_thread_instance = threading.Thread(target=travel_thread)
+        travel_thread_instance = Thread(target=travel_thread)
         travel_thread_instance.start()
         return distance
 
     def scan(self):
         """Returns a list of locations in a grid around the ship, depending on the radar module level"""
         scan_range = self.ship.modules["RadarModule"].radar_range // 2
-        return _db.player_from_scan(self.x_pos, self.y_pos, scan_range, self.id)
+        return _db.players_from_scan(
+            x_pos=self.x_pos, y_pos=self.y_pos, distance=scan_range, excluded_player_discord_id=self.id
+        )
 
     def long_scan(self):
         scan_range = self.ship.modules["RadarModule"].radar_range // 2

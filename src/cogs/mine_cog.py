@@ -31,7 +31,7 @@ class MineCommands(commands.Cog):
             return
 
         position = Coordinate(player.x_pos, player.y_pos)
-        if position.is_location() == False:
+        if position.is_location() is False:
             await interaction.response.send_message("You can only mine on a planet.", ephemeral=True)
             return
 

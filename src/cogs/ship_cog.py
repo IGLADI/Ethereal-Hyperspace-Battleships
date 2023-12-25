@@ -79,7 +79,7 @@ class ShipCommands(commands.Cog):
             exploit = module.free_upgrade(player.id)
             if exploit:
                 banner = ErrorBanner(
-                    text=f"Are you trying to make me upgrade 2 modules for you? Do you want to start a war?",
+                    text="Are you trying to make me upgrade 2 modules for you? Do you want to start a war?",
                     user=interaction.user,
                 )
             else:

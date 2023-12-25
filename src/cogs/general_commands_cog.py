@@ -93,7 +93,7 @@ class GeneralCommands(commands.Cog):
         await interaction.response.send_message(embed=banner.embed, ephemeral=True)
         tut = Tutorial(player)
         tut.travel_to_Ruebn()
-        while tut._travelled == False:
+        while tut._travelled is False:
             await asyncio.sleep(1)
         banner = NormalBanner(
             text=f"Thank you for coming {interaction.user.name}!\n We just got attacked by space pirates! They fled right before you arrived. Can you use your radar to scan the area and find them? (/scan)",
@@ -102,7 +102,7 @@ class GeneralCommands(commands.Cog):
         await asyncio.sleep(3)
         await interaction.followup.send(embed=banner.embed, ephemeral=True)
         tut.scan_for_pirates()
-        while tut._used_radar == False:
+        while tut._used_radar is False:
             await asyncio.sleep(1)
         # TODO add combat!
         # banner = NormalBanner(
@@ -110,7 +110,7 @@ class GeneralCommands(commands.Cog):
         #     user=interaction.user,
         # )
         # await interaction.followup.send(embed=banner.embed, ephemeral=True)
-        # while tut._combat == False:
+        # while tut._combat is False:
         #     await asyncio.sleep(1)
         banner = NormalBanner(
             text=f"Thank you {interaction.user.name}!\n Now that I have my resource back, you can use my planet to mine anything you want! Try to mine a bit using /mine [amount].",
@@ -118,15 +118,15 @@ class GeneralCommands(commands.Cog):
         )
         await interaction.followup.send(embed=banner.embed, ephemeral=True)
         tut.mine()
-        while tut._mined == False:
+        while tut._mined is False:
             await asyncio.sleep(1)
         banner = NormalBanner(
-            text=f"Now that you know how to get resources, it is time for me to go.\n As a last thanks to you, I will upgrade a module of your ship for free! Choose whichever you want! Use /upgrade_module [module name] to let me know which you want me to upgrade.",
+            text="Now that you know how to get resources, it is time for me to go.\n As a last thanks to you, I will upgrade a module of your ship for free! Choose whichever you want! Use /upgrade_module [module name] to let me know which you want me to upgrade.",
             user=interaction.user,
         )
         await interaction.followup.send(embed=banner.embed, ephemeral=True)
         tut.upgrade()
-        while tut._upgraded == False:
+        while tut._upgraded is False:
             await asyncio.sleep(1)
         banner = SuccessBanner(
             text=f"Thank you for playing the tutorial {interaction.user.name}!\n I hope you have fun playing Ethereal Hyperspace Battleships!\n To attack other players, use /target to choose who you want to attack. Then use /fire to shoot or /lock if you want to increase your accuracy. Good luck!",
@@ -134,7 +134,6 @@ class GeneralCommands(commands.Cog):
         )
         await interaction.followup.send(embed=banner.embed, ephemeral=True)
         player.tutorial = 1
-
 
     @app_commands.command(name="bug_report", description="Report a bug")
     async def bug_report(

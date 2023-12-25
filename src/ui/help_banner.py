@@ -13,6 +13,7 @@ def help_general():
         "upgrade_module": "Upgrade your ship",
     }
 
+
 def help_guild():
     return {
         "title": "Guild Commands",
@@ -61,6 +62,7 @@ def help_economic():
         "trade": "idk, i didn't write this...",
     }
 
+
 def help_events():
     return {
         "title": "Event Commands",
@@ -72,7 +74,7 @@ def help_events():
 def help_commands():
     return [
         {"help_general": help_general()},
-        #{"help_guild": help_guild()},
+        # {"help_guild": help_guild()},
         {"help_combat": help_combat()},
         {"help_resources": help_resources()},
         {"help_travel": help_travel()},
@@ -85,7 +87,9 @@ class HelpSelect(discord.ui.Select):
     def __init__(self):
         options = []
 
-        help_options = [list(help_command.keys())[0] for help_command in help_commands()]
+        help_options = [
+            list(help_command.keys())[0] for help_command in help_commands()
+        ]
 
         for help_option in help_options:
             options.append(discord.SelectOption(label=help_option, value=help_option))
@@ -106,7 +110,11 @@ class HelpSelect(discord.ui.Select):
                 new_commands_help = help_command[selected_option]
                 break
 
-        new_commands_help = {f"/{key}": value for key, value in new_commands_help.items() if key != "title"}
+        new_commands_help = {
+            f"/{key}": value
+            for key, value in new_commands_help.items()
+            if key != "title"
+        }
         # TODO set a custom title per menu
 
         self.table = tabulate(

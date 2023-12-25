@@ -2,25 +2,23 @@ import mariadb
 import json
 import sys
 
+with open("config.json", "r") as f:
+    data = json.load(f)
+    conn_params = data["database"]
+
+try:
+    pool = mariadb.ConnectionPool(pool_name="ethbdbpool", pool_size=50, **conn_params)
+except mariadb.Error as e:
+    print("Error connecting to MariaDB:", e)
+    sys.exit(1)
+
 
 def get_connection():
     """Returns a connection to the database using credentials in config.json"""
-    with open("config.json", "r") as f:
-        data = json.load(f)
-        db_data = data["database"]
-
-    host = db_data["host"]
-    user = db_data["user"]
-    password = db_data["password"]
-    database = db_data["database"]
-
-    try:
-        connection = mariadb.connect(host=host, user=user, password=password, port=3306, database=database)
-        connection.autocommit = True
-        return connection
-    except mariadb.Error as e:
-        print("Error connecting to MariaDB:", e)
-        sys.exit(1)
+    global pool
+    connection = pool.get_connection()
+    connection.autocommit = True
+    return connection
 
 
 class Database:
@@ -207,7 +205,10 @@ class Database:
         SELECT name, location_x_pos, location_y_pos FROM locations
         WHERE location_x_pos BETWEEN ? AND ? AND location_y_pos BETWEEN ? AND ?
         """
-        results = self.get_results(statement, (x_pos - distance, x_pos + distance, y_pos - distance, y_pos + distance))
+        results = self.get_results(
+            statement,
+            (x_pos - distance, x_pos + distance, y_pos - distance, y_pos + distance),
+        )
         return results if results else []
 
     def location_from_coordinates(self, x_pos, y_pos) -> str:
@@ -488,7 +489,7 @@ class Database:
         self.store_module(ship_id, "Cargo")
         return self.get_only_result(
             """
-            INSERT INTO cargo_modules (`module_id`) 
+            INSERT INTO cargo_modules (`module_id`)
             SELECT module_id FROM modules
             WHERE ship_id = ? AND type = 'Cargo'
             RETURNING cargo_module_id

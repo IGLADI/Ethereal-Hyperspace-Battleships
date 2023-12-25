@@ -3,6 +3,7 @@ from threading import Thread
 import data
 import time
 
+
 class Tutorial:
     def __init__(self, player: Player):
         self._player = player
@@ -18,7 +19,7 @@ class Tutorial:
         locationThread.start()
 
     def await_location(self, player: Player):
-        while (player.x_pos != 0 or player.y_pos != 0):
+        while player.x_pos != 0 or player.y_pos != 0:
             time.sleep(1)
         self._travelled = True
 
@@ -27,7 +28,7 @@ class Tutorial:
         scanThread.start()
 
     def await_scan(self):
-        while (self._used_radar == False):
+        while self._used_radar is False:
             time.sleep(1)
 
     # TODO add combat!
@@ -36,7 +37,7 @@ class Tutorial:
     #     combatThread.start()
 
     # def await_combat(self):
-    #     while (self._combat == False):
+    #     while (self._combat is False):
     #         time.sleep(1)
 
     def mine(self):
@@ -44,13 +45,13 @@ class Tutorial:
         mineThread.start()
 
     def await_mine(self):
-        while (self._mined == False):
+        while self._mined is False:
             time.sleep(1)
-    
+
     def upgrade(self):
         upgradeThread = Thread(target=self.await_upgrade, args=())
         upgradeThread.start()
 
     def await_upgrade(self):
-        while (self._upgraded == False):
+        while self._upgraded is False:
             time.sleep(1)

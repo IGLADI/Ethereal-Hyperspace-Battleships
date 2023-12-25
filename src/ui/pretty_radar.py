@@ -1,5 +1,3 @@
-import math
-
 # prints this beauty
 # ```
 #    ─┼───┼───┼───┼───┼───┼─
@@ -171,14 +169,14 @@ class Radar:
         ]
         # fmt:on
 
-        # grid boundaries go from -x to x with 0,0 in the middle
-        l = self.length // 2 - 1
+        # grid boundaries go from -width/2 to width/2 with 0,0 in the middle
+        radius = self.length // 2
 
         # fmt:off
         relative_others_upscaled = [
             (other[0],
-             (math.ceil(other[1][0] / self.range * l),
-                 math.ceil(other[1][1] / self.range * l)),
+             (round(other[1][0] / self.range * radius),
+              round(other[1][1] / self.range * radius)),
              other[2])
             for other in relative_others
         ]
