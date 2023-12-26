@@ -11,7 +11,9 @@ from utils import send_bug_report
 from utils import check_registered
 from tutorial import Tutorial
 import asyncio
-
+import database
+_db = database.Database()
+import datetime
 
 class GeneralCommands(commands.Cog):
     def __init__(self, client: commands.Bot):
@@ -150,6 +152,50 @@ class GeneralCommands(commands.Cog):
         await interaction.user.send(
             f"Thank you for your bug report: {bug_description}. The team will take a look and fix this issue as soon as possible."
         )
+
+    @app_commands.command(name="give_reputation", description="gives reputation to a player")
+    async def give_reputation(
+        self,
+        interaction: discord.Interaction,
+        reputation_recipient: discord.Member,
+    ):
+        """adds reputation to a player, required for guild hierarchy"""
+        sender = interaction.user.id
+        recipient = reputation_recipient.id
+
+        if sender == recipient:
+            banner = ErrorBanner(text="You can't give reputation to yourself.", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
+            return
+        
+        if not Player.exists(recipient):
+            banner = ErrorBanner(text="The recipient doesn't have an account.", user=interaction.user)
+            await interaction.response.send_message(embed=banner.embed, ephemeral=True)
+            return
+        
+        date = _db.last_reputation(sender)
+        date_check = str(_db.last_reputation(sender)).replace("," ,"").replace("(", "").replace(")", "")
+        if date_check == "None":
+            _db.give_reputation(sender, recipient)             
+            await interaction.response.send_message(f"You gave reputation to {reputation_recipient.name}", ephemeral=True)
+            return
+        else:
+            last_date_time = ""
+            for tuples in date:
+                last_date_time += str(tuples)
+                
+            last_date = last_date_time.replace("-", "").split(" ").pop(0)
+            one_month_ago = datetime.datetime.now() - datetime.timedelta(days=30)
+            
+            one_month_ago = str(one_month_ago)
+            one_month_ago = one_month_ago.replace("-", "").split(" ").pop(1)
+            if int(last_date) < int(one_month_ago[0]):
+                _db.give_reputation(sender, recipient)             
+                await interaction.response.send_message(f"You gave reputation to {reputation_recipient.name}", ephemeral=True)
+            else:
+                await interaction.response.send_message(f"You can only give reputation once a month, last time was on {last_date_time}", ephemeral=True)
+                return
+            
 
 
 async def setup(client: commands.Bot) -> None:

@@ -22,7 +22,7 @@ def get_connection():
 
 
 class Database:
-    """Database class for interacting with the mariadb database.  Has usefule queries to aid gameplay."""
+    """Database class for interacting with the mariadb database.  Has useful queries to aid gameplay."""
 
     def __init__(self):
         "creates a connection and cursor object for the class"
@@ -80,6 +80,7 @@ class Database:
             """,
             (discord_id,),
         )
+    
 
     def player_coordinates(self, discord_id) -> tuple:
         """Returns the coordinates of the players as a tuple."""
@@ -518,4 +519,27 @@ class Database:
             VALUES (?, ?)
             """,
             (discord_id, bug_report),
+        )
+
+    # Reputation commands #####################################################
+    def last_reputation(self, attributor_discord_id) -> int:
+        """Checks when sender last sent reputation."""
+        return self.get_result(
+            """
+            SELECT max(date) FROM reputation
+            WHERE attributor_discord_id = ?
+            """,
+            (attributor_discord_id,),
+        )
+
+        
+    
+    def give_reputation(self, attributor_discord_id, recipient_discord_id):
+        """Give reputation to a player."""
+        self._cursor.execute(
+            """
+            INSERT INTO reputation (attributor_discord_id, recipient_discord_id)
+            VALUES (?, ?)
+            """,
+            (attributor_discord_id, recipient_discord_id),
         )
