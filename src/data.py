@@ -43,4 +43,4 @@ REWARD_ON_MESSAGE_COOLDOWN = 900
 # Todo, set this wherever possible
 GENERAL_NAME = "Ethereal Hyperspace Battleships General"
 
-CACHE_DISABLED = True
+CACHE_DISABLED = False
