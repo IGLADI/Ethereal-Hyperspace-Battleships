@@ -10,6 +10,9 @@ _db = database.Database()
 
 
 async def check_registered(interaction: discord.Interaction) -> bool:
+    if data.players.get(interaction.user.id):
+        return True
+
     if _db.player_exists(interaction.user.id):
         return True
 
@@ -22,9 +25,7 @@ async def check_event_channel(interaction: discord.Interaction) -> bool:
     if interaction.channel.name == "events":
         return True
 
-    banner = ErrorBanner(
-        interaction.user, "You can only use this command in the events channel."
-    )
+    banner = ErrorBanner(interaction.user, "You can only use this command in the events channel.")
     await interaction.response.send_message(embed=banner.embed, ephemeral=True)
     return False
 
