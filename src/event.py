@@ -93,8 +93,10 @@ class EventManager:
         while True:
             event_id += 1
             # 1 = LocateEvent
-            if random.randint(1, 5) == 1:
+            if True:
+                # if random.randint(1, 5) == 1:
                 event = LocateEvent(event_id)
+                print(f"event started in {self._guild.name}, ({event.x_pos}, {event.y_pos})")
                 self._events[event_id] = event
                 banner = NormalBanner(
                     text=f"@everyone, a new event started!\n {event.description}.\n You have 10minutes!\n Prize: {event.prize[1]} tons of {event.prize[0]}\n You can join by typing /join_event.",
@@ -102,9 +104,8 @@ class EventManager:
                 )
                 await self._channel.send(embed=banner.embed)
                 await self.end_timer(event_id)
-            # Every 30 min
-            # utes
-            await asyncio.sleep(60)
+            # Every 30 minutes
+            await asyncio.sleep(60 * 30)
 
     async def end_timer(self, event_id):
         await asyncio.sleep(self._events[event_id].duration)

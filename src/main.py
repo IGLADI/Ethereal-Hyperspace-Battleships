@@ -62,10 +62,11 @@ class Client(commands.Bot):
             print(e)
         print("--------------------------------------------")
         # EventManager (only workking on 1 server)
-        guild = self.guilds[0]
-        event_manager = EventManager(guild)
-        event_manager.start_event_timer()
-        data.event_manager = event_manager
+        for guild in self.guilds:
+            print(f"event in: '{guild.name}'")
+            event_manager = EventManager(guild)
+            event_manager.start_event_timer()
+            data.event_manager = event_manager
 
 
 # load the bot token from config.json KEEP THIS TOKEN PRIVATE (gitignore)
